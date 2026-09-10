@@ -272,7 +272,7 @@
 
     .bomb-ticking-urgent {
       animation: bombTickingUrgent 0.45s infinite ease-in-out;
-      transform-origin: 120px 146px;
+      transform-origin: 120px 150px;
     }
 
     .bomb-glow-urgent {
@@ -288,7 +288,7 @@
 
     .bomb-explosion-burst {
       animation: bombExplosionBurst 0.85s ease-out;
-      transform-origin: 120px 146px;
+      transform-origin: 120px 150px;
     }
 
     body.theme-light .donut-track {
@@ -663,7 +663,7 @@
         </div>
 
         <!-- 중앙: 정밀 벡터 폭탄 & 타들어가는 도화선 타이머 (Bomb & Burning Fuse Timer) -->
-        <div id="bombTimerContainer" class="relative my-1 sm:my-1.5 flex items-center justify-center w-40 h-40 sm:w-48 sm:h-48 md:w-52 md:h-52 select-none">
+        <div id="bombTimerContainer" class="relative my-1 sm:my-2 flex items-center justify-center w-52 h-52 sm:w-60 sm:h-60 md:w-68 md:h-68 xl:w-72 xl:h-72 select-none cursor-pointer group transition-transform duration-200 hover:scale-[1.02]" title="폭탄을 클릭하여 타이머 시작 / 일시정지 (스페이스바)">
           <svg id="bombTimerSvg" class="w-full h-full overflow-visible" viewBox="0 0 240 240">
             <defs>
               <!-- 입체 방사형 그라디언트 (구형 폭탄 본체 3D 질감) -->
@@ -719,26 +719,26 @@
               </filter>
             </defs>
 
-            <!-- 1. 타들어가는 도화선 트랙 (전체 경로 가이드/재 가루 잔상) -->
+            <!-- 1. 타들어가는 도화선 트랙 (3단 곡선 가이드/재 가루 잔상) -->
             <path id="fuseTrackPath"
-                  d="M 120 72 C 120 44, 146 25, 172 34 C 194 42, 212 32, 202 14"
+                  d="M 120 68 C 120 46, 85 42, 95 26 C 105 10, 145 10, 165 22 C 185 34, 212 28, 218 14"
                   fill="none"
-                  stroke="rgba(148, 163, 184, 0.25)"
-                  stroke-width="5"
+                  stroke="rgba(148, 163, 184, 0.35)"
+                  stroke-width="5.5"
                   stroke-linecap="round"
                   stroke-dasharray="3 4" />
 
-            <!-- 2. 실시간으로 타들어가는 활성 도화선 (Burning Fuse) -->
+            <!-- 2. 실시간으로 타들어가는 활성 도화선 (Burning Fuse - 긴 베지에 곡선) -->
             <path id="fuseActivePath"
-                  d="M 120 72 C 120 44, 146 25, 172 34 C 194 42, 212 32, 202 14"
+                  d="M 120 68 C 120 46, 85 42, 95 26 C 105 10, 145 10, 165 22 C 185 34, 212 28, 218 14"
                   fill="none"
                   stroke="url(#fuseRopeGrad)"
-                  stroke-width="5.5"
+                  stroke-width="6.5"
                   stroke-linecap="round"
                   class="transition-all duration-300" />
 
             <!-- 3. 도화선 끝 불꽃 스파크 & 빛 번짐 애니메이션 (Flickering Flame Spark) -->
-            <g id="fuseFlameSpark" class="fuse-flame-group" transform="translate(202, 14)">
+            <g id="fuseFlameSpark" class="fuse-flame-group" transform="translate(218, 14)">
               <!-- 외부 빛 번짐 (Glow Aura) -->
               <circle cx="0" cy="0" r="14" fill="url(#sparkGlowGrad)" class="animate-pulse" />
               <!-- 이중 별빛 불꽃 (Outer Star Spark) -->
@@ -752,39 +752,45 @@
             </g>
 
             <!-- 4. 폭탄 본체 그룹 (1분 전 틱-톡 흔들림 제어 대상) -->
-            <g id="bombSvgGroup" class="transition-transform origin-[120px_146px]">
+            <g id="bombSvgGroup" class="transition-transform origin-[120px_150px]">
               <!-- 폭탄 금속 노즐/칼라 (Collar & Rim) -->
-              <rect x="108" y="70" width="24" height="12" rx="3" fill="url(#bombNozzleGrad)" stroke="#334155" stroke-width="1.2" />
-              <ellipse cx="120" cy="70" rx="13" ry="4" fill="#64748b" stroke="#1e293b" stroke-width="1" />
+              <rect x="105" y="68" width="30" height="15" rx="3.5" fill="url(#bombNozzleGrad)" stroke="#334155" stroke-width="1.2" />
+              <ellipse cx="120" cy="68" rx="15" ry="4.5" fill="#64748b" stroke="#1e293b" stroke-width="1" />
               <!-- 도화선 진입 홀 (Dark Hole) -->
-              <ellipse cx="120" cy="70" rx="4.5" ry="2" fill="#020617" />
+              <ellipse cx="120" cy="68" rx="5" ry="2.2" fill="#020617" />
 
-              <!-- 클래식 구형 폭탄 본체 (Spherical Bomb Body) -->
-              <circle cx="120" cy="146" r="64" fill="url(#bombBodyGrad)" filter="url(#bombShadowFilter)" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5" />
+              <!-- 클래식 대형 구형 폭탄 본체 (Spherical Bomb Body r=70) -->
+              <circle cx="120" cy="150" r="70" fill="url(#bombBodyGrad)" filter="url(#bombShadowFilter)" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.8" />
 
               <!-- 하단 은은한 앰비언트 반사광 -->
-              <circle cx="120" cy="146" r="62" fill="url(#bombRimLight)" />
+              <circle cx="120" cy="150" r="67" fill="url(#bombRimLight)" />
 
               <!-- 상단 입체 하이라이트 광택 (3D Glossy Specular Highlight) -->
-              <ellipse cx="98" cy="116" rx="30" ry="16" transform="rotate(-35 98 116)" fill="url(#bombHighlightGrad)" />
+              <ellipse cx="94" cy="118" rx="34" ry="18" transform="rotate(-35 94 118)" fill="url(#bombHighlightGrad)" />
             </g>
           </svg>
 
           <!-- 폭탄 중앙 텍스트 & 남은 시간 / 퍼센트 오버레이 (선명 폰트) -->
-          <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none select-none pt-8 sm:pt-9">
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none select-none pt-9 sm:pt-10">
             <span class="text-[10px] sm:text-[11px] uppercase tracking-widest text-slate-300 font-extrabold drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-0.5">
               남은 쉬는 시간
             </span>
-            <!-- 디지털 카운트다운 타이머 -->
-            <div class="flex items-baseline font-mono tracking-tighter drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+            <!-- 디지털 카운트다운 타이머 (크고 선명한 폰트) -->
+            <div class="flex items-baseline font-mono tracking-tighter drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
               <span id="timerDisplayMinutes" class="text-3xl sm:text-4xl lg:text-5xl font-black text-white">10</span>
               <span class="timer-colon text-2xl sm:text-3xl lg:text-4xl font-black text-amber-400 mx-0.5 animate-pulse">:</span>
               <span id="timerDisplaySeconds" class="text-3xl sm:text-4xl lg:text-5xl font-black text-white">00</span>
             </div>
-            <!-- 폭탄 중앙 잔여 퍼센트 배지 (사용자 요청: 97% 남음 선명 폰트) -->
+            <!-- 폭탄 중앙 잔여 퍼센트 배지 -->
             <div class="mt-1 flex items-center justify-center">
-              <span id="timerPercentText" class="text-[10px] sm:text-[11px] font-black text-amber-300 bg-black/60 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-amber-400/50 shadow-sm">
+              <span id="timerPercentText" class="text-[10px] sm:text-xs font-black text-amber-300 bg-black/65 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-amber-400/50 shadow-sm">
                 100% 남음
+              </span>
+            </div>
+            <!-- 시작 대기 시 터치 안내 배지 -->
+            <div id="bombStartBadge" class="mt-1 flex items-center justify-center">
+              <span class="text-[9px] sm:text-[10px] font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/40 shadow-xs flex items-center gap-1 animate-pulse">
+                <span>▶</span><span>터치하여 시작</span>
               </span>
             </div>
           </div>
@@ -1102,10 +1108,10 @@
             </svg>
           </button>
 
-          <!-- 일시정지 / 재개 버튼 (Space) -->
-          <button id="btnTogglePlay" class="h-7 px-3.5 sm:px-4 rounded-md bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm shadow-indigo-600/30 transition whitespace-nowrap cursor-pointer" title="타이머 시작 / 일시정지 (스페이스바)">
-            <span id="playIcon" class="text-xs">⏸️</span>
-            <span id="playText" class="whitespace-nowrap text-xs font-bold">일시정지</span>
+          <!-- 메인 타이머 시작 / 일시정지 / 계속 버튼 (Space) -->
+          <button id="btnTogglePlay" class="h-8 sm:h-9 px-4 sm:px-5 rounded-md bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-md shadow-emerald-600/30 transition whitespace-nowrap cursor-pointer" title="쉬는 시간 타이머 시작 (스페이스바)">
+            <span id="playIcon" class="text-sm">▶️</span>
+            <span id="playText" class="whitespace-nowrap font-black">시작</span>
           </button>
 
           <!-- 수동 종소리 울리기 버튼 -->
@@ -1119,7 +1125,7 @@
         <!-- 우측: 클린 뷰 안내 & 단축키 안내 힌트 -->
         <div class="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-800 dark:text-slate-200 font-extrabold font-mono whitespace-nowrap flex-shrink-0">
           <span class="px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 font-black text-slate-900 dark:text-white shadow-xs">Space</span>
-          <span class="font-bold text-slate-800 dark:text-slate-200">일시정지</span>
+          <span class="font-bold text-slate-800 dark:text-slate-200">시작/정지</span>
           <span class="px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 font-black text-slate-900 dark:text-white ml-1 shadow-xs">F</span>
           <span class="font-bold text-slate-800 dark:text-slate-200">전체화면</span>
           <span class="px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 font-black text-slate-900 dark:text-white ml-1 shadow-xs">S</span>
@@ -2811,6 +2817,7 @@
       bombSvgGroup: document.getElementById('bombSvgGroup'),
       fuseActivePath: document.getElementById('fuseActivePath'),
       fuseFlameSpark: document.getElementById('fuseFlameSpark'),
+      bombStartBadge: document.getElementById('bombStartBadge'),
       donutCircle: document.getElementById('donutGaugeCircle'),
       timerMinutes: document.getElementById('timerDisplayMinutes'),
       timerSeconds: document.getElementById('timerDisplaySeconds'),
@@ -3030,6 +3037,37 @@
     }
 
     // 도화선 & 폭탄 타이머 표시 업데이트
+    // 하단 퀵 독 버튼 및 폭탄 배지 상태 업데이트 ('start' | 'running' | 'paused')
+    function updateTimerPlayButton(mode) {
+      if (!dom.btnTogglePlay) return;
+      if (mode === 'running') {
+        if (dom.playIcon) dom.playIcon.textContent = '⏸️';
+        if (dom.playText) dom.playText.textContent = '일시정지';
+        dom.btnTogglePlay.className = 'h-8 sm:h-9 px-4 sm:px-5 rounded-md bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-md shadow-indigo-600/30 transition whitespace-nowrap cursor-pointer';
+        dom.btnTogglePlay.title = '쉬는 시간 일시정지 (스페이스바)';
+        if (dom.bombStartBadge) dom.bombStartBadge.classList.add('hidden');
+      } else if (mode === 'paused') {
+        if (dom.playIcon) dom.playIcon.textContent = '▶️';
+        if (dom.playText) dom.playText.textContent = '계속';
+        dom.btnTogglePlay.className = 'h-8 sm:h-9 px-4 sm:px-5 rounded-md bg-amber-600 hover:bg-amber-500 active:scale-95 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-md shadow-amber-600/30 transition whitespace-nowrap cursor-pointer';
+        dom.btnTogglePlay.title = '쉬는 시간 계속하기 (스페이스바)';
+        if (dom.bombStartBadge) {
+          dom.bombStartBadge.classList.remove('hidden');
+          dom.bombStartBadge.innerHTML = '<span class="text-[9px] sm:text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-500/40 shadow-xs flex items-center gap-1 animate-pulse"><span>▶</span><span>터치하여 계속</span></span>';
+        }
+      } else { // 'start' (초기 / 리셋 / 완료)
+        if (dom.playIcon) dom.playIcon.textContent = '▶️';
+        if (dom.playText) dom.playText.textContent = '시작';
+        dom.btnTogglePlay.className = 'h-8 sm:h-9 px-4 sm:px-5 rounded-md bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-md shadow-emerald-600/30 transition whitespace-nowrap cursor-pointer';
+        dom.btnTogglePlay.title = '쉬는 시간 타이머 시작 (스페이스바)';
+        if (dom.bombStartBadge) {
+          dom.bombStartBadge.classList.remove('hidden');
+          dom.bombStartBadge.innerHTML = '<span class="text-[9px] sm:text-[10px] font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/40 shadow-xs flex items-center gap-1 animate-pulse"><span>▶</span><span>터치하여 시작</span></span>';
+        }
+      }
+    }
+
+    // 도화선 & 폭탄 타이머 표시 업데이트
     function updateTimerDisplay() {
       const mins = Math.floor(state.remainingSeconds / 60);
       const secs = state.remainingSeconds % 60;
@@ -3049,34 +3087,41 @@
 
       // 💣 타들어가는 도화선 (Burning Fuse) & 불꽃 스파크 (Flickering Flame Spark) 연동
       if (dom.fuseActivePath) {
-        if (!dom.fuseActivePath._cachedLength) {
-          try {
-            const len = dom.fuseActivePath.getTotalLength();
-            if (len && len > 0) dom.fuseActivePath._cachedLength = len;
-          } catch (e) {
-            dom.fuseActivePath._cachedLength = 125;
+        let totalLen = 195;
+        try {
+          if (typeof dom.fuseActivePath.getTotalLength === 'function') {
+            const measured = dom.fuseActivePath.getTotalLength();
+            if (measured > 20) {
+              totalLen = measured;
+              dom.fuseActivePath._cachedLength = measured;
+            } else if (dom.fuseActivePath._cachedLength) {
+              totalLen = dom.fuseActivePath._cachedLength;
+            }
           }
+        } catch (e) {
+          totalLen = dom.fuseActivePath._cachedLength || 195;
         }
-        const totalLen = dom.fuseActivePath._cachedLength || 125;
+
         const activeLen = Math.max(0, Math.min(totalLen, totalLen * percent));
 
-        // 도화선 잔여 길이 그리기 (120,72 노즐부터 타들어간 지점까지 연결 유지)
-        dom.fuseActivePath.style.strokeDasharray = `${activeLen} ${totalLen + 20}`;
+        // 도화선 잔여 길이 그리기 (120,68 노즐부터 타들어간 지점까지 연결 유지)
+        dom.fuseActivePath.style.strokeDasharray = `${activeLen} ${totalLen + 30}`;
+        dom.fuseActivePath.setAttribute('stroke-dasharray', `${activeLen} ${totalLen + 30}`);
 
         // 불꽃 스파크 위치 이동 (도화선 끝단 좌표 추적)
         if (dom.fuseFlameSpark) {
           if (state.remainingSeconds <= 0) {
-            dom.fuseFlameSpark.setAttribute('transform', 'translate(120, 72)');
+            dom.fuseFlameSpark.setAttribute('transform', 'translate(120, 68)');
             dom.fuseFlameSpark.style.opacity = '0';
           } else {
             dom.fuseFlameSpark.style.opacity = '1';
             try {
               const pt = dom.fuseActivePath.getPointAtLength(activeLen);
               if (pt && typeof pt.x === 'number' && typeof pt.y === 'number') {
-                dom.fuseFlameSpark.setAttribute('transform', `translate(${pt.x.toFixed(2)}, ${pt.y.toFixed(2)})`);
+                dom.fuseFlameSpark.setAttribute('transform', `translate(${pt.x.toFixed(1)}, ${pt.y.toFixed(1)})`);
               }
             } catch (e) {
-              dom.fuseFlameSpark.setAttribute('transform', 'translate(202, 14)');
+              dom.fuseFlameSpark.setAttribute('transform', 'translate(218, 14)');
             }
           }
         }
@@ -3152,8 +3197,7 @@
       if (state.isRunning) return;
       audioSynth.initContext();
       state.isRunning = true;
-      dom.playIcon.textContent = '⏸️';
-      dom.playText.textContent = '일시정지';
+      updateTimerPlayButton('running');
       dom.timerStatusLabel.textContent = '쉬는 시간 진행 중';
       dom.timerStatusLabel.className = 'text-xs sm:text-sm font-bold tracking-wider text-emerald-300 uppercase';
 
@@ -3165,8 +3209,7 @@
           // 타이머 완료!
           clearInterval(state.timerInterval);
           state.isRunning = false;
-          dom.playIcon.textContent = '▶️';
-          dom.playText.textContent = '시작';
+          updateTimerPlayButton('start');
           dom.timerStatusLabel.textContent = '쉬는 시간 종료! 수업 시작';
           dom.timerStatusLabel.className = 'text-xs sm:text-sm font-bold tracking-wider text-rose-400 uppercase animate-pulse';
           show1MinWarning(false);
@@ -3193,8 +3236,7 @@
       if (!state.isRunning) return;
       clearInterval(state.timerInterval);
       state.isRunning = false;
-      dom.playIcon.textContent = '▶️';
-      dom.playText.textContent = '계속';
+      updateTimerPlayButton('paused');
       dom.timerStatusLabel.textContent = '일시정지됨';
       dom.timerStatusLabel.className = 'text-xs sm:text-sm font-bold tracking-wider text-amber-300 uppercase';
       if (dom.bombSvgGroup) {
@@ -3220,7 +3262,10 @@
 
     function resetTimer() {
       stopAlarmSequence(true);
-      pauseTimer();
+      if (state.isRunning) {
+        clearInterval(state.timerInterval);
+        state.isRunning = false;
+      }
       state.remainingSeconds = state.totalSeconds;
       state.warningFired = false;
       show1MinWarning(false);
@@ -3230,14 +3275,18 @@
       if (dom.fuseFlameSpark) {
         dom.fuseFlameSpark.style.opacity = '1';
       }
+      updateTimerPlayButton('start');
       updateTimerDisplay();
-      dom.timerStatusLabel.textContent = '대기 중';
+      dom.timerStatusLabel.textContent = '대기 중 (시작 준비)';
       dom.timerStatusLabel.className = 'text-xs sm:text-sm font-bold tracking-wider text-slate-400 uppercase';
     }
 
     function setTimerMinutes(mins) {
       stopAlarmSequence(true);
-      pauseTimer();
+      if (state.isRunning) {
+        clearInterval(state.timerInterval);
+        state.isRunning = false;
+      }
       state.totalSeconds = mins * 60;
       state.remainingSeconds = state.totalSeconds;
       state.warningFired = false;
@@ -3753,8 +3802,12 @@
       window.addEventListener('keydown', resetInactivityTimer);
       resetInactivityTimer();
 
-      // 퀵 독 버튼들
+      // 퀵 독 버튼들 & 대형 폭탄 터치 시작
       dom.btnTogglePlay.addEventListener('click', togglePlay);
+      if (dom.bombTimerContainer) {
+        dom.bombTimerContainer.addEventListener('click', togglePlay);
+      }
+      updateTimerPlayButton('start');
       dom.btnResetTimer.addEventListener('click', resetTimer);
       dom.btnAdd1Min.addEventListener('click', () => addMinutes(1));
       dom.btnSub1Min.addEventListener('click', () => addMinutes(-1));
