@@ -45,9 +45,10 @@
       box-sizing: border-box;
     }
     
-    /* 앱 속 모든 버튼: 사각형 형태로 모서리만 살짝 깎은 사각 라운드 (6px) */
+    /* 앱 속 모든 버튼: 사각형 형태로 모서리만 살짝 깎은 사각 라운드 (6px) 및 고대비 가독성 강화 */
     button, .dock-btn, .media-tab-btn, .checklist-tag-btn, .preset-btn, .stretch-step-btn, .bouncy-theme-btn, .theme-mode-btn, .settings-tab-btn {
       border-radius: 6px !important;
+      letter-spacing: -0.01em;
     }
     
     /* 부드러운 스크롤 & 선택 방지 */
@@ -87,13 +88,13 @@
       --dock-opacity: 0.92;
       --dock-border-rgb: 203, 213, 225;
 
-      --text-main: #1e293b;
-      --text-muted: #64748b;
+      --text-main: #0f172a;
+      --text-muted: #475569;
       --text-heading: #0f172a;
 
       --dimmer-bg: 248, 250, 252;
       --dimmer-opacity: 0.15;
-      color: #1e293b;
+      color: #0f172a;
     }
 
     body.theme-dark {
@@ -117,33 +118,173 @@
       color: #f8fafc;
     }
 
-    /* 라이트 테마 요소 색상 최적화 */
-    body.theme-light .text-white {
+    /* 유색 배경 액션 버튼 및 활성 탭: 최고 명도의 순백색(#ffffff) 텍스트를 어떤 테마에서도 엄격 보존 */
+    .media-tab-btn.active,
+    #btnTogglePlay,
+    #btnBouncyMicToggle,
+    #btnStretchStartStop,
+    .btn-solid-colored,
+    .bg-indigo-600,
+    .bg-purple-600,
+    .bg-sky-600,
+    .bg-rose-600,
+    .bg-emerald-600 {
+      color: #ffffff !important;
+    }
+    .media-tab-btn.active *,
+    #btnTogglePlay *,
+    #btnBouncyMicToggle *,
+    #btnStretchStartStop *,
+    .btn-solid-colored *,
+    .bg-indigo-600 *,
+    .bg-purple-600 *,
+    .bg-sky-600 *,
+    .bg-rose-600 *,
+    .bg-emerald-600 * {
+      color: #ffffff !important;
+    }
+
+    /* 비활성 미디어 탭: 뚜렷하고 선명한 고대비 화이트 카드형 텍스트 */
+    .media-tab-btn:not(.active) {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      border: 2px solid #cbd5e1 !important;
+      font-weight: 800 !important;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+    }
+    body.theme-dark .media-tab-btn:not(.active) {
+      background-color: #1e293b !important;
+      color: #f8fafc !important;
+      border: 2px solid #475569 !important;
+    }
+    .media-tab-btn:not(.active):hover {
+      background-color: #e0e7ff !important;
+      border-color: #818cf8 !important;
+      color: #312e81 !important;
+    }
+    body.theme-dark .media-tab-btn:not(.active):hover {
+      background-color: #334155 !important;
+      border-color: #818cf8 !important;
+      color: #ffffff !important;
+    }
+
+    /* 타이머 프리셋 버튼: 굵고 선명한 텍스트 */
+    .preset-btn {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      border: 2px solid #cbd5e1 !important;
+      font-weight: 900 !important;
+      font-size: 12px !important;
+    }
+    body.theme-dark .preset-btn {
+      background-color: #1e293b !important;
+      color: #f8fafc !important;
+      border: 2px solid #475569 !important;
+    }
+    .preset-btn:hover {
+      background-color: #4f46e5 !important;
+      color: #ffffff !important;
+      border-color: #4338ca !important;
+    }
+
+    /* 하단 독 조작 버튼 */
+    .dock-btn {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      border: 2px solid #cbd5e1 !important;
+      font-weight: 800 !important;
+    }
+    body.theme-dark .dock-btn {
+      background-color: #1e293b !important;
+      color: #f8fafc !important;
+      border: 2px solid #475569 !important;
+    }
+
+    /* 디지털 시계 및 타이머 핵심 숫자: 라이트 테마(딥 차콜 #0f172a), 다크 테마(순백색 #ffffff) */
+    #clockHourMinute,
+    #timerDisplayMinutes,
+    #timerDisplaySeconds {
+      transition: color 0.2s ease;
+    }
+    body.theme-light #clockHourMinute,
+    body.theme-light #timerDisplayMinutes,
+    body.theme-light #timerDisplaySeconds {
       color: #0f172a !important;
     }
-    body.theme-light .text-slate-200 {
+    body.theme-dark #clockHourMinute,
+    body.theme-dark #timerDisplayMinutes,
+    body.theme-dark #timerDisplaySeconds {
+      color: #ffffff !important;
+    }
+
+    body.theme-light #clockSeconds {
+      color: #4338ca !important;
+    }
+    body.theme-dark #clockSeconds {
+      color: #818cf8 !important;
+    }
+
+    body.theme-light .timer-colon {
+      color: #4338ca !important;
+    }
+    body.theme-dark .timer-colon {
+      color: #a5b4fc !important;
+    }
+
+    body.theme-light .donut-track {
+      stroke: #cbd5e1 !important;
+    }
+    body.theme-dark .donut-track {
+      stroke: #1e293b !important;
+    }
+
+    body.theme-light #timerStatusLabel {
+      color: #047857 !important;
+    }
+    body.theme-dark #timerStatusLabel {
+      color: #34d399 !important;
+    }
+
+    body.theme-light .timer-label-sub {
       color: #334155 !important;
+      font-weight: 800 !important;
+    }
+    body.theme-dark .timer-label-sub {
+      color: #cbd5e1 !important;
+      font-weight: 700 !important;
+    }
+
+    body.theme-light #timerTargetTimeText {
+      color: #0f172a !important;
+    }
+    body.theme-dark #timerTargetTimeText {
+      color: #ffffff !important;
+    }
+
+    /* 라이트 테마 요소 색상 최적화 */
+    body.theme-light .text-slate-200 {
+      color: #1e293b !important;
     }
     body.theme-light .text-slate-300 {
-      color: #475569 !important;
+      color: #334155 !important;
     }
     body.theme-light .text-slate-400 {
-      color: #64748b !important;
+      color: #475569 !important;
     }
     body.theme-light .bg-slate-900\/70,
     body.theme-light .bg-slate-900\/80,
     body.theme-light .bg-slate-900\/85,
     body.theme-light .bg-slate-900\/90,
     body.theme-light .bg-slate-900 {
-      background-color: rgba(241, 245, 249, 0.92) !important;
-      color: #1e293b !important;
+      background-color: rgba(248, 250, 252, 0.95) !important;
+      color: #0f172a !important;
     }
     body.theme-light .bg-slate-800\/60,
     body.theme-light .bg-slate-800\/80,
     body.theme-light .bg-slate-800\/90,
     body.theme-light .bg-slate-800 {
-      background-color: rgba(248, 250, 252, 0.95) !important;
-      color: #1e293b !important;
+      background-color: #ffffff !important;
+      color: #0f172a !important;
     }
     body.theme-light .border-slate-700,
     body.theme-light .border-slate-700\/60,
@@ -151,16 +292,16 @@
     body.theme-light .border-slate-700\/80,
     body.theme-light .border-slate-800,
     body.theme-light .border-slate-800\/80 {
-      border-color: rgba(203, 213, 225, 0.8) !important;
+      border-color: rgba(203, 213, 225, 0.9) !important;
     }
     body.theme-light .border-white\/10,
     body.theme-light .border-white\/20 {
-      border-color: rgba(148, 163, 184, 0.3) !important;
+      border-color: rgba(148, 163, 184, 0.4) !important;
     }
     body.theme-light .bg-white\/5,
     body.theme-light .bg-white\/10 {
-      background-color: rgba(241, 245, 249, 0.8) !important;
-      color: #1e293b !important;
+      background-color: rgba(255, 255, 255, 0.9) !important;
+      color: #0f172a !important;
     }
     body.theme-light input,
     body.theme-light textarea,
@@ -336,32 +477,32 @@
       </div>
 
       <!-- 소음 측정 신호등 뱃지 (사각 라운드) -->
-      <button id="btnToggleNoise" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-900/85 dark:hover:bg-slate-800/90 border border-slate-300 dark:border-slate-700/70 transition shadow-sm cursor-pointer whitespace-nowrap text-[11px] font-semibold text-slate-700 dark:text-slate-200" title="클릭하여 교실 소음 측정기 켜기/끄기">
+      <button id="btnToggleNoise" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-900/85 dark:hover:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-600 transition shadow-sm cursor-pointer whitespace-nowrap text-[11px] font-bold text-slate-900 dark:text-slate-100" title="클릭하여 교실 소음 측정기 켜기/끄기">
         <span id="noiseLightDot" class="w-2.5 h-2.5 rounded-md bg-slate-400 shadow-sm flex-shrink-0"></span>
-        <span id="noiseText" class="whitespace-nowrap">소음계 OFF</span>
-        <span id="noiseDbValue" class="text-slate-500 dark:text-slate-400 font-mono hidden">-- dB</span>
+        <span id="noiseText" class="whitespace-nowrap font-black">소음계 OFF</span>
+        <span id="noiseDbValue" class="text-slate-900 dark:text-white font-mono font-black hidden">-- dB</span>
       </button>
 
       <!-- 쉿 경고음 ON/OFF 독립 제어 토글 (사각 라운드) -->
-      <button id="btnToggleShhSound" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-indigo-50 dark:bg-slate-900/85 dark:hover:bg-slate-800/90 border border-indigo-400/50 transition shadow-sm cursor-pointer text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 whitespace-nowrap" title="75dB 초과 시 '쉿!' 경고 효과음 켜기/끄기 (자율학습 및 시험 시 무음 가능)">
+      <button id="btnToggleShhSound" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-indigo-50 dark:bg-slate-900/85 dark:hover:bg-slate-800/90 border-2 border-indigo-400 dark:border-indigo-600 transition shadow-sm cursor-pointer text-[11px] font-black text-indigo-900 dark:text-indigo-200 whitespace-nowrap" title="75dB 초과 시 '쉿!' 경고 효과음 켜기/끄기 (자율학습 및 시험 시 무음 가능)">
         <span id="headerShhIcon" class="flex-shrink-0">🔔</span>
-        <span id="headerShhText" class="whitespace-nowrap">쉿 소리 ON</span>
+        <span id="headerShhText" class="whitespace-nowrap font-black">쉿 소리 ON</span>
       </button>
 
       <!-- 백색소음 앰비언트 버튼 (사각 라운드) -->
-      <button id="btnToggleAmbient" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-900/85 dark:hover:bg-slate-800/90 border border-slate-300 dark:border-slate-700/70 transition shadow-sm cursor-pointer whitespace-nowrap text-[11px] font-semibold text-slate-700 dark:text-slate-300" title="휴식 집중 백색소음 (빗소리/바람소리)">
+      <button id="btnToggleAmbient" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-900/85 dark:hover:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-600 transition shadow-sm cursor-pointer whitespace-nowrap text-[11px] font-bold text-slate-800 dark:text-slate-200" title="휴식 집중 백색소음 (빗소리/바람소리)">
         <span id="ambientIcon" class="text-xs flex-shrink-0">🌧️</span>
-        <span id="ambientText" class="whitespace-nowrap">백색소음 OFF</span>
+        <span id="ambientText" class="whitespace-nowrap font-bold">백색소음 OFF</span>
       </button>
     </div>
 
     <!-- 중앙 확장형 동기부여 명언 / 휴식 팁 위젯 (사각 라운드) -->
-    <div id="quoteWidget" class="flex-1 max-w-xl px-3.5 py-1.5 rounded-xl glass-card-subtle hover:bg-white/10 transition-all cursor-pointer flex items-center justify-center gap-2 group border border-white/15 shadow-md text-center" title="클릭하면 다음 명언과 팁으로 바뀝니다">
-      <span class="text-amber-400 text-xs group-hover:scale-125 transition-transform duration-300">✨</span>
-      <p id="quoteText" class="text-xs sm:text-sm font-medium text-slate-200 tracking-normal truncate transition-all duration-300">
+    <div id="quoteWidget" class="flex-1 max-w-xl px-3.5 py-1.5 rounded-xl bg-white/80 dark:bg-slate-900/80 hover:bg-white dark:hover:bg-slate-800 transition-all cursor-pointer flex items-center justify-center gap-2 group border-2 border-slate-200 dark:border-white/15 shadow-md text-center" title="클릭하면 다음 명언과 팁으로 바뀝니다">
+      <span class="text-amber-500 dark:text-amber-400 text-xs group-hover:scale-125 transition-transform duration-300">✨</span>
+      <p id="quoteText" class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 tracking-normal truncate transition-all duration-300">
         "충분한 휴식은 더 멀리 나아가기 위한 가장 현명한 준비입니다."
       </p>
-      <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 group-hover:bg-indigo-500/50 transition font-bold">Next</span>
+      <span class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white font-black border border-indigo-700 shadow-xs transition">Next</span>
     </div>
 
     <!-- 우측 도구: 선명하고 또렷한 컬러 버튼 (QR / 테마 / 전체화면 / 설정) -->
@@ -414,20 +555,20 @@
       <!-- 1) 실시간 디지털 표준시 시계 카드 (상단) -->
       <section class="glass-card rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 flex flex-col justify-center relative overflow-hidden transition-all duration-300 shadow-xl">
         <!-- 날짜 및 요일 -->
-        <div class="flex items-center justify-between text-slate-300 text-xs sm:text-sm font-semibold mb-1">
+        <div class="flex items-center justify-between text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-bold mb-1">
           <span id="currentDateText" class="tracking-wide">2026년 9월 10일 (목)</span>
           <div class="flex items-center gap-1.5">
-            <span class="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-[11px] font-bold uppercase tracking-wider" id="currentAmPm">오전</span>
-            <span class="text-[10px] text-slate-400 bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-700">KST</span>
+            <span class="px-2 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/30 text-[11px] font-black uppercase tracking-wider" id="currentAmPm">오전</span>
+            <span class="text-[10px] text-slate-800 dark:text-slate-200 bg-slate-200/90 dark:bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 font-extrabold">KST</span>
           </div>
         </div>
-        <!-- 초대형 디지털 시계 폰트 -->
+        <!-- 초대형 디지털 시계 폰트 (테마 반응형: 라이트 차콜 #0f172a, 다크 백색 #ffffff) -->
         <div class="flex items-baseline justify-center sm:justify-start gap-1.5 font-mono tracking-tighter select-none my-1">
-          <span id="clockHourMinute" class="text-5xl sm:text-6xl font-black text-white drop-shadow-md">10:40</span>
-          <span id="clockSeconds" class="text-2xl sm:text-3xl font-extrabold text-indigo-400 drop-shadow-[0_0_15px_rgba(99,102,241,0.6)]">:25</span>
+          <span id="clockHourMinute" class="text-5xl sm:text-6xl font-black text-slate-900 dark:text-white drop-shadow-sm">10:40</span>
+          <span id="clockSeconds" class="text-2xl sm:text-3xl font-black text-indigo-600 dark:text-indigo-400 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]">:25</span>
         </div>
-        <p class="text-[10px] sm:text-[11px] text-slate-400 text-center sm:text-left flex items-center gap-1 mt-0.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <p class="text-[10px] sm:text-[11px] text-slate-800 dark:text-slate-200 text-center sm:text-left flex items-center gap-1 mt-0.5 font-bold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span>대한민국 표준시(KST) 실시간 동기화</span>
         </p>
       </section>
@@ -435,15 +576,15 @@
       <!-- 2) 타이머 & 듀얼 비주얼 게이지 카드 (하단) -->
       <section id="timerCard" class="glass-card rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 flex-1 flex flex-col justify-between items-center relative overflow-hidden transition-all duration-500 shadow-xl">
         <!-- 카드 상단: 상태 배지 & 스케줄 정보 -->
-        <div class="w-full flex items-center justify-between pb-1.5 border-b border-white/10">
+        <div class="w-full flex items-center justify-between pb-1.5 border-b border-slate-200 dark:border-white/10">
           <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-            <span id="timerStatusLabel" class="text-xs sm:text-sm font-bold tracking-wider text-emerald-300 uppercase">쉬는 시간 진행 중</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+            <span id="timerStatusLabel" class="text-xs sm:text-sm font-black tracking-wider text-emerald-700 dark:text-emerald-400 uppercase">쉬는 시간 진행 중</span>
           </div>
           <!-- 종료 예정 시각 -->
-          <div class="text-[11px] sm:text-xs text-slate-300 flex items-center gap-1 bg-slate-800/80 px-2 py-0.5 rounded-full border border-slate-700">
+          <div class="text-[11px] sm:text-xs text-slate-900 dark:text-slate-100 flex items-center gap-1 bg-slate-200/90 dark:bg-slate-800 px-2.5 py-0.5 rounded-md border border-slate-300 dark:border-slate-600 font-black">
             <span>종료:</span>
-            <span id="timerTargetTimeText" class="font-mono font-bold text-white">--:--</span>
+            <span id="timerTargetTimeText" class="font-mono font-black text-slate-900 dark:text-white">--:--</span>
           </div>
         </div>
 
@@ -465,22 +606,22 @@
         <div class="relative my-1.5 sm:my-2.5 flex items-center justify-center w-36 h-36 sm:w-44 sm:h-44 md:w-46 md:h-46 select-none">
           <svg class="w-full h-full donut-gauge" viewBox="0 0 240 240">
             <!-- 배경 트랙 원 -->
-            <circle cx="120" cy="120" r="100" class="donut-track stroke-slate-800/90" stroke-width="14" fill="transparent" />
+            <circle cx="120" cy="120" r="100" class="donut-track stroke-slate-200 dark:stroke-slate-800/90" stroke-width="14" fill="transparent" />
             <!-- 진행도 원형 바 -->
             <circle id="donutGaugeCircle" cx="120" cy="120" r="100" class="donut-circle stroke-indigo-500" stroke-width="14" 
                     stroke-linecap="round" fill="transparent" stroke-dasharray="628.3" stroke-dashoffset="0" />
           </svg>
 
-          <!-- 게이지 내부 텍스트 -->
+          <!-- 게이지 내부 텍스트 (테마 반응형: 라이트 딥 차콜 #0f172a, 다크 백색 #ffffff) -->
           <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <span class="text-[10px] sm:text-[11px] uppercase tracking-widest text-slate-400 font-semibold mb-0.5">남은 쉬는 시간</span>
+            <span class="timer-label-sub text-xs sm:text-sm uppercase tracking-widest text-slate-900 dark:text-slate-100 font-black mb-0.5">남은 쉬는 시간</span>
             <div class="flex items-baseline font-mono tracking-tighter">
-              <span id="timerDisplayMinutes" class="text-4xl sm:text-5xl font-black text-white drop-shadow-lg">10</span>
-              <span class="text-3xl sm:text-4xl font-black text-indigo-300 mx-0.5">:</span>
-              <span id="timerDisplaySeconds" class="text-4xl sm:text-5xl font-black text-white drop-shadow-lg">00</span>
+              <span id="timerDisplayMinutes" class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white drop-shadow-sm">10</span>
+              <span class="timer-colon text-3xl sm:text-4xl font-black text-indigo-600 dark:text-indigo-400 mx-0.5">:</span>
+              <span id="timerDisplaySeconds" class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white drop-shadow-sm">00</span>
             </div>
             <!-- 하단 진행율 퍼센트 -->
-            <span id="timerPercentText" class="mt-1 text-[10px] sm:text-[11px] font-semibold text-indigo-300 bg-indigo-950/60 px-2 py-0.5 rounded-full border border-indigo-500/30">
+            <span id="timerPercentText" class="mt-1 text-[10px] sm:text-[11px] font-black text-indigo-900 dark:text-indigo-200 bg-indigo-100 dark:bg-indigo-950/80 px-2.5 py-0.5 rounded-full border border-indigo-300 dark:border-indigo-500/40 shadow-xs">
               100% 잔여
             </span>
           </div>
@@ -504,13 +645,13 @@
 
           <!-- 학교 종 맞춤 스케줄러 & 직접 입력 -->
           <div class="grid grid-cols-3 gap-1 sm:gap-1.5">
-            <button id="btnNext50" class="px-1 py-1.5 rounded-lg sm:rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-indigo-500/40 text-[10px] sm:text-[11px] font-semibold text-indigo-300 hover:text-white transition flex items-center justify-center gap-1 shadow-sm active:scale-95" title="다음 :50분 학교 종에 맞추기">
+            <button id="btnNext50" class="px-1 py-1.5 rounded-lg sm:rounded-xl bg-white dark:bg-slate-900/90 hover:bg-indigo-50 dark:hover:bg-slate-800 border-2 border-slate-300 dark:border-indigo-500/40 text-[10px] sm:text-[11px] font-extrabold text-indigo-900 dark:text-indigo-300 transition flex items-center justify-center gap-1 shadow-xs active:scale-95 cursor-pointer" title="다음 :50분 학교 종에 맞추기">
               <span>🔔</span><span>:50분</span>
             </button>
-            <button id="btnNext00" class="px-1 py-1.5 rounded-lg sm:rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-sky-500/40 text-[10px] sm:text-[11px] font-semibold text-sky-300 hover:text-white transition flex items-center justify-center gap-1 shadow-sm active:scale-95" title="다음 정각 :00 학교 종에 맞추기">
+            <button id="btnNext00" class="px-1 py-1.5 rounded-lg sm:rounded-xl bg-white dark:bg-slate-900/90 hover:bg-sky-50 dark:hover:bg-slate-800 border-2 border-slate-300 dark:border-sky-500/40 text-[10px] sm:text-[11px] font-extrabold text-sky-900 dark:text-sky-300 transition flex items-center justify-center gap-1 shadow-xs active:scale-95 cursor-pointer" title="다음 정각 :00 학교 종에 맞추기">
               <span>⏰</span><span>정각(:00)</span>
             </button>
-            <button id="btnCustomTime" class="px-1 py-1.5 rounded-lg sm:rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-[10px] sm:text-[11px] font-semibold text-slate-300 hover:text-white transition flex items-center justify-center gap-1 shadow-sm active:scale-95">
+            <button id="btnCustomTime" class="px-1 py-1.5 rounded-lg sm:rounded-xl bg-white dark:bg-slate-900/90 hover:bg-slate-100 dark:hover:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 text-[10px] sm:text-[11px] font-extrabold text-slate-800 dark:text-slate-300 transition flex items-center justify-center gap-1 shadow-xs active:scale-95 cursor-pointer">
               <span>✏️</span><span>직접설정</span>
             </button>
           </div>
@@ -523,85 +664,88 @@
     <section id="mediaCenterCard" class="col-span-12 lg:col-span-8 xl:col-span-9 glass-card rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 flex flex-col justify-between relative overflow-hidden transition-all duration-300 shadow-2xl">
       
       <!-- 미디어 탭 네비게이션 헤더 -->
-      <div class="flex items-center justify-between mb-2 border-b border-white/10 pb-2">
+      <div class="flex items-center justify-between mb-2 border-b border-slate-200/80 dark:border-white/10 pb-2">
         <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto text-xs sm:text-sm font-semibold">
-          <button id="tabBtnNotice" class="media-tab-btn px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
+          <button id="tabBtnNotice" class="media-tab-btn h-8 sm:h-9 px-3.5 py-1 rounded-md bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border-2 border-slate-300 dark:border-slate-600 text-xs sm:text-sm font-extrabold shadow-sm transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
             <span>📝</span><span>수업 안내문</span>
           </button>
-          <button id="tabBtnImage" class="media-tab-btn active px-3 py-1.5 rounded-xl bg-indigo-600 text-white shadow-md transition flex items-center gap-1.5 whitespace-nowrap">
+          <button id="tabBtnImage" class="media-tab-btn active h-8 sm:h-9 px-3.5 py-1 rounded-md bg-indigo-600 text-white font-black border-2 border-indigo-700 shadow-md transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
             <span>🖼️</span><span>수업 이미지</span>
           </button>
-          <button id="tabBtnVideo" class="media-tab-btn px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
+          <button id="tabBtnVideo" class="media-tab-btn h-8 sm:h-9 px-3.5 py-1 rounded-md bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border-2 border-slate-300 dark:border-slate-600 text-xs sm:text-sm font-extrabold shadow-sm transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
             <span>🎬</span><span>수업 영상</span>
           </button>
-          <button id="tabBtnStretch" class="media-tab-btn px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
+          <button id="tabBtnStretch" class="media-tab-btn h-8 sm:h-9 px-3.5 py-1 rounded-md bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border-2 border-slate-300 dark:border-slate-600 text-xs sm:text-sm font-extrabold shadow-sm transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
             <span>🧘</span><span>1분 스트레칭</span>
           </button>
-          <button id="tabBtnBouncy" class="media-tab-btn px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
+          <button id="tabBtnBouncy" class="media-tab-btn h-8 sm:h-9 px-3.5 py-1 rounded-md bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border-2 border-slate-300 dark:border-slate-600 text-xs sm:text-sm font-extrabold shadow-sm transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
             <span>🎾</span><span>바운시 소음계</span>
           </button>
         </div>
         <!-- 우측 배지 표시 -->
-        <span id="displayClassBadge" class="hidden sm:inline-flex text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 font-bold">🤙 우리들의 약속</span>
+        <span id="displayClassBadge" class="hidden sm:inline-flex text-xs px-2.5 py-1 rounded-md bg-indigo-100 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-200 border-2 border-indigo-300 dark:border-indigo-600 font-black shadow-sm">🤙 우리들의 약속</span>
       </div>
 
       <!-- 컨텐츠 영역 (수업 안내문 / 이미지 / 영상 / 스트레칭) -->
       <div class="flex-1 flex flex-col min-h-[320px] sm:min-h-[360px] lg:min-h-[410px] overflow-hidden">
         
         <!-- 탭 1: 수업 안내문 & 인터랙티브 체크리스트 -->
-        <div id="tabContentNotice" class="hidden flex-1 flex-col justify-between overflow-y-auto pr-2">
+        <div id="tabContentNotice" class="hidden flex-1 flex-col justify-between overflow-y-auto pr-1">
           <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="sm:hidden text-xs px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-400/30 font-bold">수업 규칙 안내</span>
-              <span class="text-xs text-slate-600 dark:text-slate-300 flex items-center gap-1 font-medium">
+            <div class="flex items-center justify-between mb-1">
+              <span class="sm:hidden text-[11px] px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-400/30 font-bold">수업 규칙 안내</span>
+              <span class="text-[11px] sm:text-xs text-amber-900 dark:text-amber-200 bg-amber-100 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-700/60 px-2.5 py-0.5 rounded-md flex items-center gap-1 font-bold shadow-xs">
                 <span>💡</span><span>약속 항목을 클릭하여 실천 완료(✓) 표시를 해보세요</span>
               </span>
             </div>
-            <h3 id="displayNoticeTitle" class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white mb-2 leading-tight tracking-tight">
+            <h3 id="displayNoticeTitle" class="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 dark:text-white mb-1 leading-tight tracking-tight">
               🤙 함께 지켜요! 우리들의 약속 (약속해줘~!!)
             </h3>
-            <!-- 마크다운 서식 단락 렌더링 컨테이너 (내용량에 맞춰 반응형 폰트 자동 스케일) -->
-            <div id="displayNoticeBody" class="space-y-2 sm:space-y-2.5 mb-2 max-h-[280px] sm:max-h-[340px] lg:max-h-[400px] overflow-y-auto pr-2 text-slate-900 dark:text-slate-100"></div>
+            <!-- 마크다운 서식 단락 렌더링 컨테이너 (8대 수칙이 슬림하게 한눈에 들어오는 타이트 구조) -->
+            <div id="displayNoticeBody" class="space-y-1 sm:space-y-1.5 mb-1 max-h-[340px] sm:max-h-[400px] lg:max-h-[460px] overflow-y-auto pr-1.5 text-slate-900 dark:text-slate-100"></div>
           </div>
 
-          <!-- 인터랙티브 체크리스트 뱃지 목록 (8대 우리들의 약속) -->
-          <div class="pt-2 border-t border-slate-300/60 dark:border-white/10 mt-auto">
-            <div class="text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-2">
-              <span>우리들의 실천 약속 체크리스트</span>
-              <span class="text-[10px] text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900/50 px-1.5 py-0.5 rounded-md border border-indigo-300 dark:border-indigo-500/40 font-bold">클릭 토글</span>
+          <!-- 인터랙티브 체크리스트 뱃지 목록 (8대 우리들의 약속) - 초슬림 4x2 격자 그리드 -->
+          <div class="pt-1.5 border-t border-slate-300/80 dark:border-white/10 mt-auto">
+            <div class="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider mb-1 flex items-center justify-between">
+              <span class="flex items-center gap-1.5">
+                <span>📋</span>
+                <span>우리들의 실천 약속 체크리스트</span>
+              </span>
+              <span class="text-[11px] text-white bg-indigo-600 hover:bg-indigo-500 dark:bg-indigo-500 px-2 py-0.5 rounded-md border border-indigo-700 dark:border-indigo-400 font-black shadow-xs">클릭 토글</span>
             </div>
-            <div id="displayChecklistTags" class="flex flex-wrap gap-1.5 sm:gap-2">
-              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
-                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
-                <span class="tag-text">🚫 장난치지 않기</span>
+            <div id="displayChecklistTags" class="grid grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-1.5">
+              <button class="checklist-tag-btn h-7 px-2 rounded-md bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-[11px] font-extrabold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 truncate" data-checked="false">
+                <span class="check-icon w-3 h-3 rounded border-2 border-slate-400 dark:border-slate-500 flex items-center justify-center text-[9px] flex-shrink-0"></span>
+                <span class="tag-text truncate">🚫 장난치지 않기</span>
               </button>
-              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
-                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
-                <span class="tag-text">🤫 떠들지 않기</span>
+              <button class="checklist-tag-btn h-7 px-2 rounded-md bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-[11px] font-extrabold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 truncate" data-checked="false">
+                <span class="check-icon w-3 h-3 rounded border-2 border-slate-400 dark:border-slate-500 flex items-center justify-center text-[9px] flex-shrink-0"></span>
+                <span class="tag-text truncate">🤫 떠들지 않기</span>
               </button>
-              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
-                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
-                <span class="tag-text">💬 예쁜 말, 바른 자세하기</span>
+              <button class="checklist-tag-btn h-7 px-2 rounded-md bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-[11px] font-extrabold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 truncate" data-checked="false">
+                <span class="check-icon w-3 h-3 rounded border-2 border-slate-400 dark:border-slate-500 flex items-center justify-center text-[9px] flex-shrink-0"></span>
+                <span class="tag-text truncate">💬 예쁜 말, 바른 자세</span>
               </button>
-              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
-                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
-                <span class="tag-text">🛑 위험한 행동하지 않기</span>
+              <button class="checklist-tag-btn h-7 px-2 rounded-md bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-[11px] font-extrabold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 truncate" data-checked="false">
+                <span class="check-icon w-3 h-3 rounded border-2 border-slate-400 dark:border-slate-500 flex items-center justify-center text-[9px] flex-shrink-0"></span>
+                <span class="tag-text truncate">🛑 위험한 행동 금지</span>
               </button>
-              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
-                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
-                <span class="tag-text">✅ 규칙 잘 지키기</span>
+              <button class="checklist-tag-btn h-7 px-2 rounded-md bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-[11px] font-extrabold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 truncate" data-checked="false">
+                <span class="check-icon w-3 h-3 rounded border-2 border-slate-400 dark:border-slate-500 flex items-center justify-center text-[9px] flex-shrink-0"></span>
+                <span class="tag-text truncate">✅ 규칙 잘 지키기</span>
               </button>
-              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
-                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
-                <span class="tag-text">🎁 교구 소중히 다루기</span>
+              <button class="checklist-tag-btn h-7 px-2 rounded-md bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-[11px] font-extrabold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 truncate" data-checked="false">
+                <span class="check-icon w-3 h-3 rounded border-2 border-slate-400 dark:border-slate-500 flex items-center justify-center text-[9px] flex-shrink-0"></span>
+                <span class="tag-text truncate">🎁 교구 소중히 다루기</span>
               </button>
-              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
-                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
-                <span class="tag-text">🧹 활동 후 뒷정리 잘하기</span>
+              <button class="checklist-tag-btn h-7 px-2 rounded-md bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-[11px] font-extrabold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 truncate" data-checked="false">
+                <span class="check-icon w-3 h-3 rounded border-2 border-slate-400 dark:border-slate-500 flex items-center justify-center text-[9px] flex-shrink-0"></span>
+                <span class="tag-text truncate">🧹 활동 후 뒷정리</span>
               </button>
-              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
-                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
-                <span class="tag-text">🙋‍♂️ 인사 잘하기</span>
+              <button class="checklist-tag-btn h-7 px-2 rounded-md bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-[11px] font-extrabold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 truncate" data-checked="false">
+                <span class="check-icon w-3 h-3 rounded border-2 border-slate-400 dark:border-slate-500 flex items-center justify-center text-[9px] flex-shrink-0"></span>
+                <span class="tag-text truncate">🙋‍♂️ 인사 잘하기</span>
               </button>
             </div>
           </div>
@@ -635,74 +779,81 @@
           <div class="flex items-center justify-between pb-2 border-b border-white/10">
             <div class="flex items-center gap-2">
               <span class="text-xl sm:text-2xl">🧘‍♂️</span>
-              <span class="font-bold text-sm sm:text-base text-indigo-300">몸과 뇌를 깨우는 1분 리셋 체조</span>
+              <span class="font-bold text-sm sm:text-base text-indigo-700 dark:text-indigo-300">몸과 뇌를 깨우는 1분 리셋 체조</span>
             </div>
             <div class="flex items-center gap-2">
-              <span id="stretchStepIndicator" class="text-xs px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-400/30">1단계 / 3단계</span>
+              <span id="stretchStepIndicator" class="text-xs px-2 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 font-bold border border-indigo-300 dark:border-indigo-400/30">1단계 / 3단계</span>
               <button id="btnStretchStartStop" class="text-xs sm:text-sm px-3.5 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow-md">체조 시작</button>
             </div>
           </div>
 
           <!-- 스트레칭 애니메이션 카드 -->
-          <div class="flex-1 flex flex-col items-center justify-center my-2 text-center p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10 relative overflow-hidden">
+          <div class="flex-1 flex flex-col items-center justify-center my-2 text-center p-3 sm:p-4 rounded-xl bg-white/80 dark:bg-white/5 border border-slate-300 dark:border-white/10 shadow-sm relative overflow-hidden">
             <div id="stretchIcon" class="text-5xl sm:text-6xl mb-2 animate-bounce-subtle transition-all duration-500">🙆‍♂️</div>
-            <h4 id="stretchTitle" class="text-lg sm:text-xl font-bold text-white mb-1">1단계: 손 깍지 위로 쭉 기지개</h4>
-            <p id="stretchDesc" class="text-xs sm:text-sm text-slate-300 max-w-md leading-relaxed">양손을 깍지 끼고 머리 위로 힘껏 밀어 올리며 숨을 깊게 들이마시고 내쉽니다. 척추를 길게 펴주세요!</p>
+            <h4 id="stretchTitle" class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-1">1단계: 손 깍지 위로 쭉 기지개</h4>
+            <p id="stretchDesc" class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 max-w-md leading-relaxed">양손을 깍지 끼고 머리 위로 힘껏 밀어 올리며 숨을 깊게 들이마시고 내쉽니다. 척추를 길게 펴주세요!</p>
             
             <!-- 스트레칭 카운트다운 게이지 -->
-            <div class="mt-2.5 flex items-center gap-2 font-mono text-xs sm:text-sm text-indigo-300 bg-indigo-950/40 px-2.5 py-0.5 rounded-full border border-indigo-500/20">
-              <span>남은 시간:</span>
-              <span id="stretchSeconds" class="text-lg sm:text-xl font-bold text-white">20</span>초
+            <div class="mt-2.5 flex items-center gap-2 font-mono text-xs sm:text-sm text-indigo-900 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-950/40 px-2.5 py-0.5 rounded-full border border-indigo-300 dark:border-indigo-500/20">
+              <span class="font-bold">남은 시간:</span>
+              <span id="stretchSeconds" class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">20</span>초
             </div>
           </div>
 
           <!-- 3단계 수동 점프 버튼들 -->
           <div class="grid grid-cols-3 gap-2 text-xs">
-            <button class="stretch-step-btn active p-2 rounded-xl bg-indigo-900/60 border border-indigo-500/50 text-indigo-200 font-semibold text-center" data-step="1">1. 깍지 기지개</button>
-            <button class="stretch-step-btn p-2 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-400 font-semibold text-center" data-step="2">2. 먼 곳 응시</button>
-            <button class="stretch-step-btn p-2 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-400 font-semibold text-center" data-step="3">3. 부드러운 목 회전</button>
+            <button class="stretch-step-btn active p-2 rounded-md bg-indigo-100 dark:bg-indigo-900/60 border-2 border-indigo-500 text-indigo-900 dark:text-indigo-200 font-extrabold text-center" data-step="1">1. 깍지 기지개</button>
+            <button class="stretch-step-btn p-2 rounded-md bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-400 font-bold text-center" data-step="2">2. 먼 곳 응시</button>
+            <button class="stretch-step-btn p-2 rounded-md bg-white dark:bg-slate-800/60 border-2 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-400 font-bold text-center" data-step="3">3. 부드러운 목 회전</button>
           </div>
         </div>
 
         <!-- 탭 5: 물리 엔진 기반 바운시(Bouncy Balls) 소음측정기 -->
         <div id="tabContentBouncy" class="hidden flex-1 flex-col justify-between overflow-hidden rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/80 dark:border-white/15 p-2 sm:p-3 relative shadow-inner">
-          <!-- 상단 제어 툴바 -->
+          <!-- 상단 제어 툴바 (좌측: 제목 & 기준 & 감도 & 쉿소리 & 마이크 일렬 정렬 / 우측: 공 테마 선택기) -->
           <div class="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 pb-2 border-b border-slate-200/80 dark:border-white/10 z-10">
-            <!-- 좌측: 실시간 dB 및 상태 배지 -->
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" id="bouncyStatusDot"></span>
-                <span class="hidden sm:inline">교실 소음 물리 시뮬레이터</span>
-                <span class="sm:hidden">소음계</span>
-              </span>
-              <span id="bouncyDbBadge" class="px-2.5 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 text-xs font-mono font-bold">
-                -- dB
-              </span>
-            </div>
-
-            <!-- 중앙: 공 테마 선택기 (컬러 / 이모지 / 버블) -->
-            <div class="flex items-center gap-1 bg-white/90 dark:bg-slate-900/80 p-0.5 sm:p-1 rounded-lg border border-slate-300 dark:border-slate-800 text-xs shadow-sm">
-              <button id="themeBtnColor" class="bouncy-theme-btn active px-2.5 py-1 rounded-md bg-indigo-600 text-white font-bold transition cursor-pointer" data-theme="color">🎨 컬러볼</button>
-              <button id="themeBtnEmoji" class="bouncy-theme-btn px-2.5 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 font-bold transition cursor-pointer" data-theme="emoji">😀 이모지</button>
-              <button id="themeBtnBubble" class="bouncy-theme-btn px-2.5 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 font-bold transition cursor-pointer" data-theme="bubble">🫧 비눗방울</button>
-            </div>
-
-            <!-- 우측 도구: 감도 조절 & 쉿 경고음 토글 & 마이크 버튼 -->
+            <!-- 좌측: 제목 및 모든 제어 버튼 일렬 나란히 배치 -->
             <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-              <div class="flex items-center gap-1 bg-white/90 dark:bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 shadow-sm">
-                <span class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">감도:</span>
-                <input id="sliderBouncySensitivity" type="range" min="0.5" max="3.0" step="0.1" value="1.5" class="w-14 sm:w-18 accent-indigo-500 cursor-pointer" />
-                <span id="labelBouncySensitivity" class="text-[10px] sm:text-[11px] font-mono text-indigo-600 dark:text-indigo-300 font-bold">1.5x</span>
+              <span class="text-sm sm:text-base font-black text-slate-900 dark:text-white flex items-center gap-1.5 whitespace-nowrap mr-0.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" id="bouncyStatusDot"></span>
+                <span>교실 소음 물리 시뮬레이터</span>
+              </span>
+
+              <!-- 쉿 경고 기준 dB 선택기 (65dB / 70dB 기본 / 75dB / 80dB) -->
+              <div class="flex items-center gap-1 bg-white dark:bg-slate-800 px-2 py-1 rounded-md border-2 border-slate-300 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-200 shadow-xs" title="쉿! 경고가 발동할 데시벨(dB) 기준을 설정합니다">
+                <span class="text-[11px] font-black text-rose-600 dark:text-rose-400">기준:</span>
+                <select id="selectBouncyThreshold" class="bg-transparent text-xs font-black text-indigo-700 dark:text-indigo-300 focus:outline-none cursor-pointer">
+                  <option value="65" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">65 dB (도서관·시험)</option>
+                  <option value="70" selected class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">70 dB (수업 집중 - 기본)</option>
+                  <option value="75" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">75 dB (모둠·토의 활동)</option>
+                  <option value="80" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">80 dB (체육·자유 시간)</option>
+                </select>
               </div>
-              <!-- 쉿 소리 ON/OFF 독립 버튼 -->
-              <button id="btnTabShhToggle" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-600/30 hover:bg-indigo-100 dark:hover:bg-indigo-600/50 border border-indigo-300 dark:border-indigo-400/40 text-indigo-700 dark:text-indigo-200 text-xs font-bold transition cursor-pointer" title="75dB 초과 시 '쉿!' 경고 효과음 ON/OFF">
+
+              <!-- 감도 조절 슬라이더 -->
+              <div class="flex items-center gap-1 bg-white dark:bg-slate-800 px-2 py-1 rounded-md border-2 border-slate-300 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-200 shadow-xs">
+                <span class="text-[11px] text-slate-900 dark:text-white font-black">감도:</span>
+                <input id="sliderBouncySensitivity" type="range" min="0.5" max="3.0" step="0.1" value="1.5" class="w-12 sm:w-16 accent-indigo-500 cursor-pointer" />
+                <span id="labelBouncySensitivity" class="text-[11px] font-mono text-indigo-700 dark:text-indigo-300 font-black">1.5x</span>
+              </div>
+
+              <!-- 쉿 소리 ON/OFF 독립 버튼 (고대비 선명 텍스트) -->
+              <button id="btnTabShhToggle" class="flex items-center gap-1 px-2.5 py-1 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white font-black border-2 border-indigo-700 text-xs transition shadow-xs cursor-pointer whitespace-nowrap" title="설정 기준 초과 시 '쉿!' 경고 효과음 ON/OFF">
                 <span id="tabShhIcon">🔔</span>
-                <span id="tabShhText" class="hidden sm:inline">쉿 소리 ON</span>
+                <span id="tabShhText">쉿 소리 ON</span>
               </button>
+
               <!-- 마이크 ON/OFF -->
-              <button id="btnBouncyMicToggle" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow cursor-pointer">
+              <button id="btnBouncyMicToggle" class="px-2.5 py-1 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white font-black border-2 border-indigo-700 text-xs transition shadow-xs cursor-pointer whitespace-nowrap">
                 마이크 시작
               </button>
+            </div>
+
+            <!-- 우측: 공 테마 선택기 (컬러 / 이모지 / 버블) -->
+            <div class="flex items-center gap-1 bg-white/90 dark:bg-slate-900/80 p-0.5 sm:p-1 rounded-lg border-2 border-slate-300 dark:border-slate-700 text-xs shadow-sm flex-shrink-0">
+              <button id="themeBtnColor" class="bouncy-theme-btn active px-2.5 py-1 rounded-md bg-indigo-600 text-white font-black transition cursor-pointer" data-theme="color">🎨 컬러볼</button>
+              <button id="themeBtnEmoji" class="bouncy-theme-btn px-2.5 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/10 text-slate-900 dark:text-slate-100 font-extrabold transition cursor-pointer" data-theme="emoji">😀 이모지</button>
+              <button id="themeBtnBubble" class="bouncy-theme-btn px-2.5 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/10 text-slate-900 dark:text-slate-100 font-extrabold transition cursor-pointer" data-theme="bubble">🫧 비눗방울</button>
             </div>
           </div>
 
@@ -710,14 +861,35 @@
           <div class="flex-1 w-full h-full min-h-[270px] sm:min-h-[310px] lg:min-h-[360px] relative overflow-hidden my-1 rounded-xl bg-white/40 dark:bg-slate-950/40 border border-slate-200/70 dark:border-white/10 shadow-inner">
             <canvas id="bouncyCanvas" class="w-full h-full block rounded-xl"></canvas>
 
-            <!-- 75dB 초과 시 시각적 정숙 유도 팝업 (쉿! 조용히 해주세요) -->
+            <!-- 캔버스 상단 중앙: 초대형 실시간 데시벨 플로팅 HUD (교실 어디서든 숫자의 높낮이가 한눈에 직관적으로 보임) -->
+            <div id="canvasDecibelHUD" class="absolute top-2 sm:top-3 left-1/2 -translate-x-1/2 pointer-events-none z-20 flex flex-col items-center gap-1 sm:gap-1.5 px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-2 border-emerald-500/60 shadow-xl transition-all duration-200">
+              <div class="flex items-center gap-2 sm:gap-3">
+                <span id="hudNoiseIcon" class="text-base sm:text-xl">🟢</span>
+                <div class="flex items-baseline gap-1">
+                  <span id="hudDbNumber" class="text-2xl sm:text-3xl lg:text-4xl font-black font-mono tracking-tight text-slate-900 dark:text-white">35</span>
+                  <span class="text-xs sm:text-sm font-black text-slate-900 dark:text-white">dB</span>
+                </div>
+                <span id="hudStatusBadge" class="px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+                  쾌적 (조용함)
+                </span>
+                <span id="hudThresholdBadge" class="hidden sm:inline-flex text-[10px] sm:text-[11px] font-extrabold text-slate-800 dark:text-slate-200">
+                  (경고: <strong id="hudThresholdNum" class="text-rose-600 dark:text-rose-400">70</strong>dB)
+                </span>
+              </div>
+              <!-- 역동적 사운드 레벨 게이지 바 -->
+              <div class="w-40 sm:w-56 lg:w-72 h-2.5 sm:h-3 rounded-full bg-slate-200 dark:bg-slate-800 p-0.5 border border-slate-300 dark:border-slate-700 overflow-hidden">
+                <div id="hudLevelBar" class="h-full rounded-full bg-emerald-500 transition-all duration-100" style="width: 15%;"></div>
+              </div>
+            </div>
+
+            <!-- 기준 초과 시 시각적 정숙 유도 팝업 (쉿! 조용히 해주세요) -->
             <div id="shhAlertPopup" class="absolute inset-0 bg-rose-950/85 backdrop-blur-sm flex flex-col items-center justify-center transition-all duration-300 opacity-0 pointer-events-none z-30">
               <div class="text-5xl sm:text-6xl mb-2 animate-bounce">🤫</div>
               <h3 class="text-2xl sm:text-3xl font-black text-rose-300 drop-shadow-[0_0_20px_rgba(244,63,94,0.6)]">
                 쉿! 조용히 해주세요
               </h3>
-              <p class="text-xs sm:text-sm text-rose-200 font-medium mt-1.5 bg-rose-900/60 px-3.5 py-1 rounded-full border border-rose-500/40">
-                교실 소음이 75dB을 초과했습니다. 목소리를 조금만 낮춰주세요!
+              <p id="shhAlertDesc" class="text-xs sm:text-sm text-rose-200 font-bold mt-1.5 bg-rose-900/60 px-3.5 py-1 rounded-full border border-rose-500/40">
+                교실 소음이 70dB을 초과했습니다. 목소리를 조금만 낮춰주세요!
               </p>
             </div>
           </div>
@@ -738,7 +910,7 @@
         <span class="text-slate-400 dark:text-slate-600">•</span>
         <span>All rights reserved.</span>
         <span class="text-slate-400 dark:text-slate-600">•</span>
-        <span class="px-1.5 py-0.5 rounded-md bg-indigo-500/15 dark:bg-indigo-500/25 text-indigo-600 dark:text-indigo-300 font-mono text-[11px] font-bold border border-indigo-400/30">v1.8</span>
+        <span class="px-1.5 py-0.5 rounded-md bg-indigo-500/15 dark:bg-indigo-500/25 text-indigo-600 dark:text-indigo-300 font-mono text-[11px] font-bold border border-indigo-400/30">v2.1</span>
       </div>
     </div>
 
@@ -782,13 +954,13 @@
         </div>
 
         <!-- 우측: 클린 뷰 안내 & 단축키 안내 힌트 -->
-        <div class="hidden sm:flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 font-mono whitespace-nowrap flex-shrink-0">
-          <span class="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-semibold text-slate-700 dark:text-slate-300">Space</span>
-          <span>일시정지</span>
-          <span class="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-semibold text-slate-700 dark:text-slate-300 ml-1">F</span>
-          <span>전체화면</span>
-          <span class="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-semibold text-slate-700 dark:text-slate-300 ml-1">S</span>
-          <span>설정</span>
+        <div class="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-800 dark:text-slate-200 font-extrabold font-mono whitespace-nowrap flex-shrink-0">
+          <span class="px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 font-black text-slate-900 dark:text-white shadow-xs">Space</span>
+          <span class="font-bold text-slate-800 dark:text-slate-200">일시정지</span>
+          <span class="px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 font-black text-slate-900 dark:text-white ml-1 shadow-xs">F</span>
+          <span class="font-bold text-slate-800 dark:text-slate-200">전체화면</span>
+          <span class="px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 font-black text-slate-900 dark:text-white ml-1 shadow-xs">S</span>
+          <span class="font-bold text-slate-800 dark:text-slate-200">설정</span>
         </div>
       </div>
     </div>
@@ -814,7 +986,7 @@
             </div>
             <p class="text-[11px] text-slate-400 hidden sm:block">교실 전자칠판 및 노트북 화면 비율에 최적화된 올인원 제어판</p>
           </div>
-          <span class="text-[10px] px-2.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">Zzang_AA Edition v1.8</span>
+          <span class="text-[10px] px-2.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">Zzang_AA Edition v2.1</span>
         </div>
         <button id="btnCloseSettings" class="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition text-lg cursor-pointer" title="설정 닫기 (Esc)">✕</button>
       </div>
@@ -1607,53 +1779,58 @@
         if (now - this.lastPlayedTime < 2800) return; // 2.8초 쿨다운 중복 방지
         this.lastPlayedTime = now;
 
-        this.initContext();
-        const t = this.ctx.currentTime;
-        const duration = 1.3;
+        try {
+          this.initContext();
+          if (!this.ctx) return;
+          const t = Math.max(0.001, this.ctx.currentTime || 0);
+          const duration = 1.3;
 
-        // 1. '쉿~~~' (Shh~~) 숨소리 합성
-        const bufferSize = Math.floor(this.ctx.sampleRate * duration);
-        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-        const data = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          data[i] = (Math.random() * 2 - 1) * 0.75;
+          // 1. '쉿~~~' (Shh~~) 숨소리 합성
+          const bufferSize = Math.max(256, Math.floor(this.ctx.sampleRate * duration));
+          const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const data = noiseBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * 0.75;
+          }
+
+          const noiseSrc = this.ctx.createBufferSource();
+          noiseSrc.buffer = noiseBuffer;
+
+          // 2600Hz 밴드패스 필터 (쉿 소리 공명)
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(2600, t);
+          filter.Q.setValueAtTime(3.5, t);
+
+          const gainNode = this.ctx.createGain();
+          gainNode.gain.setValueAtTime(0.001, t);
+          gainNode.gain.linearRampToValueAtTime(0.38, t + 0.12);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, t + duration);
+
+          noiseSrc.connect(filter);
+          filter.connect(gainNode);
+          gainNode.connect(this.ctx.destination);
+
+          noiseSrc.start(t);
+          noiseSrc.stop(t + duration);
+
+          // 2. 다정하고 맑은 집중 차임벨 (784Hz - Sol음)
+          const chimeOsc = this.ctx.createOscillator();
+          const chimeGain = this.ctx.createGain();
+          chimeOsc.type = 'sine';
+          chimeOsc.frequency.setValueAtTime(783.99, t);
+          chimeGain.gain.setValueAtTime(0.001, t);
+          chimeGain.gain.linearRampToValueAtTime(0.12, t + 0.05);
+          chimeGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+
+          chimeOsc.connect(chimeGain);
+          chimeGain.connect(this.ctx.destination);
+
+          chimeOsc.start(t);
+          chimeOsc.stop(t + 0.9);
+        } catch (err) {
+          console.warn('쉿 사운드 재생 중 안전 방어:', err);
         }
-
-        const noiseSrc = this.ctx.createBufferSource();
-        noiseSrc.buffer = noiseBuffer;
-
-        // 2600Hz 밴드패스 필터 (쉿 소리 공명)
-        const filter = this.ctx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(2600, t);
-        filter.Q.setValueAtTime(3.5, t);
-
-        const gainNode = this.ctx.createGain();
-        gainNode.gain.setValueAtTime(0.001, t);
-        gainNode.gain.linearRampToValueAtTime(0.38, t + 0.12);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, t + duration);
-
-        noiseSrc.connect(filter);
-        filter.connect(gainNode);
-        gainNode.connect(this.ctx.destination);
-
-        noiseSrc.start(t);
-        noiseSrc.stop(t + duration);
-
-        // 2. 다정하고 맑은 집중 차임벨 (784Hz - Sol음)
-        const chimeOsc = this.ctx.createOscillator();
-        const chimeGain = this.ctx.createGain();
-        chimeOsc.type = 'sine';
-        chimeOsc.frequency.setValueAtTime(783.99, t);
-        chimeGain.gain.setValueAtTime(0.001, t);
-        chimeGain.gain.linearRampToValueAtTime(0.12, t + 0.05);
-        chimeGain.exponentialRampToValueAtTime(0.0001, t + 0.9);
-
-        chimeOsc.connect(chimeGain);
-        chimeGain.connect(this.ctx.destination);
-
-        chimeOsc.start(t);
-        chimeOsc.stop(t + 0.9);
       }
     }
 
@@ -1683,7 +1860,7 @@
         this.theme = 'color'; // 'color' | 'emoji' | 'bubble'
         this.balls = [];
         this.ballCount = 38;
-        this.threshold = 75;
+        this.threshold = 70;
         this.lastExplosionTime = 0;
 
         this.emojis = ['😀', '🤫', '🎈', '🐱', '⭐', '🌈', '🍎', '🚀', '🐶', '⚽'];
@@ -1707,7 +1884,11 @@
         if (this.canvas) {
           this.resize();
           this.initBalls();
-          window.addEventListener('resize', () => this.resize());
+          this.render();
+          window.addEventListener('resize', () => {
+            this.resize();
+            this.render();
+          });
         }
       }
 
@@ -1722,41 +1903,51 @@
         if (this.ctx) {
           this.ctx.scale(dpr, dpr);
         }
+        this.render();
       }
 
       initBalls() {
         this.balls = [];
+        const cols = 5;
+        const colWidth = Math.max(60, (this.width - 40) / cols);
         for (let i = 0; i < this.ballCount; i++) {
-          // 크기를 1.2-2.0배 확대 (반지름 24px ~ 42px)
-          const radius = 24 + Math.random() * 18;
+          // 크기를 1.2-2.0배 확대 (반지름 26px ~ 42px)
+          const radius = 26 + (i % 4) * 4;
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+          const x = Math.min(this.width - radius - 15, Math.max(radius + 15, 30 + colWidth * (col + 0.5) + ((row % 2 === 1) ? 20 : -10)));
+          const y = this.height - radius - 4 - (row * 36);
           this.balls.push({
-            x: radius + Math.random() * Math.max(100, this.width - radius * 2),
-            y: this.height - radius - Math.random() * 60,
-            vx: (Math.random() - 0.5) * 2.2,
-            vy: -Math.random() * 3.5,
+            x: x,
+            y: y,
+            vx: 0,
+            vy: 0,
             radius: radius,
             color: this.palette[i % this.palette.length],
             emoji: this.emojis[i % this.emojis.length],
-            rotation: 0,
-            vRot: (Math.random() - 0.5) * 0.05,
-            bubbleWobble: Math.random() * Math.PI * 2,
+            rotation: (i * 0.15),
+            vRot: (Math.random() - 0.5) * 0.04,
+            bubbleWobble: (i * Math.PI) / 5,
           });
         }
+        this.render();
       }
 
       setTheme(theme) {
         this.theme = theme;
+        this.render();
       }
 
       setSensitivity(val) {
         this.sensitivity = parseFloat(val);
       }
 
+      setThreshold(val) {
+        this.threshold = parseInt(val, 10) || 70;
+      }
+
       async start() {
         try {
-          if (!this.micStream) {
-            this.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          }
           if (!this.audioCtx) {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
             this.audioCtx = new AudioContextClass();
@@ -1765,13 +1956,47 @@
             await this.audioCtx.resume();
           }
 
+          if (!this.micStream) {
+            try {
+              this.micStream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                  echoCancellation: false,
+                  noiseSuppression: false,
+                  autoGainControl: false
+                }
+              });
+            } catch (micErr) {
+              console.warn('원시 오디오 제약 실패, 기본 마이크로 재시도:', micErr);
+              this.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            }
+          }
+
           if (!this.analyser) {
-            const source = this.audioCtx.createMediaStreamSource(this.micStream);
             this.analyser = this.audioCtx.createAnalyser();
             this.analyser.fftSize = 512;
-            this.analyser.smoothingTimeConstant = 0.65;
-            source.connect(this.analyser);
+            this.analyser.smoothingTimeConstant = 0.35;
           }
+
+          // 전역 window 프로퍼티에 영구 보존하여 Chromium V8 가비지 컬렉션(GC) 원천 차단
+          if (this.source) {
+            try { this.source.disconnect(); } catch (e) {}
+          }
+          window._bouncySource = this.source = this.audioCtx.createMediaStreamSource(this.micStream);
+          this.source.connect(this.analyser);
+
+          // 브라우저의 오디오 프로세싱 파이프라인 절전/일시중단 방지를 위한 무음 게인 연결
+          if (!this.silenceGain) {
+            this.silenceGain = this.audioCtx.createGain();
+            this.silenceGain.gain.value = 0;
+            this.analyser.connect(this.silenceGain);
+            this.silenceGain.connect(this.audioCtx.destination);
+          }
+          window._bouncyAudioCtx = this.audioCtx;
+          window._bouncySilenceGain = this.silenceGain;
+          window._bouncyAnalyser = this.analyser;
+          window._bouncyMicStream = this.micStream;
+
+          this.timeData = new Uint8Array(this.analyser.fftSize);
 
           this.isRunning = true;
           this.resize();
@@ -1790,61 +2015,123 @@
           cancelAnimationFrame(this.animId);
           this.animId = null;
         }
+        if (this.source) {
+          try { this.source.disconnect(); } catch (e) {}
+          this.source = null;
+          window._bouncySource = null;
+        }
+        if (this.silenceGain) {
+          try { this.silenceGain.disconnect(); } catch (e) {}
+          this.silenceGain = null;
+          window._bouncySilenceGain = null;
+        }
         if (this.micStream) {
           this.micStream.getTracks().forEach(t => t.stop());
           this.micStream = null;
+          window._bouncyMicStream = null;
         }
         if (this.audioCtx) {
           try { this.audioCtx.close(); } catch (e) {}
           this.audioCtx = null;
+          window._bouncyAudioCtx = null;
         }
         this.analyser = null;
+        window._bouncyAnalyser = null;
+        this.timeData = null;
         this.currentDb = 35;
+        this.smoothedDb = 35;
+        this.initBalls();
+        this.render();
       }
 
       loop() {
         if (!this.isRunning) return;
-        this.updatePhysics();
-        this.render();
-        this.animId = requestAnimationFrame(() => this.loop());
+        try {
+          if (this.audioCtx && this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {});
+          }
+          this.updatePhysics();
+          if (this.canvas && this.canvas.offsetWidth > 0 && this.canvas.offsetHeight > 0) {
+            this.render();
+          }
+        } catch (loopErr) {
+          console.error('Bouncy noise loop recovered:', loopErr);
+        } finally {
+          if (this.isRunning) {
+            this.animId = requestAnimationFrame(() => this.loop());
+          }
+        }
       }
 
       updatePhysics() {
         let db = 35;
-        if (this.analyser) {
-          const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
-          this.analyser.getByteFrequencyData(dataArray);
+        if (this.analyser && this.timeData) {
+          this.analyser.getByteTimeDomainData(this.timeData);
           let sum = 0;
-          for (let i = 0; i < dataArray.length; i++) {
-            sum += dataArray[i] * dataArray[i];
+          for (let i = 0; i < this.timeData.length; i++) {
+            const val = (this.timeData[i] - 128) / 128;
+            sum += val * val;
           }
-          const rms = Math.sqrt(sum / dataArray.length);
-          db = Math.min(95, Math.max(35, Math.round(35 + (rms / 255) * 60)));
+          const rms = Math.sqrt(sum / this.timeData.length);
+          // 실시간 사운드 음압(RMS) 기반 실시간 데시벨 산출 (35dB ~ 95dB)
+          const instantDb = Math.round(35 + Math.min(60, rms * 175));
+          this.smoothedDb = this.smoothedDb ? (this.smoothedDb * 0.35 + instantDb * 0.65) : instantDb;
+          db = Math.min(95, Math.max(35, Math.round(this.smoothedDb)));
         }
         this.currentDb = db;
 
         // 상단 헤더 소음 UI 동기화
         updateNoiseUI(db);
 
-        // 바운시 탭 전용 배지 동기화
-        const bouncyDbBadge = document.getElementById('bouncyDbBadge');
-        if (bouncyDbBadge) {
-          bouncyDbBadge.textContent = `${db} dB`;
-          if (db < 58) bouncyDbBadge.className = 'px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-mono font-bold';
-          else if (db <= 74) bouncyDbBadge.className = 'px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-mono font-bold';
-          else bouncyDbBadge.className = 'px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-mono font-bold animate-pulse';
+        // 캔버스 초대형 플로팅 HUD 실시간 연동 (교실 어디서나 직관적 모니터링)
+        const hudDbNumber = document.getElementById('hudDbNumber');
+        const hudLevelBar = document.getElementById('hudLevelBar');
+        const hudNoiseIcon = document.getElementById('hudNoiseIcon');
+        const hudStatusBadge = document.getElementById('hudStatusBadge');
+        const canvasDecibelHUD = document.getElementById('canvasDecibelHUD');
+
+        if (hudDbNumber) hudDbNumber.textContent = db;
+        if (hudLevelBar) {
+          const ratio = Math.min(100, Math.max(6, Math.round(((db - 35) / Math.max(1, this.threshold - 25)) * 100)));
+          hudLevelBar.style.width = `${ratio}%`;
         }
 
-        // 데시벨 기반 반중력 펄스 계산
-        const excess = Math.max(0, db - 45);
-        const impulse = Math.pow(excess / 30, 1.8) * 2.2 * this.sensitivity;
+        if (hudNoiseIcon && hudStatusBadge && canvasDecibelHUD) {
+          if (db < this.threshold - 15) {
+            hudNoiseIcon.textContent = '🟢';
+            hudStatusBadge.textContent = '쾌적 (조용함)';
+            hudStatusBadge.className = 'px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700';
+            if (hudLevelBar) hudLevelBar.className = 'h-full rounded-full bg-emerald-500 transition-all duration-100';
+            canvasDecibelHUD.className = 'absolute top-2 sm:top-3 left-1/2 -translate-x-1/2 pointer-events-none z-20 flex flex-col items-center gap-1 sm:gap-1.5 px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-2 border-emerald-500/60 shadow-xl transition-all duration-200';
+          } else if (db < this.threshold) {
+            hudNoiseIcon.textContent = '🟡';
+            hudStatusBadge.textContent = '주의 (목소리 조절)';
+            hudStatusBadge.className = 'px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-black bg-amber-100 text-amber-800 dark:bg-amber-900/70 dark:text-amber-300 border border-amber-300 dark:border-amber-700';
+            if (hudLevelBar) hudLevelBar.className = 'h-full rounded-full bg-amber-500 transition-all duration-100';
+            canvasDecibelHUD.className = 'absolute top-2 sm:top-3 left-1/2 -translate-x-1/2 pointer-events-none z-20 flex flex-col items-center gap-1 sm:gap-1.5 px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-2 border-amber-500/60 shadow-xl transition-all duration-200';
+          } else {
+            hudNoiseIcon.textContent = '🔴';
+            hudStatusBadge.textContent = '쉿! 정숙 경고';
+            hudStatusBadge.className = 'px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-black bg-rose-500 text-white border border-rose-600 animate-pulse';
+            if (hudLevelBar) hudLevelBar.className = 'h-full rounded-full bg-rose-600 transition-all duration-100 animate-pulse';
+            canvasDecibelHUD.className = 'absolute top-2 sm:top-3 left-1/2 -translate-x-1/2 pointer-events-none z-20 flex flex-col items-center gap-1 sm:gap-1.5 px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-2 border-rose-500 shadow-2xl animate-pulse transition-all duration-200';
+          }
+        }
 
-        // 75dB 초과 시: 대폭발 충격 + 쉿 정숙 이벤트
+        // 데시벨 기반 반중력 펄스 계산 (38dB부터 부드럽고 생동감 넘치게 통통 튐)
+        const excess = Math.max(0, db - 38);
+        const impulse = (excess / 12) * 1.85 * this.sensitivity;
+
+        // 설정된 임계치(기본 70dB) 초과 시: 대폭발 충격 + 쉿 정숙 이벤트
         const now = Date.now();
         if (db >= this.threshold && (now - this.lastExplosionTime > 2600)) {
           this.lastExplosionTime = now;
           if (this.onThresholdExceeded) {
-            this.onThresholdExceeded(db);
+            try {
+              this.onThresholdExceeded(db);
+            } catch (cbErr) {
+              console.warn('onThresholdExceeded callback error:', cbErr);
+            }
           }
           this.balls.forEach(b => {
             b.vy = -14 - Math.random() * 15;
@@ -1852,17 +2139,17 @@
           });
         }
 
-        const gravity = 0.40;
-        const bounceRestitution = 0.76;
+        const gravity = 0.38;
+        const bounceRestitution = 0.78;
         const airFriction = 0.992;
 
         for (let i = 0; i < this.balls.length; i++) {
           const b = this.balls[i];
 
-          // 소리 크기에 따른 공 튀어오름
-          if (impulse > 0.05 && Math.random() < 0.7) {
-            b.vy -= impulse * (0.6 + Math.random() * 0.8);
-            b.vx += (Math.random() - 0.5) * impulse * 1.0;
+          // 소리 크기에 따른 공 튀어오름 (반응성 강화)
+          if (impulse > 0.08 && Math.random() < 0.75) {
+            b.vy -= impulse * (0.65 + Math.random() * 0.75);
+            b.vx += (Math.random() - 0.5) * impulse * 1.1;
           }
 
           b.vy += gravity;
@@ -1887,7 +2174,7 @@
           if (b.y > this.height - b.radius) {
             b.y = this.height - b.radius;
             b.vy = -b.vy * bounceRestitution;
-            if (Math.abs(b.vy) < 0.6) b.vy = 0;
+            if (Math.abs(b.vy) < 0.3) b.vy = 0;
           }
 
           // 천장 충돌
@@ -1899,7 +2186,7 @@
       }
 
       render() {
-        if (!this.ctx) return;
+        if (!this.ctx || !this.width || !this.height || this.width <= 10 || this.height <= 10) return;
         this.ctx.clearRect(0, 0, this.width, this.height);
 
         // 바닥 기준선
@@ -2023,26 +2310,26 @@
           emojiBadgeClass: 'w-10 h-10 sm:w-11 sm:h-11 text-2xl sm:text-3xl'
         };
       }
-      // 2) 중문 (150자 ~ 480자, 8대 약속 수칙 등) : 가독성을 대폭 끌어올린 시원한 대화면 폰트
+      // 2) 중문 (150자 ~ 480자, 8대 약속 수칙 등) : 가독성을 극대화하고 8개 수칙 전체가 한 화면에 쏙 들어오는 무스크롤 콤팩트 레이아웃
       else if (totalLen <= 480 && lineCount <= 10) {
         return {
-          containerClass: 'space-y-2 sm:space-y-2.5 mb-2 max-h-[300px] sm:max-h-[360px] lg:max-h-[420px]',
-          titleClass: 'text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white mb-2 leading-tight tracking-tight',
-          itemClass: 'py-2 sm:py-2.5 px-3 sm:px-4',
-          ruleTitleClass: 'text-base sm:text-lg lg:text-xl font-black',
-          ruleDescClass: 'text-sm sm:text-base lg:text-lg text-slate-800 dark:text-slate-100 font-bold',
-          emojiBadgeClass: 'w-8 h-8 sm:w-9 sm:h-9 text-lg sm:text-xl'
+          containerClass: 'space-y-0.5 sm:space-y-1 mb-1 max-h-[380px] sm:max-h-[440px] lg:max-h-[500px]',
+          titleClass: 'text-base sm:text-lg lg:text-xl font-black text-slate-900 dark:text-white mb-1 leading-tight tracking-tight',
+          itemClass: 'py-0.5 sm:py-1 px-2.5 sm:px-3',
+          ruleTitleClass: 'text-xs sm:text-sm lg:text-[14px] font-black',
+          ruleDescClass: 'text-[11px] sm:text-xs lg:text-[13px] text-slate-800 dark:text-slate-100 font-bold',
+          emojiBadgeClass: 'w-5 h-5 sm:w-6 sm:h-6 text-xs sm:text-sm'
         };
       }
       // 3) 장문 (480자 초과) : 많은 내용을 깔끔히 담는 스마트 압축 폰트
       else {
         return {
-          containerClass: 'space-y-1.5 sm:space-y-2 mb-2 max-h-[300px] sm:max-h-[360px] lg:max-h-[420px]',
-          titleClass: 'text-lg sm:text-xl lg:text-2xl font-black text-slate-900 dark:text-white mb-1.5 leading-tight tracking-tight',
-          itemClass: 'py-1.5 sm:py-2 px-3',
-          ruleTitleClass: 'text-sm sm:text-base font-black',
-          ruleDescClass: 'text-xs sm:text-sm lg:text-base text-slate-800 dark:text-slate-100 font-bold',
-          emojiBadgeClass: 'w-7 h-7 sm:w-8 sm:h-8 text-base sm:text-lg'
+          containerClass: 'space-y-1 mb-1 max-h-[350px] sm:max-h-[410px] lg:max-h-[470px]',
+          titleClass: 'text-base sm:text-lg lg:text-xl font-black text-slate-900 dark:text-white mb-1 leading-tight tracking-tight',
+          itemClass: 'py-1 px-2.5',
+          ruleTitleClass: 'text-xs sm:text-sm font-black',
+          ruleDescClass: 'text-[11px] sm:text-xs text-slate-800 dark:text-slate-100 font-bold',
+          emojiBadgeClass: 'w-6 h-6 text-xs'
         };
       }
     }
@@ -2086,8 +2373,8 @@
         // 1) 주의사항/팁 박스 (> ...)
         if (rawLine.startsWith('>')) {
           const content = parseInline(rawLine.substring(1).trim());
-          html += `<div class="border-l-4 border-amber-500 bg-amber-50/95 dark:bg-amber-950/50 ${fontClasses.itemClass} rounded-r-xl text-amber-950 dark:text-amber-200 ${fontClasses.ruleDescClass} my-1.5 flex items-start gap-2 shadow-sm border-y border-r border-amber-200/80 dark:border-amber-700/40">
-            <span class="text-amber-600 dark:text-amber-400 font-bold flex-shrink-0 text-base">💡</span>
+          html += `<div class="border-l-4 border-amber-500 bg-amber-50/95 dark:bg-amber-950/50 ${fontClasses.itemClass} rounded-r-xl text-amber-950 dark:text-amber-200 ${fontClasses.ruleDescClass} my-1 flex items-start gap-2 shadow-xs border-y border-r border-amber-200/80 dark:border-amber-700/40">
+            <span class="text-amber-600 dark:text-amber-400 font-bold flex-shrink-0 text-sm">💡</span>
             <div class="leading-relaxed flex-1">${content}</div>
           </div>`;
           continue;
@@ -2097,7 +2384,7 @@
         const headingMatch = rawLine.match(/^(#{1,4})\s+(.+)$/);
         if (headingMatch) {
           const title = parseInline(headingMatch[2]);
-          html += `<div class="${fontClasses.titleClass} mt-3 mb-1.5 pb-1 border-b border-slate-300/60 dark:border-white/10 flex items-center gap-1.5">${title}</div>`;
+          html += `<div class="${fontClasses.titleClass} mt-2 mb-1 pb-1 border-b border-slate-300/60 dark:border-white/10 flex items-center gap-1.5">${title}</div>`;
           continue;
         }
 
@@ -2120,8 +2407,8 @@
           const parsedTitle = parseInline(title);
           const parsedDesc = parseInline(rightPart);
 
-          html += `<div class="flex items-center gap-3 ${fontClasses.itemClass} rounded-xl bg-white/95 dark:bg-slate-900/90 border-2 border-indigo-200/90 dark:border-indigo-600/50 hover:border-indigo-500 hover:shadow-md transition shadow-sm mb-2 group">
-            ${emoji ? `<div class="flex-shrink-0 ${fontClasses.emojiBadgeClass} rounded-lg bg-indigo-100/95 dark:bg-indigo-950/80 border border-indigo-300 dark:border-indigo-700/70 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">${emoji}</div>` : ''}
+          html += `<div class="flex items-center gap-2 sm:gap-2.5 ${fontClasses.itemClass} rounded-lg bg-white/95 dark:bg-slate-900/90 border-2 border-indigo-200/90 dark:border-indigo-600/50 hover:border-indigo-500 hover:shadow-md transition shadow-xs mb-1 group">
+            ${emoji ? `<div class="flex-shrink-0 ${fontClasses.emojiBadgeClass} rounded-md bg-indigo-100/95 dark:bg-indigo-950/80 border border-indigo-300 dark:border-indigo-700/70 flex items-center justify-center shadow-xs group-hover:scale-110 transition-transform">${emoji}</div>` : ''}
             <div class="flex-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
               <span class="${fontClasses.ruleTitleClass} text-indigo-950 dark:text-white tracking-wide">${parsedTitle}</span>
               <span class="text-indigo-600 dark:text-indigo-400 font-black hidden sm:inline">:</span>
@@ -2134,7 +2421,7 @@
         // 4) 이모지 소제목 배지 (예: 📌 **수업 개요**, 🎒 **학생 준비 및 행동 요령**)
         if (/^[📌🎒💡✨🔍📢🎯📝🔔]\s*\*\*/.test(rawLine)) {
           const content = parseInline(rawLine);
-          html += `<div class="${fontClasses.ruleTitleClass} text-indigo-900 dark:text-indigo-300 font-black flex items-center gap-1.5 pt-2 pb-0.5">${content}</div>`;
+          html += `<div class="${fontClasses.ruleTitleClass} text-indigo-900 dark:text-indigo-300 font-black flex items-center gap-1.5 pt-1 pb-0.5">${content}</div>`;
           continue;
         }
 
@@ -2143,8 +2430,8 @@
         if (numMatch) {
           const num = numMatch[1];
           const content = parseInline(numMatch[2]);
-          html += `<div class="flex items-start gap-2.5 ${fontClasses.itemClass} rounded-xl bg-white/95 dark:bg-slate-900/90 border-2 border-indigo-200/90 dark:border-indigo-600/50 hover:border-indigo-500 hover:shadow-md transition shadow-sm mb-2">
-            <span class="flex-shrink-0 w-6 h-6 rounded-md bg-indigo-600 text-white font-black text-xs sm:text-sm flex items-center justify-center mt-0.5 shadow-sm">${num}</span>
+          html += `<div class="flex items-start gap-2 ${fontClasses.itemClass} rounded-lg bg-white/95 dark:bg-slate-900/90 border-2 border-indigo-200/90 dark:border-indigo-600/50 hover:border-indigo-500 hover:shadow-md transition shadow-xs mb-1">
+            <span class="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-indigo-600 text-white font-black text-xs flex items-center justify-center mt-0.5 shadow-xs">${num}</span>
             <div class="${fontClasses.ruleDescClass} text-slate-800 dark:text-slate-100 font-bold leading-relaxed flex-1">${content}</div>
           </div>`;
           continue;
@@ -2154,8 +2441,8 @@
         const bulletMatch = rawLine.match(/^[\-\*]\s+(.+)$/);
         if (bulletMatch) {
           const content = parseInline(bulletMatch[1]);
-          html += `<div class="flex items-start gap-2.5 ${fontClasses.itemClass} rounded-xl bg-white/90 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-800 mb-1.5 shadow-sm">
-            <span class="text-indigo-600 dark:text-sky-400 font-bold text-base leading-none mt-1">•</span>
+          html += `<div class="flex items-start gap-2 ${fontClasses.itemClass} rounded-lg bg-white/90 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-800 mb-1 shadow-xs">
+            <span class="text-indigo-600 dark:text-sky-400 font-bold text-base leading-none mt-0.5">•</span>
             <div class="${fontClasses.ruleDescClass} text-slate-800 dark:text-slate-100 font-bold leading-relaxed flex-1">${content}</div>
           </div>`;
           continue;
@@ -2163,7 +2450,7 @@
 
         // 7) 일반 문단 단락
         const content = parseInline(rawLine);
-        html += `<p class="${fontClasses.ruleDescClass} text-slate-800 dark:text-slate-100 font-bold leading-relaxed mb-1.5">${content}</p>`;
+        html += `<p class="${fontClasses.ruleDescClass} text-slate-800 dark:text-slate-100 font-bold leading-relaxed mb-1">${content}</p>`;
       }
 
       return html;
@@ -2303,7 +2590,7 @@
       cardOpacity: parseInt(localStorage.getItem('zzang_cardOpacity')) || 45,
       bgDimmer: parseInt(localStorage.getItem('zzang_bgDimmer')) || 15,
       bgUrl: localStorage.getItem('zzang_bgUrl') || 'https://i.imgur.com/VXI1sTq.jpeg',
-      version: 'v1.8',
+      version: 'v1.9',
       shhSoundEnabled: true,
       bouncySensitivity: 1.5,
       bouncyTheme: 'color',
@@ -2869,25 +3156,26 @@
       dom.noiseDbValue.textContent = `${db} dB`;
       dom.noiseDbValue.classList.remove('hidden');
 
-      if (db < 58) {
-        dom.noiseLightDot.className = 'w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399]';
+      const thr = bouncyNoiseMeter ? bouncyNoiseMeter.threshold : 70;
+      if (db < thr - 15) {
+        dom.noiseLightDot.className = 'w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]';
         dom.noiseText.textContent = '쾌적 (조용함)';
-        dom.noiseText.className = 'text-xs font-semibold text-emerald-300';
-      } else if (db <= 74) {
-        dom.noiseLightDot.className = 'w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_10px_#fbbf24]';
+        dom.noiseText.className = 'text-xs font-black text-emerald-700 dark:text-emerald-300';
+      } else if (db < thr) {
+        dom.noiseLightDot.className = 'w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_10px_#f59e0b]';
         dom.noiseText.textContent = '주의 (목소리 조절)';
-        dom.noiseText.className = 'text-xs font-semibold text-amber-300';
+        dom.noiseText.className = 'text-xs font-black text-amber-700 dark:text-amber-300';
       } else {
         dom.noiseLightDot.className = 'w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_15px_#f43f5e] animate-ping';
         dom.noiseText.textContent = '쉿! 정숙 경고';
-        dom.noiseText.className = 'text-xs font-bold text-rose-400 animate-pulse';
+        dom.noiseText.className = 'text-xs font-black text-rose-600 dark:text-rose-400 animate-pulse';
       }
     }
 
     function initBouncyMeterIfNeeded() {
       if (!bouncyNoiseMeter && dom.bouncyCanvas) {
         bouncyNoiseMeter = new BouncyPhysicsNoiseMeter(dom.bouncyCanvas, (db) => {
-          // 75dB 초과 시: 시각적 팝업 & 쉿 효과음 트리거
+          // 설정 데시벨(기본 70dB) 초과 시: 시각적 팝업 & 쉿 효과음 트리거
           triggerShhAlert(db);
         });
       }
@@ -2895,6 +3183,11 @@
 
     function triggerShhAlert(db) {
       if (dom.shhAlertPopup) {
+        const shhAlertDesc = document.getElementById('shhAlertDesc');
+        const thr = bouncyNoiseMeter ? bouncyNoiseMeter.threshold : 70;
+        if (shhAlertDesc) {
+          shhAlertDesc.textContent = `교실 소음이 ${thr}dB을 초과했습니다. 목소리를 조금만 낮춰주세요!`;
+        }
         dom.shhAlertPopup.classList.remove('opacity-0', 'pointer-events-none');
         dom.shhAlertPopup.classList.add('opacity-100');
         setTimeout(() => {
@@ -2920,7 +3213,7 @@
         if (dom.tabShhIcon) dom.tabShhIcon.textContent = '🔔';
         if (dom.tabShhText) dom.tabShhText.textContent = '쉿 소리 ON';
         if (dom.btnTabShhToggle) {
-          dom.btnTabShhToggle.className = 'flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-400/40 text-indigo-200 text-xs font-bold transition cursor-pointer';
+          dom.btnTabShhToggle.className = 'flex items-center gap-1 px-2.5 py-1 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white font-black border-2 border-indigo-700 text-xs transition shadow-xs cursor-pointer whitespace-nowrap';
         }
       } else {
         if (dom.headerShhIcon) dom.headerShhIcon.textContent = '🔕';
@@ -2931,7 +3224,7 @@
         if (dom.tabShhIcon) dom.tabShhIcon.textContent = '🔕';
         if (dom.tabShhText) dom.tabShhText.textContent = '쉿 소리 OFF';
         if (dom.btnTabShhToggle) {
-          dom.btnTabShhToggle.className = 'flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-400 text-xs font-bold transition cursor-pointer';
+          dom.btnTabShhToggle.className = 'flex items-center gap-1 px-2.5 py-1 rounded-md bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-black border-2 border-slate-400 dark:border-slate-600 text-xs transition shadow-xs cursor-pointer whitespace-nowrap';
         }
       }
     }
@@ -2947,11 +3240,11 @@
         bouncyNoiseMeter.stop();
         dom.noiseLightDot.className = 'w-3 h-3 rounded-full bg-slate-500';
         dom.noiseText.textContent = '소음계 OFF';
-        dom.noiseText.className = 'text-xs font-semibold text-slate-300';
+        dom.noiseText.className = 'text-xs font-semibold text-slate-500 dark:text-slate-400';
         dom.noiseDbValue.classList.add('hidden');
         if (dom.btnBouncyMicToggle) {
           dom.btnBouncyMicToggle.textContent = '마이크 시작';
-          dom.btnBouncyMicToggle.className = 'px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow cursor-pointer';
+          dom.btnBouncyMicToggle.className = 'px-2.5 py-1 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white font-black border-2 border-indigo-700 text-xs transition shadow-xs cursor-pointer whitespace-nowrap';
         }
       } else {
         const ok = await bouncyNoiseMeter.start();
@@ -2959,7 +3252,7 @@
           dom.noiseText.textContent = '측정 중...';
           if (dom.btnBouncyMicToggle) {
             dom.btnBouncyMicToggle.textContent = '마이크 중지';
-            dom.btnBouncyMicToggle.className = 'px-3 py-1 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition shadow cursor-pointer';
+            dom.btnBouncyMicToggle.className = 'px-2.5 py-1 rounded-md bg-rose-600 hover:bg-rose-500 text-white font-black border-2 border-rose-700 text-xs transition shadow-xs cursor-pointer whitespace-nowrap';
           }
         }
       }
@@ -2980,12 +3273,13 @@
       ];
 
       tabs.forEach(t => {
+        if (!t.btn) return;
         if (t.name === tabName) {
-          t.btn.className = 'media-tab-btn active px-4 py-2 rounded-xl bg-indigo-600 text-white shadow-md transition flex items-center gap-1.5 whitespace-nowrap';
+          t.btn.className = 'media-tab-btn active h-8 sm:h-9 px-3.5 py-1 rounded-md bg-indigo-600 text-white font-black border-2 border-indigo-700 shadow-md transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer';
           t.content.classList.remove('hidden');
           t.content.classList.add('flex');
         } else {
-          t.btn.className = 'media-tab-btn px-4 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap';
+          t.btn.className = 'media-tab-btn h-8 sm:h-9 px-3.5 py-1 rounded-md bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border-2 border-slate-300 dark:border-slate-600 text-xs sm:text-sm font-extrabold shadow-sm transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer';
           t.content.classList.add('hidden');
           t.content.classList.remove('flex');
         }
@@ -2994,8 +3288,11 @@
       if (tabName === 'bouncy') {
         initBouncyMeterIfNeeded();
         setTimeout(() => {
-          if (bouncyNoiseMeter) bouncyNoiseMeter.resize();
-        }, 60);
+          if (bouncyNoiseMeter) {
+            bouncyNoiseMeter.resize();
+            bouncyNoiseMeter.render();
+          }
+        }, 50);
       }
     }
 
@@ -3292,9 +3589,9 @@
             themeButtons.forEach(t => {
               if (t.btn) {
                 if (t.theme === item.theme) {
-                  t.btn.className = 'bouncy-theme-btn active px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-semibold transition cursor-pointer';
+                  t.btn.className = 'bouncy-theme-btn active px-2.5 py-1 rounded-md bg-indigo-600 text-white font-bold transition cursor-pointer';
                 } else {
-                  t.btn.className = 'bouncy-theme-btn px-2.5 py-1 rounded-lg hover:bg-white/10 text-slate-300 font-semibold transition cursor-pointer';
+                  t.btn.className = 'bouncy-theme-btn px-2.5 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 font-bold transition cursor-pointer';
                 }
               }
             });
@@ -3309,6 +3606,20 @@
           if (dom.labelBouncySensitivity) dom.labelBouncySensitivity.textContent = `${val}x`;
           initBouncyMeterIfNeeded();
           if (bouncyNoiseMeter) bouncyNoiseMeter.setSensitivity(val);
+        });
+      }
+
+      // 바운시 쉿 경고 기준 데시벨 선택기 (65 / 70 / 75 / 80 dB)
+      const selectBouncyThreshold = document.getElementById('selectBouncyThreshold');
+      if (selectBouncyThreshold) {
+        selectBouncyThreshold.addEventListener('change', (e) => {
+          const val = parseInt(e.target.value, 10);
+          initBouncyMeterIfNeeded();
+          if (bouncyNoiseMeter) bouncyNoiseMeter.setThreshold(val);
+          const hudThresholdNum = document.getElementById('hudThresholdNum');
+          if (hudThresholdNum) hudThresholdNum.textContent = val;
+          const btnTabShhToggle = document.getElementById('btnTabShhToggle');
+          if (btnTabShhToggle) btnTabShhToggle.title = `${val}dB 초과 시 '쉿!' 경고 효과음 ON/OFF`;
         });
       }
 
@@ -3340,6 +3651,8 @@
       if (dom.tabBtnBouncy) {
         dom.tabBtnBouncy.addEventListener('click', () => switchMediaTab('bouncy'));
       }
+      // 초기 활성 미디어 탭 설정 (기본: 이미지 모드)
+      switchMediaTab(state.activeMediaTab || 'image');
 
       // 인터랙티브 체크리스트 항목 클릭 토글
       bindChecklistTagEvents();
@@ -3502,16 +3815,24 @@
 
           if (!checked) {
             btn.dataset.checked = 'true';
-            btn.classList.add('bg-emerald-950/70', 'border-emerald-500/60');
-            icon.textContent = '✓';
-            icon.className = 'check-icon w-4 h-4 rounded bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-xs';
-            text.classList.add('line-through', 'text-slate-400');
+            btn.classList.add('bg-emerald-100', 'dark:bg-emerald-950/70', 'border-emerald-500', 'text-emerald-900', 'dark:text-emerald-200');
+            if (icon) {
+              icon.textContent = '✓';
+              icon.className = 'check-icon w-3.5 h-3.5 rounded bg-emerald-500 text-white font-black flex items-center justify-center text-[10px] flex-shrink-0';
+            }
+            if (text) {
+              text.classList.add('line-through', 'opacity-60');
+            }
           } else {
             btn.dataset.checked = 'false';
-            btn.classList.remove('bg-emerald-950/70', 'border-emerald-500/60');
-            icon.textContent = '';
-            icon.className = 'check-icon w-4 h-4 rounded border border-slate-500 flex items-center justify-center text-xs';
-            text.classList.remove('line-through', 'text-slate-400');
+            btn.classList.remove('bg-emerald-100', 'dark:bg-emerald-950/70', 'border-emerald-500', 'text-emerald-900', 'dark:text-emerald-200');
+            if (icon) {
+              icon.textContent = '';
+              icon.className = 'check-icon w-3.5 h-3.5 rounded border-2 border-slate-400 dark:border-slate-500 flex items-center justify-center text-[10px] flex-shrink-0';
+            }
+            if (text) {
+              text.classList.remove('line-through', 'opacity-60');
+            }
           }
         });
       });
@@ -3625,9 +3946,9 @@
       dom.displayChecklistTags.innerHTML = '';
       tags.forEach(tag => {
         const btn = document.createElement('button');
-        btn.className = 'checklist-tag-btn px-3 py-1.5 rounded-xl bg-slate-800/90 border border-slate-700 hover:border-indigo-400 text-xs sm:text-sm font-medium text-slate-200 transition flex items-center gap-2 cursor-pointer shadow-sm active:scale-95';
+        btn.className = 'checklist-tag-btn h-7 px-2 rounded-md bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-[11px] font-extrabold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 truncate';
         btn.dataset.checked = 'false';
-        btn.innerHTML = `<span class="check-icon w-4 h-4 rounded border border-slate-500 flex items-center justify-center text-xs"></span><span class="tag-text">${tag}</span>`;
+        btn.innerHTML = `<span class="check-icon w-3.5 h-3.5 rounded border-2 border-slate-400 dark:border-slate-500 flex items-center justify-center text-[10px] flex-shrink-0"></span><span class="tag-text truncate">${tag}</span>`;
         dom.displayChecklistTags.appendChild(btn);
       });
       bindChecklistTagEvents();
