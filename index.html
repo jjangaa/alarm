@@ -1,0 +1,2195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>스마트 쉬는 시간 알람 & 수업 미디어 디스플레이</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- QRCode.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            amberPulse: '#f59e0b',
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-subtle': 'bounceSubtle 2s infinite',
+          },
+          keyframes: {
+            bounceSubtle: {
+              '0%, 100%': { transform: 'translateY(-2%)' },
+              '50%': { transform: 'translateY(0)' },
+            }
+          }
+        },
+      },
+    };
+  </script>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    * {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      box-sizing: border-box;
+    }
+    
+    /* 부드러운 스크롤 & 선택 방지 */
+    body {
+      user-select: none;
+      overflow-x: hidden;
+    }
+
+    /* Glassmorphism 효과 */
+    .glass-card {
+      background: rgba(18, 24, 38, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    }
+    .glass-card-subtle {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-dock {
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    /* 1분 전 경고 앰버 펄스 테두리 */
+    .amber-warning-border {
+      box-shadow: inset 0 0 45px rgba(245, 158, 11, 0.65), 0 0 40px rgba(245, 158, 11, 0.5) !important;
+      border-color: rgba(245, 158, 11, 0.9) !important;
+      animation: pulse-amber 1.8s infinite ease-in-out;
+    }
+    @keyframes pulse-amber {
+      0%, 100% { box-shadow: inset 0 0 25px rgba(245, 158, 11, 0.4), 0 0 25px rgba(245, 158, 11, 0.3); }
+      50% { box-shadow: inset 0 0 55px rgba(245, 158, 11, 0.85), 0 0 50px rgba(245, 158, 11, 0.7); }
+    }
+
+    /* 원형 프로그레스 바 */
+    .donut-gauge {
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+    .donut-circle {
+      transition: stroke-dashoffset 0.8s ease-in-out, stroke 0.5s ease;
+    }
+
+    /* 오토 하이드 모드 */
+    .auto-hide-inactive {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      cursor: none !important;
+      transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .auto-hide-active {
+      opacity: 1;
+      pointer-events: auto;
+      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* 커스텀 스크롤바 */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+  </style>
+</head>
+<body class="min-h-screen w-screen bg-slate-950 text-slate-100 flex flex-col justify-between relative overflow-hidden select-none transition-all duration-300">
+
+  <!-- 동적 배경 레이어 & 딤머 오버레이 -->
+  <div id="bgLayer" class="absolute inset-0 bg-cover bg-center transition-all duration-700 -z-20 scale-105" 
+       style="background-image: url('https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=2560&auto=format&fit=crop');"></div>
+  <div id="bgDimmer" class="absolute inset-0 bg-black transition-opacity duration-300 -z-10" style="opacity: 0.72;"></div>
+
+  <!-- 최상단 헤더 바 (명언 / 모바일 QR / 전체화면 / 설정 바로가기) -->
+  <header class="w-full px-6 pt-4 pb-2 flex items-center justify-between z-10 gap-4">
+    <!-- 좌측 브랜드 로고 & 소음 신호등 미니 인디케이터 -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 border border-slate-700/60 shadow-lg">
+        <span class="text-xl">🏫</span>
+        <span class="font-bold text-sm tracking-wide bg-gradient-to-r from-indigo-300 via-white to-sky-300 bg-clip-text text-transparent">스마트 교실 디스플레이</span>
+      </div>
+
+      <!-- 소음 측정 신호등 뱃지 -->
+      <button id="btnToggleNoise" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/60 transition shadow-lg cursor-pointer" title="클릭하여 교실 소음 측정기 켜기/끄기">
+        <span id="noiseLightDot" class="w-3 h-3 rounded-full bg-slate-500 shadow-sm"></span>
+        <span id="noiseText" class="text-xs font-semibold text-slate-300">소음계 OFF</span>
+        <span id="noiseDbValue" class="text-xs text-slate-400 font-mono hidden">-- dB</span>
+      </button>
+
+      <!-- 백색소음 앰비언트 버튼 -->
+      <button id="btnToggleAmbient" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/60 transition shadow-lg cursor-pointer" title="휴식 집중 백색소음 (빗소리/바람소리)">
+        <span id="ambientIcon" class="text-xs">🌧️</span>
+        <span id="ambientText" class="text-xs font-semibold text-slate-300">백색소음 OFF</span>
+      </button>
+    </div>
+
+    <!-- 중앙 확장형 동기부여 명언 / 휴식 팁 위젯 -->
+    <div id="quoteWidget" class="flex-1 max-w-2xl px-5 py-2 rounded-2xl glass-card-subtle hover:bg-white/10 transition-all cursor-pointer flex items-center justify-center gap-3 group border border-white/10 shadow-lg text-center" title="클릭하면 다음 명언과 팁으로 바뀝니다">
+      <span class="text-amber-400 text-sm group-hover:scale-125 transition-transform duration-300">✨</span>
+      <p id="quoteText" class="text-sm md:text-base font-medium text-slate-200 tracking-normal truncate transition-all duration-300">
+        "충분한 휴식은 더 멀리 나아가기 위한 가장 현명한 준비입니다."
+      </p>
+      <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 group-hover:bg-indigo-500/50 transition">Next</span>
+    </div>
+
+    <!-- 우측 도구: QR 코드 팝업 / 전체화면 / 설정 열기 -->
+    <div class="flex items-center gap-2">
+      <!-- 1분 전 경고 뱃지 (기본 숨김) -->
+      <div id="warningBadge" class="hidden items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500 text-amber-950 font-bold text-xs animate-bounce shadow-lg border border-amber-300">
+        <span>⚠️</span>
+        <span>1분 전! 착석 및 수업 준비</span>
+      </div>
+
+      <!-- 모바일 연동 QR 팝업 버튼 -->
+      <button id="btnShowQr" class="p-2.5 rounded-xl glass-card-subtle hover:bg-white/15 active:scale-95 transition shadow-lg border border-white/10" title="수업 참여 모바일 QR 코드 보기">
+        <svg class="w-5 h-5 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+        </svg>
+      </button>
+
+      <!-- 전체화면 토글 (F) -->
+      <button id="btnFullscreen" class="p-2.5 rounded-xl glass-card-subtle hover:bg-white/15 active:scale-95 transition shadow-lg border border-white/10" title="전체화면 토글 (F)">
+        <svg id="fullscreenIcon" class="w-5 h-5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+        </svg>
+      </button>
+
+      <!-- 설정창 열기 (S) -->
+      <button id="btnOpenSettings" class="p-2.5 rounded-xl glass-card-subtle hover:bg-white/15 active:scale-95 transition shadow-lg border border-white/10" title="디스플레이 & 알람 설정 (S)">
+        <svg class="w-5 h-5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 메인 1:1 대칭 듀얼 카드 레이아웃 (50% : 50%) -->
+  <main class="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-3 grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch justify-center">
+
+    <!-- 좌측 카드: 현재 시각 & 수업 미디어 디스플레이 (50%) -->
+    <section class="glass-card rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-300">
+      <!-- 상단: 실시간 디지털 표준시 시계 -->
+      <div class="pb-4 border-b border-white/10 flex flex-col items-center sm:items-start justify-center">
+        <!-- 날짜 및 요일 -->
+        <div class="flex items-center gap-3 text-slate-300 text-sm md:text-base font-semibold mb-1">
+          <span id="currentDateText" class="tracking-wide">2026년 9월 10일 (목)</span>
+          <span class="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold uppercase tracking-wider" id="currentAmPm">오전</span>
+          <span class="text-xs text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">한국 표준시 (KST)</span>
+        </div>
+        <!-- 초대형 디지털 시계 폰트 -->
+        <div class="flex items-baseline gap-2 font-mono tracking-tighter select-none">
+          <span id="clockHourMinute" class="text-5xl sm:text-7xl md:text-8xl font-black text-white drop-shadow-md">10:40</span>
+          <span id="clockSeconds" class="text-3xl sm:text-5xl font-extrabold text-indigo-400 drop-shadow-[0_0_15px_rgba(99,102,241,0.6)]">:25</span>
+        </div>
+      </div>
+
+      <!-- 하단: 수업 미디어 탭 컨텐츠 영역 -->
+      <div class="flex-1 flex flex-col pt-4 overflow-hidden">
+        <!-- 미디어 탭 네비게이션 헤더 -->
+        <div class="flex items-center gap-2 mb-3 border-b border-white/10 pb-2 overflow-x-auto text-xs font-semibold">
+          <button id="tabBtnNotice" class="media-tab-btn active px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white shadow-md transition flex items-center gap-1.5 whitespace-nowrap">
+            <span>📝</span><span>수업 안내문</span>
+          </button>
+          <button id="tabBtnImage" class="media-tab-btn px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
+            <span>🖼️</span><span>수업 이미지</span>
+          </button>
+          <button id="tabBtnVideo" class="media-tab-btn px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
+            <span>🎬</span><span>수업 영상</span>
+          </button>
+          <button id="tabBtnStretch" class="media-tab-btn px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
+            <span>🧘</span><span>1분 스트레칭</span>
+          </button>
+        </div>
+
+        <!-- 탭 1: 수업 안내문 & 인터랙티브 체크리스트 -->
+        <div id="tabContentNotice" class="flex-1 flex flex-col justify-between overflow-y-auto pr-1">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span id="displayClassBadge" class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 font-bold">다음 3교시 : 과학</span>
+              <span class="text-xs text-slate-400">항목을 클릭하여 완료(✓) 표시</span>
+            </div>
+            <h3 id="displayNoticeTitle" class="text-xl sm:text-2xl font-bold text-white mb-2 leading-tight">
+              실험복 착용 및 과학 탐구 키트 수령 안내
+            </h3>
+            <!-- 마크다운 서식 단락 렌더링 컨테이너 -->
+            <div id="displayNoticeBody" class="space-y-2 mb-3.5 max-h-[220px] overflow-y-auto pr-1 text-slate-200"></div>
+          </div>
+
+          <!-- 인터랙티브 체크리스트 뱃지 목록 -->
+          <div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+              <span>준비물 & 할 일 체크리스트</span>
+              <span class="text-[10px] text-indigo-300 bg-indigo-900/40 px-1.5 py-0.5 rounded">클릭 토글</span>
+            </div>
+            <div id="displayChecklistTags" class="flex flex-wrap gap-2">
+              <button class="checklist-tag-btn px-3 py-1.5 rounded-xl bg-slate-800/90 border border-slate-700 hover:border-indigo-400 text-xs sm:text-sm font-medium text-slate-200 transition flex items-center gap-2 cursor-pointer shadow-sm active:scale-95" data-checked="false">
+                <span class="check-icon w-4 h-4 rounded border border-slate-500 flex items-center justify-center text-xs"></span>
+                <span class="tag-text">실험복 및 보안경 착용</span>
+              </button>
+              <button class="checklist-tag-btn px-3 py-1.5 rounded-xl bg-slate-800/90 border border-slate-700 hover:border-indigo-400 text-xs sm:text-sm font-medium text-slate-200 transition flex items-center gap-2 cursor-pointer shadow-sm active:scale-95" data-checked="false">
+                <span class="check-icon w-4 h-4 rounded border border-slate-500 flex items-center justify-center text-xs"></span>
+                <span class="tag-text">교탁 앞 키트 수령</span>
+              </button>
+              <button class="checklist-tag-btn px-3 py-1.5 rounded-xl bg-slate-800/90 border border-slate-700 hover:border-indigo-400 text-xs sm:text-sm font-medium text-slate-200 transition flex items-center gap-2 cursor-pointer shadow-sm active:scale-95" data-checked="false">
+                <span class="check-icon w-4 h-4 rounded border border-slate-500 flex items-center justify-center text-xs"></span>
+                <span class="tag-text">교과서 74p 펼치기</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 탭 2: 수업 이미지 디스플레이 -->
+        <div id="tabContentImage" class="hidden flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl bg-black/40 border border-white/10 p-2 relative group">
+          <img id="displayClassImage" src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1200&auto=format&fit=crop" alt="수업 준비 이미지" class="w-full h-full max-h-64 object-contain rounded-xl shadow-md transition duration-300" />
+          <div id="displayImageCaption" class="absolute bottom-2 left-2 right-2 bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs sm:text-sm text-center font-medium text-slate-200 border border-white/10">
+            실험 도구 구성 예시 (슬라이드 글라스 및 핀셋 위치 확인)
+          </div>
+        </div>
+
+        <!-- 탭 3: 수업 영상 플레이어 (YouTube 등) -->
+        <div id="tabContentVideo" class="hidden flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl bg-black/50 border border-white/10 relative">
+          <div id="videoContainer" class="w-full h-full flex items-center justify-center">
+            <!-- 유튜브 iframe 삽입 위치 -->
+            <iframe id="displayClassVideo" class="w-full h-full min-h-[200px] rounded-xl" src="https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=0&mute=1&loop=1&controls=1" title="수업 영상" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+        </div>
+
+        <!-- 탭 4: 1분 브레인 스트레칭 3단계 애니메이션 -->
+        <div id="tabContentStretch" class="hidden flex-1 flex-col justify-between overflow-y-auto p-2">
+          <div class="flex items-center justify-between pb-2 border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🧘‍♂️</span>
+              <span class="font-bold text-sm text-indigo-300">몸과 뇌를 깨우는 1분 리셋 체조</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="stretchStepIndicator" class="text-xs px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-400/30">1단계 / 3단계</span>
+              <button id="btnStretchStartStop" class="text-xs px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition">체조 시작</button>
+            </div>
+          </div>
+
+          <!-- 스트레칭 애니메이션 카드 -->
+          <div class="flex-1 flex flex-col items-center justify-center my-3 text-center p-4 rounded-2xl bg-white/5 border border-white/10 relative overflow-hidden">
+            <div id="stretchIcon" class="text-6xl mb-3 animate-bounce-subtle transition-all duration-500">🙆‍♂️</div>
+            <h4 id="stretchTitle" class="text-lg sm:text-xl font-bold text-white mb-1">1단계: 손 깍지 위로 쭉 기지개</h4>
+            <p id="stretchDesc" class="text-xs sm:text-sm text-slate-300 max-w-sm">양손을 깍지 끼고 머리 위로 힘껏 밀어 올리며 숨을 깊게 들이마시고 내쉽니다. 척추를 길게 펴주세요!</p>
+            
+            <!-- 스트레칭 카운트다운 게이지 -->
+            <div class="mt-3 flex items-center gap-2 font-mono text-sm text-indigo-300">
+              <span>남은 시간:</span>
+              <span id="stretchSeconds" class="text-lg font-bold text-white">20</span>초
+            </div>
+          </div>
+
+          <!-- 3단계 수동 점프 버튼들 -->
+          <div class="grid grid-cols-3 gap-2 text-xs">
+            <button class="stretch-step-btn active p-2 rounded-xl bg-indigo-900/60 border border-indigo-500/50 text-indigo-200 font-semibold" data-step="1">1. 깍지 기지개</button>
+            <button class="stretch-step-btn p-2 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-400 font-semibold" data-step="2">2. 먼 곳 응시</button>
+            <button class="stretch-step-btn p-2 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-400 font-semibold" data-step="3">3. 부드러운 목 회전</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 우측 카드: 타이머 & 듀얼 비주얼 게이지 (50%) -->
+    <section id="timerCard" class="glass-card rounded-3xl p-6 flex flex-col justify-between items-center relative overflow-hidden transition-all duration-500">
+      
+      <!-- 카드 상단: 상태 배지 & 스케줄 정보 -->
+      <div class="w-full flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span id="timerStatusLabel" class="text-xs sm:text-sm font-bold tracking-wider text-emerald-300 uppercase">쉬는 시간 진행 중</span>
+        </div>
+        <!-- 종료 예정 시각 -->
+        <div class="text-xs sm:text-sm text-slate-300 flex items-center gap-1.5 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700">
+          <span>종료 시각:</span>
+          <span id="timerTargetTimeText" class="font-mono font-bold text-white">--:--</span>
+        </div>
+      </div>
+
+      <!-- 중앙 대형 원형 도넛 게이지 (SVG Stroke-Dashoffset) -->
+      <div class="relative my-auto flex items-center justify-center w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 select-none">
+        <svg class="w-full h-full donut-gauge" viewBox="0 0 240 240">
+          <!-- 배경 트랙 원 -->
+          <circle cx="120" cy="120" r="100" class="stroke-slate-800/90" stroke-width="14" fill="transparent" />
+          <!-- 진행도 원형 바 -->
+          <circle id="donutGaugeCircle" cx="120" cy="120" r="100" class="donut-circle stroke-indigo-500" stroke-width="14" 
+                  stroke-linecap="round" fill="transparent" stroke-dasharray="628.3" stroke-dashoffset="0" />
+        </svg>
+
+        <!-- 게이지 내부 텍스트 (남은 시간 & 퍼센트) -->
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+          <span class="text-xs uppercase tracking-widest text-slate-400 font-semibold mb-1">남은 쉬는 시간</span>
+          <div class="flex items-baseline font-mono tracking-tighter">
+            <span id="timerDisplayMinutes" class="text-6xl sm:text-7xl font-black text-white drop-shadow-lg">10</span>
+            <span class="text-5xl sm:text-6xl font-black text-indigo-300 mx-1">:</span>
+            <span id="timerDisplaySeconds" class="text-6xl sm:text-7xl font-black text-white drop-shadow-lg">00</span>
+          </div>
+          <!-- 하단 진행율 퍼센트 -->
+          <span id="timerPercentText" class="mt-2 text-xs sm:text-sm font-semibold text-indigo-300 bg-indigo-950/60 px-2.5 py-0.5 rounded-full border border-indigo-500/30">
+            100% 잔여
+          </span>
+        </div>
+      </div>
+
+      <!-- 하단 선형 그라디언트 바 -->
+      <div class="w-full mb-4">
+        <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden border border-white/10 p-0.5">
+          <div id="linearProgressBar" class="h-full rounded-full bg-gradient-to-r from-indigo-500 via-sky-400 to-emerald-400 transition-all duration-500" style="width: 100%;"></div>
+        </div>
+      </div>
+
+      <!-- 타이머 빠른 설정 프리셋 버튼군 -->
+      <div class="w-full flex flex-col gap-2">
+        <div class="grid grid-cols-4 gap-2">
+          <button class="preset-btn px-2 py-2 rounded-xl bg-slate-800/90 hover:bg-indigo-600 border border-slate-700/80 hover:border-indigo-400 text-xs sm:text-sm font-bold text-slate-200 hover:text-white transition shadow-sm active:scale-95" data-mins="5">+5분</button>
+          <button class="preset-btn px-2 py-2 rounded-xl bg-slate-800/90 hover:bg-indigo-600 border border-slate-700/80 hover:border-indigo-400 text-xs sm:text-sm font-bold text-slate-200 hover:text-white transition shadow-sm active:scale-95" data-mins="10">+10분</button>
+          <button class="preset-btn px-2 py-2 rounded-xl bg-slate-800/90 hover:bg-indigo-600 border border-slate-700/80 hover:border-indigo-400 text-xs sm:text-sm font-bold text-slate-200 hover:text-white transition shadow-sm active:scale-95" data-mins="15">+15분</button>
+          <button class="preset-btn px-2 py-2 rounded-xl bg-slate-800/90 hover:bg-indigo-600 border border-slate-700/80 hover:border-indigo-400 text-xs sm:text-sm font-bold text-slate-200 hover:text-white transition shadow-sm active:scale-95" data-mins="20">+20분</button>
+        </div>
+
+        <!-- 학교 종 맞춤 스케줄러 & 직접 입력 -->
+        <div class="grid grid-cols-3 gap-2">
+          <button id="btnNext50" class="px-2 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-indigo-500/40 text-xs font-semibold text-indigo-300 hover:text-white transition flex items-center justify-center gap-1 shadow-sm active:scale-95" title="다음 :50분 학교 종에 맞추기">
+            <span>🔔</span><span>다음 :50분</span>
+          </button>
+          <button id="btnNext00" class="px-2 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-sky-500/40 text-xs font-semibold text-sky-300 hover:text-white transition flex items-center justify-center gap-1 shadow-sm active:scale-95" title="다음 정각 :00 학교 종에 맞추기">
+            <span>⏰</span><span>다음 정각(:00)</span>
+          </button>
+          <!-- 직접 마감 분 또는 시:분 입력 -->
+          <button id="btnCustomTime" class="px-2 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition flex items-center justify-center gap-1 shadow-sm active:scale-95">
+            <span>✏️</span><span>직접 설정</span>
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- 하단 퀵 컨트롤 독 (Quick Dock) - 3.5초 무조작 시 오토 하이드 -->
+  <footer id="controlDock" class="w-full max-w-4xl mx-auto px-6 py-3 mb-3 glass-dock rounded-2xl flex items-center justify-between gap-4 z-20 shadow-2xl transition-all duration-300">
+    <!-- 좌측: 타이머 시간 조절 (-1m, +1m, +3m) -->
+    <div class="flex items-center gap-1.5">
+      <button id="btnSub1Min" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition text-xs sm:text-sm font-bold text-slate-200 border border-white/10" title="1분 단축 (-)">
+        -1분
+      </button>
+      <button id="btnAdd1Min" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition text-xs sm:text-sm font-bold text-slate-200 border border-white/10" title="1분 연장 (+)">
+        +1분
+      </button>
+      <button id="btnAdd3Min" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition text-xs sm:text-sm font-bold text-indigo-300 border border-indigo-400/20" title="3분 연장">
+        +3분
+      </button>
+    </div>
+
+    <!-- 중앙: 메인 재생 / 일시정지 / 리셋 -->
+    <div class="flex items-center gap-3">
+      <!-- 리셋 -->
+      <button id="btnResetTimer" class="p-2.5 rounded-full bg-white/10 hover:bg-rose-500/30 text-slate-300 hover:text-rose-300 active:scale-95 transition border border-white/10" title="타이머 리셋">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+      </button>
+
+      <!-- 일시정지 / 재개 버튼 (Space) -->
+      <button id="btnTogglePlay" class="px-6 py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-700 hover:from-indigo-600 hover:to-indigo-800 text-white font-bold text-sm sm:text-base flex items-center gap-2 shadow-lg shadow-indigo-600/40 active:scale-95 transition" title="타이머 시작 / 일시정지 (스페이스바)">
+        <span id="playIcon">⏸️</span>
+        <span id="playText">일시정지</span>
+      </button>
+
+      <!-- 수동 종소리 울리기 버튼 -->
+      <button id="btnRingBellNow" class="p-2.5 rounded-full bg-white/10 hover:bg-amber-500/30 text-amber-300 active:scale-95 transition border border-white/10" title="학교 종소리 즉시 울리기">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- 우측: 클린 뷰 안내 & 단축키 안내 힌트 -->
+    <div class="hidden sm:flex items-center gap-2 text-xs text-slate-400 font-mono">
+      <span class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700">Space</span>
+      <span>일시정지</span>
+      <span class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 ml-1">F</span>
+      <span>전체화면</span>
+      <span class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 ml-1">S</span>
+      <span>설정</span>
+    </div>
+  </footer>
+
+  <!-- ======================= 모달 창 영역 ======================= -->
+
+  <!-- 1. 환경설정 모달 (Settings Modal) -->
+  <div id="settingsModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-card max-w-3xl w-full max-h-[90vh] rounded-3xl p-6 sm:p-8 flex flex-col justify-between overflow-hidden shadow-2xl border border-white/20">
+      
+      <!-- 모달 헤더 -->
+      <div class="flex items-center justify-between pb-4 border-b border-white/10">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">⚙️</span>
+          <h2 class="text-xl font-bold text-white">디스플레이 및 수업 알람 설정</h2>
+        </div>
+        <button id="btnCloseSettings" class="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition">✕</button>
+      </div>
+
+      <!-- 설정 탭 네비게이션 -->
+      <div class="flex items-center gap-2 my-4 border-b border-white/10 pb-2 text-xs sm:text-sm font-semibold overflow-x-auto">
+        <button class="settings-tab-btn active px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white" data-tab="stNotice">수업 안내 & 자동변환</button>
+        <button class="settings-tab-btn px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300" data-tab="stMedia">미디어(이미지/영상)</button>
+        <button class="settings-tab-btn px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300" data-tab="stAudio">알람음 & 백색소음</button>
+        <button class="settings-tab-btn px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300" data-tab="stDisplay">배경 & QR 코드</button>
+      </div>
+
+      <!-- 모달 바디 스크롤 영역 -->
+      <div class="flex-1 overflow-y-auto pr-2 space-y-6 text-sm">
+
+        <!-- 섹션 1: 수업 안내 및 지능형 상호 변환기 -->
+        <div id="sec-stNotice" class="settings-section space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">상단 교시/과목 뱃지</label>
+              <input id="inputClassBadge" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" value="다음 3교시 : 과학" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">수업 공지 제목</label>
+              <input id="inputNoticeTitle" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" value="실험복 착용 및 과학 탐구 키트 수령 안내" />
+            </div>
+          </div>
+
+          <!-- 본문 입력 및 체크리스트 상호 변환 -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-2">
+                <label class="text-xs font-semibold text-slate-300">수업 안내 상세 본문 (마크다운 단락 지원)</label>
+                <span class="text-[10px] text-indigo-300 bg-indigo-950 px-1.5 py-0.5 rounded border border-indigo-800">서식/단락 지원</span>
+              </div>
+              <!-- 본문 -> 체크리스트 변환 버튼 (⚡) -->
+              <button id="btnParseBodyToChecklist" type="button" class="text-xs px-2.5 py-1 rounded-lg bg-indigo-600/80 hover:bg-indigo-600 text-indigo-100 font-bold flex items-center gap-1 transition" title="작성된 긴 안내문에서 핵심 체크리스트 키워드를 자동 추출합니다">
+                <span>⚡</span><span>본문 ➔ 체크리스트 자동 추출</span>
+              </button>
+            </div>
+            <!-- 마크다운 퀵 서식 툴바 -->
+            <div class="flex items-center gap-1.5 mb-1.5 text-xs">
+              <span class="text-[11px] text-slate-400 mr-1">단락 서식 삽입:</span>
+              <button id="btnInsertMdNum" type="button" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition">+ 번호 목록 (1.)</button>
+              <button id="btnInsertMdBullet" type="button" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition">+ 불릿 목록 (-)</button>
+              <button id="btnInsertMdBold" type="button" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition">+ 강조 (**굵게**)</button>
+              <button id="btnInsertMdQuote" type="button" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition">+ 주의 박스 (>)</button>
+            </div>
+            <textarea id="inputNoticeBody" rows="6" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none leading-relaxed font-sans text-xs sm:text-sm" placeholder="수업 안내 내용을 입력하세요..."></textarea>
+          </div>
+
+          <!-- 체크리스트 태그 목록 및 문장 생성 -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-semibold text-slate-300">체크리스트 태그 (쉼표로 구분)</label>
+              <!-- 체크리스트 -> 본문 문장 생성 버튼 (⚡) -->
+              <button id="btnGenerateSentenceFromChecklist" class="text-xs px-2.5 py-1 rounded-lg bg-sky-600/70 hover:bg-sky-600 text-sky-100 font-bold flex items-center gap-1 transition" title="체크리스트 단어들을 바탕으로 매끄러운 안내 문장을 자동 조합합니다">
+                <span>⚡</span><span>체크리스트 ➔ 본문 문장 자동 생성</span>
+              </button>
+            </div>
+            <input id="inputChecklistTags" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" value="실험복 착용, 키트 수령, 교과서 74p 펼치기" />
+            <p class="text-[11px] text-slate-400 mt-1">💡 예: "실험복 착용, 키트 수령, 교과서 74p 펼치기"를 입력하고 버튼을 누르면 한국어 조사(을/를)를 맞춘 친절한 문장이 생성됩니다.</p>
+          </div>
+        </div>
+
+        <!-- 섹션 2: 수업 미디어(이미지 및 동영상) 설정 -->
+        <div id="sec-stMedia" class="settings-section hidden space-y-4">
+          <!-- 이미지 설정 -->
+          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+            <h4 class="font-bold text-white flex items-center gap-2">
+              <span>🖼️</span><span>수업 이미지 설정</span>
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">웹 이미지 URL 링크</label>
+                <input id="inputImageUrl" type="url" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs" placeholder="https://..." value="https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1200&auto=format&fit=crop" />
+              </div>
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">또는 PC 로컬 이미지 파일 업로드</label>
+                <input id="inputFileImage" type="file" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-300 mb-1">이미지 캡션 / 부연 설명</label>
+              <input id="inputImageCaption" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" value="실험 도구 구성 예시 (슬라이드 글라스 및 핀셋 위치 확인)" />
+            </div>
+          </div>
+
+          <!-- 비디오 설정 -->
+          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+            <h4 class="font-bold text-white flex items-center gap-2">
+              <span>🎬</span><span>수업 영상 (YouTube 등) 설정</span>
+            </h4>
+            <div>
+              <label class="block text-xs text-slate-300 mb-1">유튜브 링크 또는 iframe 태그</label>
+              <input id="inputVideoUrl" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" placeholder="https://www.youtube.com/watch?v=... 또는 <iframe ...>" value="https://www.youtube.com/watch?v=jfKfPfyJRdk" />
+              <p class="text-[11px] text-slate-400 mt-1">💡 일반 유튜브 주소, 짧은 주소(youtu.be), 또는 퍼가기 HTML 태그를 넣으면 자동으로 무음/반복 최적화 코드로 변환됩니다.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 섹션 3: Web Audio 신디사이저 & 백색소음 -->
+        <div id="sec-stAudio" class="settings-section hidden space-y-4">
+          <!-- 알람 벨소리 선택 -->
+          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-white flex items-center gap-2">
+                <span>🔔</span><span>알람 종료 벨소리</span>
+              </label>
+              <!-- 미리듣기 버튼 -->
+              <button id="btnPreviewAlarm" class="text-xs px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition flex items-center gap-1">
+                <span>▶️</span><span>미리듣기</span>
+              </button>
+            </div>
+            <select id="selectAlarmSound" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none">
+              <option value="koreanSchoolBell" selected>실제 한국 학교 7음절 종소리 (솔-도-레-솔 / 솔-레-도 & 청동 배음)</option>
+              <option value="westminster">웨스트민스터 차임 (빅벤 4마디 종소리)</option>
+              <option value="dingDong">맑은 딩동 (2음 차임벨)</option>
+              <option value="marimba">경쾌한 마림바 아르페지오</option>
+              <option value="digitalBeep">디지털 시계 비프음</option>
+            </select>
+          </div>
+
+          <!-- 1분 전 예비령 및 앰버 펄스 설정 -->
+          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+            <div>
+              <div class="font-bold text-white flex items-center gap-2">
+                <span>⚠️</span><span>1분 전 착석 예비령 & 앰버 펄스</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-1">남은 시간 1분 도달 시 2음 핑 사운드 재생 및 테두리 시각 경고 점멸</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input id="chkWarningAlert" type="checkbox" checked class="sr-only peer">
+              <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+            </label>
+          </div>
+
+          <!-- 집중 앰비언트 백색소음 -->
+          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+            <h4 class="font-bold text-white flex items-center gap-2">
+              <span>🎧</span><span>집중 앰비언트 사운드 (백색소음)</span>
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">소음 종류 선택</label>
+                <select id="selectAmbientType" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs">
+                  <option value="rain" selected>잔잔한 빗소리 (Low-Pass Filter)</option>
+                  <option value="breeze">솔솔 부는 숲속 바람소리 (Band-Pass Filter)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">음량 조절 (<span id="ambientVolumeLabel">40%</span>)</label>
+                <input id="sliderAmbientVolume" type="range" min="0" max="100" value="40" class="w-full accent-indigo-500" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 섹션 4: 배경화면 커스텀 & QR 코드 설정 -->
+        <div id="sec-stDisplay" class="settings-section hidden space-y-4">
+          <!-- 배경 테마 선택 -->
+          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+            <h4 class="font-bold text-white flex items-center gap-2">
+              <span>🎨</span><span>배경화면 테마 프리셋</span>
+            </h4>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button class="preset-bg-btn p-2 rounded-xl bg-slate-800/80 hover:border-indigo-400 border border-slate-700 text-xs font-semibold text-slate-200 transition text-center" data-bg="https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=2560&auto=format&fit=crop">
+                🏫 따뜻한 교실
+              </button>
+              <button class="preset-bg-btn p-2 rounded-xl bg-slate-800/80 hover:border-indigo-400 border border-slate-700 text-xs font-semibold text-slate-200 transition text-center" data-bg="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=2560&auto=format&fit=crop">
+                📚 아늑한 도서관
+              </button>
+              <button class="preset-bg-btn p-2 rounded-xl bg-slate-800/80 hover:border-indigo-400 border border-slate-700 text-xs font-semibold text-slate-200 transition text-center" data-bg="https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2560&auto=format&fit=crop">
+                🌲 푸른 숲속
+              </button>
+              <button class="preset-bg-btn p-2 rounded-xl bg-slate-800/80 hover:border-indigo-400 border border-slate-700 text-xs font-semibold text-slate-200 transition text-center" data-bg="https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=2560&auto=format&fit=crop">
+                🌌 신비한 우주
+              </button>
+            </div>
+
+            <!-- 커스텀 배경 업로드 -->
+            <div class="pt-2">
+              <label class="block text-xs text-slate-300 mb-1">내 PC 이미지로 배경 변경</label>
+              <input id="inputFileBg" type="file" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500" />
+            </div>
+
+            <!-- 배경 어둡기(Dimmer) 슬라이더 -->
+            <div class="pt-2">
+              <div class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>배경 어둡기 (글자 시인성 강화)</span>
+                <span id="labelBgDimmer" class="font-bold text-indigo-300">72%</span>
+              </div>
+              <input id="sliderBgDimmer" type="range" min="30" max="95" value="72" class="w-full accent-indigo-500" />
+            </div>
+          </div>
+
+          <!-- 모바일 연동 QR 코드 링크 설정 -->
+          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+            <h4 class="font-bold text-white flex items-center gap-2">
+              <span>📱</span><span>모바일 연동 QR 코드 설정</span>
+            </h4>
+            <div>
+              <label class="block text-xs text-slate-300 mb-1">연결할 URL (구글 폼, 패들렛, 클래스룸 등)</label>
+              <input id="inputQrUrl" type="url" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" value="https://padlet.com" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-300 mb-1">QR 모달 안내 제목</label>
+              <input id="inputQrTitle" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" value="모바일로 수업 패들렛 접속하기" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 모달 푸터 버튼 -->
+      <div class="pt-4 border-t border-white/10 flex items-center justify-end gap-3">
+        <button id="btnSaveSettings" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow-lg shadow-indigo-600/30">
+          설정 저장 및 적용
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 2. 모바일 QR 코드 팝업 모달 -->
+  <div id="qrModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-card max-w-sm w-full rounded-3xl p-6 flex flex-col items-center text-center shadow-2xl border border-white/20">
+      <div class="w-full flex justify-end">
+        <button id="btnCloseQr" class="p-1 rounded-full text-slate-400 hover:text-white transition">✕</button>
+      </div>
+      <h3 id="displayQrTitle" class="text-lg font-bold text-white mb-2">모바일로 수업 참여하기</h3>
+      <p class="text-xs text-slate-300 mb-4">스마트폰이나 태블릿 카메라로 아래 QR 코드를 비춰주세요.</p>
+      
+      <!-- QR 코드 렌더링 컨테이너 -->
+      <div class="p-4 bg-white rounded-2xl shadow-xl flex items-center justify-center mb-4">
+        <div id="qrcodeCanvas"></div>
+      </div>
+
+      <p id="displayQrUrlText" class="text-xs font-mono text-indigo-300 truncate max-w-xs"></p>
+    </div>
+  </div>
+
+  <!-- 3. 타이머 직접 설정 모달 -->
+  <div id="customTimeModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-card max-w-sm w-full rounded-3xl p-6 flex flex-col shadow-2xl border border-white/20">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-white">타이머 직접 설정</h3>
+        <button id="btnCloseCustomTime" class="p-1 text-slate-400 hover:text-white transition">✕</button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">1) 쉬는 시간 분(min) 직접 입력</label>
+          <div class="flex items-center gap-2">
+            <input id="inputCustomMinutes" type="number" min="1" max="180" value="10" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-center font-bold text-lg focus:border-indigo-500 focus:outline-none" />
+            <button id="btnApplyCustomMinutes" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm whitespace-nowrap transition">적용</button>
+          </div>
+        </div>
+
+        <div class="relative flex py-1 items-center">
+          <div class="flex-grow border-t border-slate-700"></div>
+          <span class="flex-shrink mx-3 text-xs text-slate-400">또는</span>
+          <div class="flex-grow border-t border-slate-700"></div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">2) 특정 마감 시각(HH:MM) 지정</label>
+          <div class="flex items-center gap-2">
+            <input id="inputTargetClock" type="time" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-center font-bold text-base focus:border-indigo-500 focus:outline-none" />
+            <button id="btnApplyTargetClock" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm whitespace-nowrap transition">설정</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================= 자바스크립트 로직 ======================= -->
+  <script>
+    /* ==========================================================
+       1. 스마트 오디오 신디사이저 (Web Audio API Engine)
+       ========================================================== */
+    class AudioSynthesizer {
+      constructor() {
+        this.ctx = null;
+        this.ambientNode = null;
+        this.ambientGain = null;
+        this.isAmbientPlaying = false;
+      }
+
+      initContext() {
+        if (!this.ctx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContextClass();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      // 음표 하나 연주 (기본음 + 금속 배음 합성)
+      playTone(freq, startTime, duration, isBronzeHarmonic = true, gainMult = 1.0) {
+        if (!this.ctx) return;
+        const now = startTime;
+
+        // 1. 기본음 오실레이터 (삼각파/사인파)
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+
+        // 엔벨로프 (타격 후 서서히 감쇠)
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.4 * gainMult, now + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+
+        // 2. 청동 차임벨 2.76배 비화성 배음 (Overtone) 합성으로 맑은 금속성 잔향 생성
+        if (isBronzeHarmonic) {
+          const overtoneOsc = this.ctx.createOscillator();
+          const overtoneGain = this.ctx.createGain();
+          overtoneOsc.type = 'sine';
+          overtoneOsc.frequency.setValueAtTime(freq * 2.76, now);
+
+          overtoneGain.gain.setValueAtTime(0, now);
+          overtoneGain.gain.linearRampToValueAtTime(0.15 * gainMult, now + 0.01);
+          overtoneGain.gain.exponentialRampToValueAtTime(0.0001, now + duration * 0.7);
+
+          overtoneOsc.connect(overtoneGain);
+          overtoneGain.connect(this.ctx.destination);
+          overtoneOsc.start(now);
+          overtoneOsc.stop(now + duration * 0.7);
+        }
+      }
+
+      // 한국 학교 7음절 실제 종소리 연주
+      // 1마디: 솔(392) - 도(523.25) - 레(587.33) - 높은 솔(783.99, 롱톤)
+      // 2마디: 높은 솔(783.99) - 레(587.33) - 도(523.25, 잔향)
+      playKoreanSchoolBell() {
+        this.initContext();
+        const t = this.ctx.currentTime;
+        const step = 0.55;
+
+        // 1마디
+        this.playTone(392.00, t + 0 * step, 0.9, true); // 솔
+        this.playTone(523.25, t + 1 * step, 0.9, true); // 도
+        this.playTone(587.33, t + 2 * step, 0.9, true); // 레
+        this.playTone(783.99, t + 3 * step, 1.8, true, 1.2); // 높은 솔 (롱톤)
+
+        // 2마디
+        const pause = 2.4;
+        this.playTone(783.99, t + pause + 0 * step, 0.9, true); // 높은 솔
+        this.playTone(587.33, t + pause + 1 * step, 0.9, true); // 레
+        this.playTone(523.25, t + pause + 2 * step, 2.8, true, 1.3); // 도 (긴 잔향)
+      }
+
+      // 웨스트민스터 차임 (빅벤 4마디)
+      playWestminster() {
+        this.initContext();
+        const t = this.ctx.currentTime;
+        const step = 0.5;
+        const notes = [
+          { f: 659.25, d: 0.8 }, { f: 587.33, d: 0.8 }, { f: 523.25, d: 0.8 }, { f: 392.00, d: 1.4 },
+          { f: 523.25, d: 0.8 }, { f: 587.33, d: 0.8 }, { f: 659.25, d: 0.8 }, { f: 523.25, d: 1.8 }
+        ];
+        notes.forEach((n, idx) => {
+          this.playTone(n.f, t + idx * step, n.d, true);
+        });
+      }
+
+      // 맑은 딩동 (2음)
+      playDingDong() {
+        this.initContext();
+        const t = this.ctx.currentTime;
+        this.playTone(783.99, t + 0.0, 1.2, true);
+        this.playTone(523.25, t + 0.6, 2.2, true);
+      }
+
+      // 경쾌한 마림바 아르페지오
+      playMarimba() {
+        this.initContext();
+        const t = this.ctx.currentTime;
+        const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((f, idx) => {
+          this.playTone(f, t + idx * 0.12, 0.4, false, 0.9);
+        });
+      }
+
+      // 디지털 시계 비프음
+      playDigitalBeep() {
+        this.initContext();
+        const t = this.ctx.currentTime;
+        for (let i = 0; i < 4; i++) {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(2093, t + i * 0.2); // C7 beep
+          gain.gain.setValueAtTime(0.2, t + i * 0.2);
+          gain.gain.setValueAtTime(0, t + i * 0.2 + 0.1);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(t + i * 0.2);
+          osc.stop(t + i * 0.2 + 0.1);
+        }
+      }
+
+      // 1분 전 착석 안내 부드러운 핑(Ping) 2음
+      playWarningPing() {
+        this.initContext();
+        const t = this.ctx.currentTime;
+        this.playTone(659.25, t, 0.8, false, 0.6); // E5
+        this.playTone(987.77, t + 0.35, 1.5, true, 0.8); // B5
+      }
+
+      // 백색소음 시작 (Rain / Breeze)
+      startAmbient(type = 'rain', volume = 0.4) {
+        this.initContext();
+        this.stopAmbient();
+
+        // 5초 화이트 노이즈 버퍼 생성 후 루핑
+        const bufferSize = this.ctx.sampleRate * 5;
+        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+
+        const whiteNoise = this.ctx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        whiteNoise.loop = true;
+
+        const filter = this.ctx.createBiquadFilter();
+        if (type === 'rain') {
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(900, this.ctx.currentTime);
+        } else {
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(450, this.ctx.currentTime);
+          filter.Q.setValueAtTime(1.8, this.ctx.currentTime);
+        }
+
+        this.ambientGain = this.ctx.createGain();
+        this.ambientGain.gain.setValueAtTime(volume * 0.4, this.ctx.currentTime);
+
+        whiteNoise.connect(filter);
+        filter.connect(this.ambientGain);
+        this.ambientGain.connect(this.ctx.destination);
+
+        whiteNoise.start();
+        this.ambientNode = whiteNoise;
+        this.isAmbientPlaying = true;
+      }
+
+      stopAmbient() {
+        if (this.ambientNode) {
+          try {
+            this.ambientNode.stop();
+            this.ambientNode.disconnect();
+          } catch (e) {}
+          this.ambientNode = null;
+        }
+        this.isAmbientPlaying = false;
+      }
+
+      setAmbientVolume(vol) {
+        if (this.ambientGain && this.ctx) {
+          this.ambientGain.gain.setValueAtTime(vol * 0.4, this.ctx.currentTime);
+        }
+      }
+    }
+
+    const audioSynth = new AudioSynthesizer();
+
+
+    /* ==========================================================
+       2. 실시간 교실 소음 측정기 (Noise Traffic Light Meter)
+       ========================================================== */
+    class NoiseMeter {
+      constructor() {
+        this.audioCtx = null;
+        this.analyser = null;
+        this.micStream = null;
+        this.isRunning = false;
+        this.animationFrame = null;
+      }
+
+      async start() {
+        try {
+          this.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          this.audioCtx = new AudioContextClass();
+          const source = this.audioCtx.createMediaStreamSource(this.micStream);
+          this.analyser = this.audioCtx.createAnalyser();
+          this.analyser.fftSize = 512;
+          source.connect(this.analyser);
+          this.isRunning = true;
+          this.monitor();
+          return true;
+        } catch (err) {
+          console.warn('마이크 접근 불가:', err);
+          alert('마이크 접근 권한이 허용되지 않아 소음계를 켤 수 없습니다.');
+          return false;
+        }
+      }
+
+      stop() {
+        this.isRunning = false;
+        if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
+        if (this.micStream) {
+          this.micStream.getTracks().forEach(track => track.stop());
+          this.micStream = null;
+        }
+        if (this.audioCtx) {
+          this.audioCtx.close();
+          this.audioCtx = null;
+        }
+      }
+
+      monitor() {
+        if (!this.isRunning || !this.analyser) return;
+        const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+        this.analyser.getByteFrequencyData(dataArray);
+
+        // RMS 및 데시벨(dB) 추정 계산
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          sum += dataArray[i] * dataArray[i];
+        }
+        const rms = Math.sqrt(sum / dataArray.length);
+        // 35dB ~ 95dB 범위로 보정 맵핑
+        const db = Math.min(95, Math.max(35, Math.round(35 + (rms / 255) * 60)));
+
+        updateNoiseUI(db);
+        this.animationFrame = requestAnimationFrame(() => this.monitor());
+      }
+    }
+
+    const noiseMeter = new NoiseMeter();
+
+
+    /* ==========================================================
+       3. 지능형 자연어 수업 공지 & 마크다운 서식 렌더러
+       ========================================================== */
+    // 한글 받침 판별 함수: 받침이 있으면 true, 없으면 false
+    function hasBatchim(word) {
+      if (!word || word.length === 0) return false;
+      const lastChar = word.trim().slice(-1);
+      const code = lastChar.charCodeAt(0);
+      if (code < 0xac00 || code > 0xd7a3) return false; // 한글이 아니면 false
+      return (code - 0xac00) % 28 > 0;
+    }
+
+    // 조사(을/를) 자동 부착
+    function attachObjectParticle(word) {
+      return word + (hasBatchim(word) ? '을' : '를');
+    }
+
+    // 마크다운 텍스트를 아름답고 시인성 높은 구조화된 단락 HTML로 변환하는 렌더러
+    function renderMarkdownToHTML(markdown) {
+      if (!markdown || !markdown.trim()) {
+        return '<p class="text-xs sm:text-sm text-slate-400 italic">등록된 수업 안내가 없습니다.</p>';
+      }
+
+      const lines = markdown.split(/\r?\n/);
+      let html = '';
+
+      // 인라인 마크다운 서식 변환 (굵은 글씨, 기울임, 코드 등)
+      const parseInline = (text) => {
+        let escaped = text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+        // **굵은 글씨**
+        escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-white tracking-wide">$1</strong>');
+        // *기울임*
+        escaped = escaped.replace(/\*(.+?)\*/g, '<em class="italic text-indigo-200">$1</em>');
+        // `인라인 코드`
+        escaped = escaped.replace(/`(.+?)`/g, '<code class="px-1.5 py-0.5 rounded bg-slate-800 text-indigo-300 font-mono text-xs border border-slate-700">$1</code>');
+        return escaped;
+      };
+
+      for (let i = 0; i < lines.length; i++) {
+        const rawLine = lines[i].trim();
+        if (!rawLine) continue;
+
+        // 1) 주의사항/팁 박스 (> ...)
+        if (rawLine.startsWith('>')) {
+          const content = parseInline(rawLine.substring(1).trim());
+          html += `<div class="border-l-4 border-amber-400/90 bg-amber-500/10 px-3 py-2 rounded-r-xl text-amber-200 text-xs sm:text-sm my-1.5 flex items-start gap-2 shadow-sm">
+            <span class="text-amber-400 font-bold flex-shrink-0">💡</span>
+            <div class="leading-relaxed flex-1">${content}</div>
+          </div>`;
+          continue;
+        }
+
+        // 2) 헤딩 (#, ##, ###)
+        const headingMatch = rawLine.match(/^(#{1,4})\s+(.+)$/);
+        if (headingMatch) {
+          const title = parseInline(headingMatch[2]);
+          html += `<div class="text-sm sm:text-base font-bold text-white mt-3 mb-1 pb-1 border-b border-white/10 flex items-center gap-1.5">${title}</div>`;
+          continue;
+        }
+
+        // 3) 이모지 소제목 배지 (예: 📌 **수업 개요**, 🎒 **학생 준비 및 행동 요령**, 💡 **주의 사항**)
+        if (/^[📌🎒💡✨🔍📢🎯📝🔔]\s*\*\*/.test(rawLine)) {
+          const content = parseInline(rawLine);
+          html += `<div class="text-xs sm:text-sm font-bold text-indigo-300 flex items-center gap-1.5 pt-2 pb-0.5">${content}</div>`;
+          continue;
+        }
+
+        // 4) 숫자 번호 목록 (1. , 2. ) -> 깔끔한 독립 카드 박스로 단락화
+        const numMatch = rawLine.match(/^(\d+)[\.\)]\s+(.+)$/);
+        if (numMatch) {
+          const num = numMatch[1];
+          const content = parseInline(numMatch[2]);
+          html += `<div class="flex items-start gap-2.5 px-3 py-2 rounded-xl bg-slate-900/70 border border-slate-800/80 hover:border-indigo-500/40 transition shadow-sm mb-1.5">
+            <span class="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/40 text-xs font-bold flex items-center justify-center mt-0.5 shadow-sm">${num}</span>
+            <div class="text-xs sm:text-sm text-slate-200 leading-relaxed flex-1">${content}</div>
+          </div>`;
+          continue;
+        }
+
+        // 5) 불릿 목록 (- , * ) -> 불릿 카드 박스
+        const bulletMatch = rawLine.match(/^[\-\*]\s+(.+)$/);
+        if (bulletMatch) {
+          const content = parseInline(bulletMatch[1]);
+          html += `<div class="flex items-start gap-2.5 px-3 py-1.5 rounded-xl bg-slate-900/40 border border-slate-800/50 mb-1.5">
+            <span class="text-sky-400 font-bold text-sm leading-none mt-1">•</span>
+            <div class="text-xs sm:text-sm text-slate-300 leading-relaxed flex-1">${content}</div>
+          </div>`;
+          continue;
+        }
+
+        // 6) 일반 문단 단락
+        const content = parseInline(rawLine);
+        html += `<p class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-1.5">${content}</p>`;
+      }
+
+      return html;
+    }
+
+    // 본문 -> 체크리스트 자동 추출 (⚡)
+    function extractChecklistFromBody(text) {
+      if (!text) return [];
+      // 마크다운 기호 제거하여 순수 텍스트로 정돈
+      const cleanedText = text
+        .replace(/\*\*(.+?)\*\*/g, '$1')
+        .replace(/^#{1,6}\s+/gm, '')
+        .replace(/^[\-\*]\s+/gm, '')
+        .replace(/^\d+[\.\)]\s+/gm, '')
+        .replace(/^>\s*/gm, '');
+
+      const sentences = cleanedText.split(/[.\n!?;]+/).map(s => s.trim()).filter(Boolean);
+      const extracted = [];
+
+      // 동작 및 키워드 추출 정규식
+      const patterns = [
+        /(.+?)(?:착용(?:해|하세요| 바랍니다|하기)?)/,
+        /(.+?)(?:수령(?:해|하세요| 바랍니다|하기)?)/,
+        /(.+?)(?:펼쳐(?:놓으세요|두세요|주세요|놓기)?)/,
+        /(.+?)(?:준비(?:해|하세요| 바랍니다|하기)?)/,
+        /(.+?)(?:제출(?:해|하세요| 바랍니다|하기)?)/,
+        /(.+?)(?:가져(?:오세요|오기|오시기)?)/,
+        /(.+?)(?:작성(?:해|하세요| 바랍니다|하기)?)/,
+        /(.+?)(?:정리(?:해|하세요| 바랍니다|하기)?)/,
+      ];
+
+      sentences.forEach(sentence => {
+        let matched = false;
+        for (const pattern of patterns) {
+          const m = sentence.match(pattern);
+          if (m && m[1]) {
+            let item = m[1].replace(/^(또한|그리고|미리|앞쪽|교탁에서|이번 시간에는|모둠별로|각자)\s*/g, '').trim();
+            // 끝에 남은 불필요한 조사(을/를, 은/는) 정돈
+            item = item.replace(/(을|를|은|는|에|에서)$/, '').trim();
+            if (item.length > 1 && item.length < 25) {
+              // 행동 형태 부착
+              if (pattern.source.includes('착용')) extracted.push(item + ' 착용');
+              else if (pattern.source.includes('수령')) extracted.push(item + ' 수령');
+              else if (pattern.source.includes('펼쳐')) extracted.push(item + ' 펼치기');
+              else if (pattern.source.includes('준비')) extracted.push(item + ' 준비');
+              else if (pattern.source.includes('제출')) extracted.push(item + ' 제출');
+              else if (pattern.source.includes('가져')) extracted.push(item + ' 지참');
+              else if (pattern.source.includes('작성')) extracted.push(item + ' 작성');
+              else if (pattern.source.includes('정리')) extracted.push(item + ' 정리');
+              matched = true;
+              break;
+            }
+          }
+        }
+        if (!matched && sentence.length < 20 && !sentence.includes('수업') && !sentence.includes('휴식')) {
+          extracted.push(sentence);
+        }
+      });
+
+      return extracted.length > 0 ? extracted : ['교과서 및 필기도구 준비', '자리 정돈'];
+    }
+
+    // 체크리스트 -> 본문 문장 자동 조합 (⚡) (마크다운 단락 구조)
+    function generateSentenceFromChecklist(tags) {
+      if (!tags || tags.length === 0) return '📌 **다음 교시 준비 안내**\n다음 시간 수업 준비를 단정히 해주세요.';
+      const items = tags.map((tag, idx) => {
+        const cleanTag = tag.trim();
+        let actionText = '';
+        let itemTitle = cleanTag;
+
+        if (cleanTag.endsWith('착용')) {
+          const item = cleanTag.replace('착용', '').trim();
+          itemTitle = item + ' 착용';
+          actionText = `${attachObjectParticle(item)} 바르게 착용해 주세요`;
+        } else if (cleanTag.endsWith('수령')) {
+          const item = cleanTag.replace('수령', '').trim();
+          itemTitle = item + ' 수령';
+          actionText = `앞쪽 교탁에서 ${attachObjectParticle(item)} 수령해 주세요`;
+        } else if (cleanTag.endsWith('펼치기')) {
+          const item = cleanTag.replace('펼치기', '').trim();
+          itemTitle = item + ' 펼치기';
+          actionText = `${attachObjectParticle(item)} 미리 펼쳐놓아 주세요`;
+        } else if (cleanTag.endsWith('준비')) {
+          const item = cleanTag.replace('준비', '').trim();
+          itemTitle = item + ' 준비';
+          actionText = `${attachObjectParticle(item)} 책상 위에 준비해 두세요`;
+        } else if (cleanTag.endsWith('제출')) {
+          const item = cleanTag.replace('제출', '').trim();
+          itemTitle = item + ' 제출';
+          actionText = `${attachObjectParticle(item)} 앞쪽으로 제출해 주세요`;
+        } else {
+          actionText = `${cleanTag} 확인을 완료해 주세요`;
+        }
+
+        return `${idx + 1}. **${itemTitle}**: ${actionText}.`;
+      });
+
+      return `📌 **다음 교시 수업 안내**\n원활한 수업 진행을 위해 쉬는 시간 동안 아래 항목을 준비해 주세요.\n\n🎒 **준비 및 행동 요령**\n` +
+        items.join('\n') +
+        `\n\n✨ 준비를 마친 친구들은 자리에 앉아 편안한 휴식을 취하세요!`;
+    }
+
+
+    /* ==========================================================
+       4. 타이머 & 시계 & 앱 상태 관리 (App State)
+       ========================================================== */
+    const state = {
+      // 타이머 상태
+      totalSeconds: 600, // 기본 10분
+      remainingSeconds: 600,
+      isRunning: false,
+      timerInterval: null,
+      warningFired: false,
+      alarmFinishedFired: false,
+
+      // 앱 설정
+      alarmSound: 'koreanSchoolBell',
+      warningEnabled: true,
+      ambientType: 'rain',
+      ambientVolume: 40,
+      bgDimmer: 72,
+      qrUrl: 'https://padlet.com',
+      qrTitle: '모바일로 수업 패들렛 접속하기',
+      activeMediaTab: 'notice',
+      noticeMarkdown: `📌 **수업 개요**
+이번 시간에는 모둠별 생태계 현미경 관찰 실습이 진행됩니다.
+
+🎒 **학생 준비 및 행동 요령**
+1. **안전 장비 착용**: 실험복과 보안경을 바르게 착용해 주세요.
+2. **키트 수령**: 앞쪽 교탁에서 배부용 실험 키트를 모둠장 1명씩 수령합니다.
+3. **교과서 펼치기**: 교과서 **74페이지**를 미리 펼쳐놓아 주세요.
+
+💡 **주의 사항**
+- 현미경 렌즈는 충격에 약하므로 양손으로 조심스럽게 다뤄주세요.`,
+
+      // 1분 브레인 스트레칭
+      stretchStep: 1,
+      stretchSeconds: 20,
+      stretchRunning: false,
+      stretchInterval: null,
+
+      // 오토 하이드
+      inactivityTimer: null,
+    };
+
+    // DOM 요소 캐싱
+    const dom = {
+      // 시계
+      clockHourMinute: document.getElementById('clockHourMinute'),
+      clockSeconds: document.getElementById('clockSeconds'),
+      currentDateText: document.getElementById('currentDateText'),
+      currentAmPm: document.getElementById('currentAmPm'),
+
+      // 타이머
+      timerCard: document.getElementById('timerCard'),
+      donutCircle: document.getElementById('donutGaugeCircle'),
+      timerMinutes: document.getElementById('timerDisplayMinutes'),
+      timerSeconds: document.getElementById('timerDisplaySeconds'),
+      timerPercentText: document.getElementById('timerPercentText'),
+      linearProgressBar: document.getElementById('linearProgressBar'),
+      timerStatusLabel: document.getElementById('timerStatusLabel'),
+      timerTargetTimeText: document.getElementById('timerTargetTimeText'),
+      warningBadge: document.getElementById('warningBadge'),
+
+      // 퀵 컨트롤 독
+      controlDock: document.getElementById('controlDock'),
+      btnTogglePlay: document.getElementById('btnTogglePlay'),
+      playIcon: document.getElementById('playIcon'),
+      playText: document.getElementById('playText'),
+      btnResetTimer: document.getElementById('btnResetTimer'),
+      btnAdd1Min: document.getElementById('btnAdd1Min'),
+      btnSub1Min: document.getElementById('btnSub1Min'),
+      btnAdd3Min: document.getElementById('btnAdd3Min'),
+      btnRingBellNow: document.getElementById('btnRingBellNow'),
+
+      // 상단 바
+      quoteWidget: document.getElementById('quoteWidget'),
+      quoteText: document.getElementById('quoteText'),
+      btnToggleNoise: document.getElementById('btnToggleNoise'),
+      noiseLightDot: document.getElementById('noiseLightDot'),
+      noiseText: document.getElementById('noiseText'),
+      noiseDbValue: document.getElementById('noiseDbValue'),
+      btnToggleAmbient: document.getElementById('btnToggleAmbient'),
+      ambientIcon: document.getElementById('ambientIcon'),
+      ambientText: document.getElementById('ambientText'),
+      btnShowQr: document.getElementById('btnShowQr'),
+      btnFullscreen: document.getElementById('btnFullscreen'),
+      fullscreenIcon: document.getElementById('fullscreenIcon'),
+      btnOpenSettings: document.getElementById('btnOpenSettings'),
+
+      // 미디어 탭 & 안내문
+      tabBtnNotice: document.getElementById('tabBtnNotice'),
+      tabBtnImage: document.getElementById('tabBtnImage'),
+      tabBtnVideo: document.getElementById('tabBtnVideo'),
+      tabBtnStretch: document.getElementById('tabBtnStretch'),
+      tabContentNotice: document.getElementById('tabContentNotice'),
+      tabContentImage: document.getElementById('tabContentImage'),
+      tabContentVideo: document.getElementById('tabContentVideo'),
+      tabContentStretch: document.getElementById('tabContentStretch'),
+      displayClassBadge: document.getElementById('displayClassBadge'),
+      displayNoticeTitle: document.getElementById('displayNoticeTitle'),
+      displayNoticeBody: document.getElementById('displayNoticeBody'),
+      displayChecklistTags: document.getElementById('displayChecklistTags'),
+      displayClassImage: document.getElementById('displayClassImage'),
+      displayImageCaption: document.getElementById('displayImageCaption'),
+      displayClassVideo: document.getElementById('displayClassVideo'),
+
+      // 스트레칭
+      btnStretchStartStop: document.getElementById('btnStretchStartStop'),
+      stretchStepIndicator: document.getElementById('stretchStepIndicator'),
+      stretchIcon: document.getElementById('stretchIcon'),
+      stretchTitle: document.getElementById('stretchTitle'),
+      stretchDesc: document.getElementById('stretchDesc'),
+      stretchSeconds: document.getElementById('stretchSeconds'),
+
+      // 모달창들
+      settingsModal: document.getElementById('settingsModal'),
+      btnCloseSettings: document.getElementById('btnCloseSettings'),
+      btnSaveSettings: document.getElementById('btnSaveSettings'),
+      qrModal: document.getElementById('qrModal'),
+      btnCloseQr: document.getElementById('btnCloseQr'),
+      qrcodeCanvas: document.getElementById('qrcodeCanvas'),
+      displayQrTitle: document.getElementById('displayQrTitle'),
+      displayQrUrlText: document.getElementById('displayQrUrlText'),
+      customTimeModal: document.getElementById('customTimeModal'),
+      btnCloseCustomTime: document.getElementById('btnCloseCustomTime'),
+      inputCustomMinutes: document.getElementById('inputCustomMinutes'),
+      btnApplyCustomMinutes: document.getElementById('btnApplyCustomMinutes'),
+      inputTargetClock: document.getElementById('inputTargetClock'),
+      btnApplyTargetClock: document.getElementById('btnApplyTargetClock'),
+      btnCustomTime: document.getElementById('btnCustomTime'),
+      btnNext50: document.getElementById('btnNext50'),
+      btnNext00: document.getElementById('btnNext00'),
+
+      // 설정 입력 필드들
+      inputClassBadge: document.getElementById('inputClassBadge'),
+      inputNoticeTitle: document.getElementById('inputNoticeTitle'),
+      inputNoticeBody: document.getElementById('inputNoticeBody'),
+      btnInsertMdNum: document.getElementById('btnInsertMdNum'),
+      btnInsertMdBullet: document.getElementById('btnInsertMdBullet'),
+      btnInsertMdBold: document.getElementById('btnInsertMdBold'),
+      btnInsertMdQuote: document.getElementById('btnInsertMdQuote'),
+      inputChecklistTags: document.getElementById('inputChecklistTags'),
+      btnParseBodyToChecklist: document.getElementById('btnParseBodyToChecklist'),
+      btnGenerateSentenceFromChecklist: document.getElementById('btnGenerateSentenceFromChecklist'),
+      inputImageUrl: document.getElementById('inputImageUrl'),
+      inputFileImage: document.getElementById('inputFileImage'),
+      inputImageCaption: document.getElementById('inputImageCaption'),
+      inputVideoUrl: document.getElementById('inputVideoUrl'),
+      selectAlarmSound: document.getElementById('selectAlarmSound'),
+      btnPreviewAlarm: document.getElementById('btnPreviewAlarm'),
+      chkWarningAlert: document.getElementById('chkWarningAlert'),
+      selectAmbientType: document.getElementById('selectAmbientType'),
+      sliderAmbientVolume: document.getElementById('sliderAmbientVolume'),
+      ambientVolumeLabel: document.getElementById('ambientVolumeLabel'),
+      sliderBgDimmer: document.getElementById('sliderBgDimmer'),
+      labelBgDimmer: document.getElementById('labelBgDimmer'),
+      inputFileBg: document.getElementById('inputFileBg'),
+      inputQrUrl: document.getElementById('inputQrUrl'),
+      inputQrTitle: document.getElementById('inputQrTitle'),
+      bgLayer: document.getElementById('bgLayer'),
+      bgDimmer: document.getElementById('bgDimmer'),
+    };
+
+    // 동기부여 명언 & 교실 웰빙 팁 리스트
+    const classroomQuotes = [
+      "충분한 휴식은 더 멀리 나아가기 위한 가장 현명한 준비입니다. ☕",
+      "스트레칭으로 굳은 몸을 풀고, 창밖 먼 산을 바라보며 눈을 쉬어주세요! 🌿",
+      "시원한 물 한 잔으로 뇌에 맑은 산소를 공급해 보세요. 💧",
+      "서로를 배려하는 다정한 말 한마디가 교실의 온도를 높입니다. 따뜻한 하루 되세요! 🌸",
+      "배움은 질문하는 용기에서 시작됩니다. 다음 교시에도 힘차게 도전해 봐요! 🚀",
+      "친구의 자리를 존중하고 교실 통로를 깨끗이 정돈하면 모두가 안전합니다. 🏫",
+      "작은 성취가 모여 위대한 내일의 내가 됩니다. 오늘도 참 잘하고 있어요! 🌟",
+      "깊게 숨을 들이마시고 천천히 내쉬며 마음의 여유를 느껴보세요. 🧘‍♀️"
+    ];
+    let quoteIndex = 0;
+
+
+    /* ==========================================================
+       5. 시계 & 타이머 제어 함수
+       ========================================================== */
+    function updateClock() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const date = now.getDate();
+      const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+      const day = dayNames[now.getDay()];
+
+      dom.currentDateText.textContent = `${year}년 ${month}월 ${date}일 (${day})`;
+
+      let hours = now.getHours();
+      const ampm = hours >= 12 ? '오후' : '오전';
+      dom.currentAmPm.textContent = ampm;
+
+      const hh = String(hours).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+
+      dom.clockHourMinute.textContent = `${hh}:${mm}`;
+      dom.clockSeconds.textContent = `:${ss}`;
+    }
+
+    // 도넛 게이지 원 둘레 계산 (r=100 -> 2 * PI * 100 ≈ 628.318)
+    const CIRCLE_CIRCUMFERENCE = 628.318;
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(state.remainingSeconds / 60);
+      const secs = state.remainingSeconds % 60;
+
+      dom.timerMinutes.textContent = String(mins).padStart(2, '0');
+      dom.timerSeconds.textContent = String(secs).padStart(2, '0');
+
+      // 진행율 계산
+      const percent = state.totalSeconds > 0 ? (state.remainingSeconds / state.totalSeconds) : 0;
+      const offset = CIRCLE_CIRCUMFERENCE * (1 - percent);
+      dom.donutCircle.style.strokeDashoffset = offset;
+      dom.linearProgressBar.style.width = `${Math.round(percent * 100)}%`;
+      dom.timerPercentText.textContent = `${Math.round(percent * 100)}% 잔여`;
+
+      // 게이지 색상 동적 변경 (30% 미만: 앰버, 10% 미만: 로즈)
+      if (percent <= 0.15) {
+        dom.donutCircle.classList.remove('stroke-indigo-500', 'stroke-amber-400');
+        dom.donutCircle.classList.add('stroke-rose-500');
+      } else if (percent <= 0.35) {
+        dom.donutCircle.classList.remove('stroke-indigo-500', 'stroke-rose-500');
+        dom.donutCircle.classList.add('stroke-amber-400');
+      } else {
+        dom.donutCircle.classList.remove('stroke-amber-400', 'stroke-rose-500');
+        dom.donutCircle.classList.add('stroke-indigo-500');
+      }
+
+      // 1분 전(60초) 착석 경고 로직
+      if (state.remainingSeconds === 60 && !state.warningFired && state.isRunning) {
+        state.warningFired = true;
+        if (state.warningEnabled) {
+          audioSynth.playWarningPing();
+        }
+        show1MinWarning(true);
+      } else if (state.remainingSeconds > 60 || state.remainingSeconds <= 0) {
+        show1MinWarning(false);
+      }
+
+      // 종료 예정 시각 업데이트
+      const targetDate = new Date(Date.now() + state.remainingSeconds * 1000);
+      const thh = String(targetDate.getHours()).padStart(2, '0');
+      const tmm = String(targetDate.getMinutes()).padStart(2, '0');
+      dom.timerTargetTimeText.textContent = `${thh}:${tmm}`;
+    }
+
+    function show1MinWarning(show) {
+      if (show) {
+        dom.warningBadge.classList.remove('hidden');
+        dom.warningBadge.classList.add('flex');
+        dom.timerCard.classList.add('amber-warning-border');
+      } else {
+        dom.warningBadge.classList.add('hidden');
+        dom.warningBadge.classList.remove('flex');
+        dom.timerCard.classList.remove('amber-warning-border');
+      }
+    }
+
+    function startTimer() {
+      if (state.isRunning) return;
+      audioSynth.initContext();
+      state.isRunning = true;
+      dom.playIcon.textContent = '⏸️';
+      dom.playText.textContent = '일시정지';
+      dom.timerStatusLabel.textContent = '쉬는 시간 진행 중';
+      dom.timerStatusLabel.className = 'text-xs sm:text-sm font-bold tracking-wider text-emerald-300 uppercase';
+
+      state.timerInterval = setInterval(() => {
+        if (state.remainingSeconds > 0) {
+          state.remainingSeconds--;
+          updateTimerDisplay();
+        } else {
+          // 타이머 완료!
+          clearInterval(state.timerInterval);
+          state.isRunning = false;
+          dom.playIcon.textContent = '▶️';
+          dom.playText.textContent = '시작';
+          dom.timerStatusLabel.textContent = '쉬는 시간 종료! 수업 시작';
+          dom.timerStatusLabel.className = 'text-xs sm:text-sm font-bold tracking-wider text-rose-400 uppercase animate-pulse';
+          show1MinWarning(false);
+
+          // 설정된 알람 종소리 재생
+          playSelectedAlarm();
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      if (!state.isRunning) return;
+      clearInterval(state.timerInterval);
+      state.isRunning = false;
+      dom.playIcon.textContent = '▶️';
+      dom.playText.textContent = '계속';
+      dom.timerStatusLabel.textContent = '일시정지됨';
+      dom.timerStatusLabel.className = 'text-xs sm:text-sm font-bold tracking-wider text-amber-300 uppercase';
+    }
+
+    function togglePlay() {
+      if (state.isRunning) {
+        pauseTimer();
+      } else {
+        if (state.remainingSeconds <= 0) {
+          state.remainingSeconds = state.totalSeconds;
+        }
+        startTimer();
+      }
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      state.remainingSeconds = state.totalSeconds;
+      state.warningFired = false;
+      show1MinWarning(false);
+      updateTimerDisplay();
+      dom.timerStatusLabel.textContent = '대기 중';
+      dom.timerStatusLabel.className = 'text-xs sm:text-sm font-bold tracking-wider text-slate-400 uppercase';
+    }
+
+    function setTimerMinutes(mins) {
+      pauseTimer();
+      state.totalSeconds = mins * 60;
+      state.remainingSeconds = state.totalSeconds;
+      state.warningFired = false;
+      show1MinWarning(false);
+      updateTimerDisplay();
+      startTimer();
+    }
+
+    function addMinutes(mins) {
+      state.remainingSeconds = Math.max(0, state.remainingSeconds + mins * 60);
+      if (state.remainingSeconds > state.totalSeconds) {
+        state.totalSeconds = state.remainingSeconds;
+      }
+      state.warningFired = state.remainingSeconds <= 60;
+      updateTimerDisplay();
+    }
+
+    function playSelectedAlarm() {
+      switch (state.alarmSound) {
+        case 'koreanSchoolBell':
+          audioSynth.playKoreanSchoolBell();
+          break;
+        case 'westminster':
+          audioSynth.playWestminster();
+          break;
+        case 'dingDong':
+          audioSynth.playDingDong();
+          break;
+        case 'marimba':
+          audioSynth.playMarimba();
+          break;
+        case 'digitalBeep':
+          audioSynth.playDigitalBeep();
+          break;
+        default:
+          audioSynth.playKoreanSchoolBell();
+      }
+    }
+
+
+    /* ==========================================================
+       6. 학교 종 자동 스케줄러 (:50분, :00정각)
+       ========================================================== */
+    function scheduleNext50() {
+      const now = new Date();
+      const currentMin = now.getMinutes();
+      let diff = 0;
+      if (currentMin < 50) {
+        diff = 50 - currentMin;
+      } else {
+        diff = (60 - currentMin) + 50;
+      }
+      setTimerMinutes(diff);
+    }
+
+    function scheduleNext00() {
+      const now = new Date();
+      const currentMin = now.getMinutes();
+      const diff = 60 - currentMin;
+      setTimerMinutes(diff);
+    }
+
+
+    /* ==========================================================
+       7. 소음 신호등 UI 업데이트
+       ========================================================== */
+    function updateNoiseUI(db) {
+      dom.noiseDbValue.textContent = `${db} dB`;
+      dom.noiseDbValue.classList.remove('hidden');
+
+      if (db < 58) {
+        dom.noiseLightDot.className = 'w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399]';
+        dom.noiseText.textContent = '쾌적 (조용함)';
+        dom.noiseText.className = 'text-xs font-semibold text-emerald-300';
+      } else if (db <= 74) {
+        dom.noiseLightDot.className = 'w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_10px_#fbbf24]';
+        dom.noiseText.textContent = '주의 (목소리 조절)';
+        dom.noiseText.className = 'text-xs font-semibold text-amber-300';
+      } else {
+        dom.noiseLightDot.className = 'w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_15px_#f43f5e] animate-ping';
+        dom.noiseText.textContent = '쉿! 정숙 경고';
+        dom.noiseText.className = 'text-xs font-bold text-rose-400 animate-pulse';
+      }
+    }
+
+    async function toggleNoiseMeter() {
+      if (noiseMeter.isRunning) {
+        noiseMeter.stop();
+        dom.noiseLightDot.className = 'w-3 h-3 rounded-full bg-slate-500';
+        dom.noiseText.textContent = '소음계 OFF';
+        dom.noiseText.className = 'text-xs font-semibold text-slate-300';
+        dom.noiseDbValue.classList.add('hidden');
+      } else {
+        const ok = await noiseMeter.start();
+        if (ok) {
+          dom.noiseText.textContent = '측정 중...';
+        }
+      }
+    }
+
+
+    /* ==========================================================
+       8. 미디어 탭 & 1분 스트레칭 애니메이션
+       ========================================================== */
+    function switchMediaTab(tabName) {
+      state.activeMediaTab = tabName;
+      const tabs = [
+        { name: 'notice', btn: dom.tabBtnNotice, content: dom.tabContentNotice },
+        { name: 'image', btn: dom.tabBtnImage, content: dom.tabContentImage },
+        { name: 'video', btn: dom.tabBtnVideo, content: dom.tabContentVideo },
+        { name: 'stretch', btn: dom.tabBtnStretch, content: dom.tabContentStretch },
+      ];
+
+      tabs.forEach(t => {
+        if (t.name === tabName) {
+          t.btn.className = 'media-tab-btn active px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white shadow-md transition flex items-center gap-1.5 whitespace-nowrap';
+          t.content.classList.remove('hidden');
+          t.content.classList.add('flex');
+        } else {
+          t.btn.className = 'media-tab-btn px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap';
+          t.content.classList.add('hidden');
+          t.content.classList.remove('flex');
+        }
+      });
+    }
+
+    const stretchSteps = [
+      {
+        step: 1,
+        title: '1단계: 손 깍지 위로 쭉 기지개',
+        desc: '양손을 깍지 끼고 머리 위로 힘껏 밀어 올리며 숨을 깊게 들이마시고 내쉽니다. 척추를 길게 펴주세요!',
+        icon: '🙆‍♂️',
+      },
+      {
+        step: 2,
+        title: '2단계: 창밖 먼 곳 응시하기',
+        desc: '스마트폰과 칠판에서 눈을 떼고, 창밖 6미터 이상 먼 곳을 바라보며 눈 깜빡임을 천천히 10번 반복합니다.',
+        icon: '👀',
+      },
+      {
+        step: 3,
+        title: '3단계: 부드러운 목과 어깨 회전',
+        desc: '머리의 무게를 느끼며 시계 방향, 반시계 방향으로 목을 천천히 3회씩 굴리고 어깨를 뒤로 젖혀 풀어줍니다.',
+        icon: '💆‍♂️',
+      }
+    ];
+
+    function setStretchStep(stepNum) {
+      state.stretchStep = stepNum;
+      state.stretchSeconds = 20;
+      const info = stretchSteps[stepNum - 1];
+      dom.stretchStepIndicator.textContent = `${stepNum}단계 / 3단계`;
+      dom.stretchTitle.textContent = info.title;
+      dom.stretchDesc.textContent = info.desc;
+      dom.stretchIcon.textContent = info.icon;
+      dom.stretchSeconds.textContent = state.stretchSeconds;
+
+      document.querySelectorAll('.stretch-step-btn').forEach(btn => {
+        if (parseInt(btn.dataset.step) === stepNum) {
+          btn.className = 'stretch-step-btn active p-2 rounded-xl bg-indigo-900/60 border border-indigo-500/50 text-indigo-200 font-semibold';
+        } else {
+          btn.className = 'stretch-step-btn p-2 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-400 font-semibold';
+        }
+      });
+    }
+
+    function toggleStretch() {
+      if (state.stretchRunning) {
+        clearInterval(state.stretchInterval);
+        state.stretchRunning = false;
+        dom.btnStretchStartStop.textContent = '체조 재개';
+        dom.btnStretchStartStop.className = 'text-xs px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition';
+      } else {
+        state.stretchRunning = true;
+        dom.btnStretchStartStop.textContent = '일시정지';
+        dom.btnStretchStartStop.className = 'text-xs px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold transition';
+
+        state.stretchInterval = setInterval(() => {
+          if (state.stretchSeconds > 0) {
+            state.stretchSeconds--;
+            dom.stretchSeconds.textContent = state.stretchSeconds;
+          } else {
+            // 다음 단계로 전환
+            if (state.stretchStep < 3) {
+              setStretchStep(state.stretchStep + 1);
+            } else {
+              // 3단계 모두 완료!
+              clearInterval(state.stretchInterval);
+              state.stretchRunning = false;
+              dom.btnStretchStartStop.textContent = '체조 완료! 🎉';
+              setTimeout(() => {
+                setStretchStep(1);
+                dom.btnStretchStartStop.textContent = '다시 하기';
+              }, 3000);
+            }
+          }
+        }, 1000);
+      }
+    }
+
+
+    /* ==========================================================
+       9. 모바일 QR 코드 생성기
+       ========================================================== */
+    function renderQRCode(url) {
+      dom.qrcodeCanvas.innerHTML = '';
+      if (window.QRCode) {
+        new QRCode(dom.qrcodeCanvas, {
+          text: url,
+          width: 190,
+          height: 190,
+          colorDark: '#0f172a',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M,
+        });
+      } else {
+        // QRCode 라이브러리 없을 때의 폴백 (Google Chart API / QuickChart)
+        const img = document.createElement('img');
+        img.src = `https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=${encodeURIComponent(url)}`;
+        img.alt = 'QR Code';
+        img.className = 'w-48 h-48 rounded-lg';
+        dom.qrcodeCanvas.appendChild(img);
+      }
+      dom.displayQrUrlText.textContent = url;
+    }
+
+    function openQrModal() {
+      renderQRCode(state.qrUrl);
+      dom.displayQrTitle.textContent = state.qrTitle;
+      dom.qrModal.classList.remove('hidden');
+    }
+
+    function closeQrModal() {
+      dom.qrModal.classList.add('hidden');
+    }
+
+
+    /* ==========================================================
+       10. 오토 하이드 클린 프레젠테이션 (Clean View)
+       ========================================================== */
+    function resetInactivityTimer() {
+      dom.controlDock.classList.remove('auto-hide-inactive');
+      dom.controlDock.classList.add('auto-hide-active');
+      document.body.classList.remove('cursor-none');
+
+      clearTimeout(state.inactivityTimer);
+      state.inactivityTimer = setTimeout(() => {
+        // 3.5초간 무조작 시 컨트롤 독 페이드아웃 및 커서 숨김
+        dom.controlDock.classList.remove('auto-hide-active');
+        dom.controlDock.classList.add('auto-hide-inactive');
+        document.body.classList.add('cursor-none');
+      }, 3500);
+    }
+
+
+    /* ==========================================================
+       11. 이벤트 리스너 바인딩 & 초기화
+       ========================================================== */
+    function initEvents() {
+      // 1초마다 실시간 시계 갱신
+      setInterval(updateClock, 1000);
+      updateClock();
+      updateTimerDisplay();
+      // 수업 안내 마크다운 초기 렌더링
+      if (dom.displayNoticeBody) {
+        dom.displayNoticeBody.innerHTML = renderMarkdownToHTML(state.noticeMarkdown);
+      }
+
+      // 마우스 움직임 감지 -> 오토 하이드 리셋
+      window.addEventListener('mousemove', resetInactivityTimer);
+      window.addEventListener('mousedown', resetInactivityTimer);
+      window.addEventListener('keydown', resetInactivityTimer);
+      resetInactivityTimer();
+
+      // 퀵 독 버튼들
+      dom.btnTogglePlay.addEventListener('click', togglePlay);
+      dom.btnResetTimer.addEventListener('click', resetTimer);
+      dom.btnAdd1Min.addEventListener('click', () => addMinutes(1));
+      dom.btnSub1Min.addEventListener('click', () => addMinutes(-1));
+      dom.btnAdd3Min.addEventListener('click', () => addMinutes(3));
+      dom.btnRingBellNow.addEventListener('click', playSelectedAlarm);
+
+      // 프리셋 버튼들 (+5, +10, +15, +20)
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mins = parseInt(btn.dataset.mins);
+          setTimerMinutes(mins);
+        });
+      });
+
+      // 스케줄러 버튼 (:50, :00)
+      dom.btnNext50.addEventListener('click', scheduleNext50);
+      dom.btnNext00.addEventListener('click', scheduleNext00);
+
+      // 직접 설정 모달
+      dom.btnCustomTime.addEventListener('click', () => {
+        dom.customTimeModal.classList.remove('hidden');
+      });
+      dom.btnCloseCustomTime.addEventListener('click', () => {
+        dom.customTimeModal.classList.add('hidden');
+      });
+      dom.btnApplyCustomMinutes.addEventListener('click', () => {
+        const mins = parseInt(dom.inputCustomMinutes.value) || 10;
+        setTimerMinutes(mins);
+        dom.customTimeModal.classList.add('hidden');
+      });
+      dom.btnApplyTargetClock.addEventListener('click', () => {
+        const val = dom.inputTargetClock.value;
+        if (!val) return;
+        const [targetHour, targetMin] = val.split(':').map(Number);
+        const now = new Date();
+        const target = new Date();
+        target.setHours(targetHour, targetMin, 0, 0);
+        if (target <= now) {
+          target.setDate(target.getDate() + 1); // 다음 날 동일 시각
+        }
+        const diffMinutes = Math.max(1, Math.round((target - now) / 60000));
+        setTimerMinutes(diffMinutes);
+        dom.customTimeModal.classList.add('hidden');
+      });
+
+      // 명언 바 클릭 시 다음 명언으로 전환
+      dom.quoteWidget.addEventListener('click', () => {
+        quoteIndex = (quoteIndex + 1) % classroomQuotes.length;
+        dom.quoteText.style.opacity = '0';
+        setTimeout(() => {
+          dom.quoteText.textContent = classroomQuotes[quoteIndex];
+          dom.quoteText.style.opacity = '1';
+        }, 200);
+      });
+
+      // 소음계 토글
+      dom.btnToggleNoise.addEventListener('click', toggleNoiseMeter);
+
+      // 백색소음 토글
+      dom.btnToggleAmbient.addEventListener('click', () => {
+        if (audioSynth.isAmbientPlaying) {
+          audioSynth.stopAmbient();
+          dom.ambientText.textContent = '백색소음 OFF';
+          dom.ambientIcon.textContent = '🌧️';
+        } else {
+          audioSynth.startAmbient(state.ambientType, state.ambientVolume / 100);
+          dom.ambientText.textContent = state.ambientType === 'rain' ? '빗소리 ON' : '바람소리 ON';
+          dom.ambientIcon.textContent = state.ambientType === 'rain' ? '🌧️' : '🍃';
+        }
+      });
+
+      // QR 코드 버튼
+      dom.btnShowQr.addEventListener('click', openQrModal);
+      dom.btnCloseQr.addEventListener('click', closeQrModal);
+
+      // 전체화면 토글 (F)
+      dom.btnFullscreen.addEventListener('click', toggleFullscreen);
+
+      // 미디어 탭 전환
+      dom.tabBtnNotice.addEventListener('click', () => switchMediaTab('notice'));
+      dom.tabBtnImage.addEventListener('click', () => switchMediaTab('image'));
+      dom.tabBtnVideo.addEventListener('click', () => switchMediaTab('video'));
+      dom.tabBtnStretch.addEventListener('click', () => switchMediaTab('stretch'));
+
+      // 인터랙티브 체크리스트 항목 클릭 토글
+      bindChecklistTagEvents();
+
+      // 스트레칭 이벤트
+      dom.btnStretchStartStop.addEventListener('click', toggleStretch);
+      document.querySelectorAll('.stretch-step-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const step = parseInt(btn.dataset.step);
+          setStretchStep(step);
+        });
+      });
+
+      // 설정 모달 열기/닫기
+      dom.btnOpenSettings.addEventListener('click', openSettingsModal);
+      dom.btnCloseSettings.addEventListener('click', closeSettingsModal);
+      dom.btnSaveSettings.addEventListener('click', saveSettingsModal);
+
+      // 설정 모달 탭 전환
+      document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.tab;
+          document.querySelectorAll('.settings-tab-btn').forEach(b => {
+            b.className = 'settings-tab-btn px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300';
+          });
+          btn.className = 'settings-tab-btn active px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white';
+
+          document.querySelectorAll('.settings-section').forEach(sec => sec.classList.add('hidden'));
+          document.getElementById(`sec-${target}`).classList.remove('hidden');
+        });
+      });
+
+      // 지능형 자연어 추출 버튼: 본문 -> 체크리스트 (⚡)
+      dom.btnParseBodyToChecklist.addEventListener('click', () => {
+        const bodyText = dom.inputNoticeBody.value;
+        const tags = extractChecklistFromBody(bodyText);
+        dom.inputChecklistTags.value = tags.join(', ');
+        alert(`⚡ 본문에서 ${tags.length}개의 체크리스트 항목을 자동 추출하였습니다!`);
+      });
+
+      // 지능형 문장 조합 버튼: 체크리스트 -> 본문 문장 (⚡)
+      dom.btnGenerateSentenceFromChecklist.addEventListener('click', () => {
+        const raw = dom.inputChecklistTags.value;
+        const tags = raw.split(',').map(s => s.trim()).filter(Boolean);
+        const sentence = generateSentenceFromChecklist(tags);
+        dom.inputNoticeBody.value = sentence;
+        alert('⚡ 체크리스트 키워드를 바탕으로 매끄러운 안내 문장이 생성되었습니다!');
+      });
+
+      // 마크다운 서식 퀵 툴바 버튼 이벤트
+      if (dom.btnInsertMdNum) {
+        dom.btnInsertMdNum.addEventListener('click', () => {
+          const prefix = dom.inputNoticeBody.value.trim() ? '\n' : '';
+          dom.inputNoticeBody.value += `${prefix}1. **첫 번째 준비물**: 상세 준비 요령을 적어주세요.\n2. **두 번째 준비물**: 상세 준비 요령을 적어주세요.`;
+          dom.inputNoticeBody.focus();
+        });
+      }
+      if (dom.btnInsertMdBullet) {
+        dom.btnInsertMdBullet.addEventListener('click', () => {
+          const prefix = dom.inputNoticeBody.value.trim() ? '\n' : '';
+          dom.inputNoticeBody.value += `${prefix}- 주요 준비물 항목 및 행동 요령\n- 친구들과 함께 지켜야 할 질서`;
+          dom.inputNoticeBody.focus();
+        });
+      }
+      if (dom.btnInsertMdBold) {
+        dom.btnInsertMdBold.addEventListener('click', () => {
+          const start = dom.inputNoticeBody.selectionStart;
+          const end = dom.inputNoticeBody.selectionEnd;
+          const text = dom.inputNoticeBody.value;
+          if (start !== end) {
+            const selected = text.substring(start, end);
+            dom.inputNoticeBody.value = text.substring(0, start) + `**${selected}**` + text.substring(end);
+          } else {
+            dom.inputNoticeBody.value += ` **강조할 내용** `;
+          }
+          dom.inputNoticeBody.focus();
+        });
+      }
+      if (dom.btnInsertMdQuote) {
+        dom.btnInsertMdQuote.addEventListener('click', () => {
+          const prefix = dom.inputNoticeBody.value.trim() ? '\n' : '';
+          dom.inputNoticeBody.value += `${prefix}> 💡 주의 사항: 안전에 유의하여 장비와 교구를 소중히 다뤄주세요.`;
+          dom.inputNoticeBody.focus();
+        });
+      }
+
+      // 알람 벨소리 미리듣기
+      dom.btnPreviewAlarm.addEventListener('click', () => {
+        const sound = dom.selectAlarmSound.value;
+        const prev = state.alarmSound;
+        state.alarmSound = sound;
+        playSelectedAlarm();
+        state.alarmSound = prev;
+      });
+
+      // 백색소음 볼륨 슬라이더
+      dom.sliderAmbientVolume.addEventListener('input', (e) => {
+        const v = e.target.value;
+        dom.ambientVolumeLabel.textContent = `${v}%`;
+        state.ambientVolume = parseInt(v);
+        audioSynth.setAmbientVolume(state.ambientVolume / 100);
+      });
+
+      // 배경 딤머 슬라이더
+      dom.sliderBgDimmer.addEventListener('input', (e) => {
+        const v = e.target.value;
+        dom.labelBgDimmer.textContent = `${v}%`;
+        dom.bgDimmer.style.opacity = v / 100;
+        state.bgDimmer = parseInt(v);
+      });
+
+      // 배경 테마 프리셋 버튼들
+      document.querySelectorAll('.preset-bg-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const url = btn.dataset.bg;
+          dom.bgLayer.style.backgroundImage = `url('${url}')`;
+        });
+      });
+
+      // 로컬 배경 이미지 업로드
+      dom.inputFileBg.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            dom.bgLayer.style.backgroundImage = `url('${event.target.result}')`;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // 로컬 수업 이미지 업로드
+      dom.inputFileImage.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            dom.displayClassImage.src = event.target.result;
+            dom.inputImageUrl.value = '';
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // 키보드 단축키
+      window.addEventListener('keydown', handleKeyboardShortcuts);
+    }
+
+    // 체크리스트 버튼 클릭 이벤트 바인딩
+    function bindChecklistTagEvents() {
+      document.querySelectorAll('.checklist-tag-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const checked = btn.dataset.checked === 'true';
+          const icon = btn.querySelector('.check-icon');
+          const text = btn.querySelector('.tag-text');
+
+          if (!checked) {
+            btn.dataset.checked = 'true';
+            btn.classList.add('bg-emerald-950/70', 'border-emerald-500/60');
+            icon.textContent = '✓';
+            icon.className = 'check-icon w-4 h-4 rounded bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-xs';
+            text.classList.add('line-through', 'text-slate-400');
+          } else {
+            btn.dataset.checked = 'false';
+            btn.classList.remove('bg-emerald-950/70', 'border-emerald-500/60');
+            icon.textContent = '';
+            icon.className = 'check-icon w-4 h-4 rounded border border-slate-500 flex items-center justify-center text-xs';
+            text.classList.remove('line-through', 'text-slate-400');
+          }
+        });
+      });
+    }
+
+    // 전체화면 토글
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+    }
+
+    // 단축키 핸들러
+    function handleKeyboardShortcuts(e) {
+      // 텍스트 입력 중일 때는 단축키 무시
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
+        if (e.key === 'Escape') {
+          closeSettingsModal();
+          closeQrModal();
+          dom.customTimeModal.classList.add('hidden');
+        }
+        return;
+      }
+
+      switch (e.key) {
+        case ' ': // Space: 일시정지 / 재개
+          e.preventDefault();
+          togglePlay();
+          break;
+        case 's':
+        case 'S': // S: 설정창 토글
+          if (dom.settingsModal.classList.contains('hidden')) openSettingsModal();
+          else closeSettingsModal();
+          break;
+        case 'f':
+        case 'F': // F: 전체화면 토글
+          toggleFullscreen();
+          break;
+        case '+':
+        case '=': // +: 1분 연장
+          addMinutes(1);
+          break;
+        case '-': // -: 1분 단축
+          addMinutes(-1);
+          break;
+        case 'Escape': // Esc: 모달 닫기
+          closeSettingsModal();
+          closeQrModal();
+          dom.customTimeModal.classList.add('hidden');
+          break;
+      }
+    }
+
+    // 설정 모달 열기
+    function openSettingsModal() {
+      dom.inputClassBadge.value = dom.displayClassBadge.textContent;
+      dom.inputNoticeTitle.value = dom.displayNoticeTitle.textContent;
+      dom.inputNoticeBody.value = state.noticeMarkdown;
+      dom.selectAlarmSound.value = state.alarmSound;
+      dom.chkWarningAlert.checked = state.warningEnabled;
+      dom.selectAmbientType.value = state.ambientType;
+      dom.sliderAmbientVolume.value = state.ambientVolume;
+      dom.ambientVolumeLabel.textContent = `${state.ambientVolume}%`;
+      dom.sliderBgDimmer.value = state.bgDimmer;
+      dom.labelBgDimmer.textContent = `${state.bgDimmer}%`;
+      dom.inputQrUrl.value = state.qrUrl;
+      dom.inputQrTitle.value = state.qrTitle;
+
+      dom.settingsModal.classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      dom.settingsModal.classList.add('hidden');
+    }
+
+    // 설정 모달 저장 & 즉각 적용
+    function saveSettingsModal() {
+      // 1. 수업 안내문
+      dom.displayClassBadge.textContent = dom.inputClassBadge.value;
+      dom.displayNoticeTitle.textContent = dom.inputNoticeTitle.value;
+      state.noticeMarkdown = dom.inputNoticeBody.value.trim();
+      dom.displayNoticeBody.innerHTML = renderMarkdownToHTML(state.noticeMarkdown);
+
+      // 체크리스트 태그 재구성
+      const tags = dom.inputChecklistTags.value.split(',').map(s => s.trim()).filter(Boolean);
+      dom.displayChecklistTags.innerHTML = '';
+      tags.forEach(tag => {
+        const btn = document.createElement('button');
+        btn.className = 'checklist-tag-btn px-3 py-1.5 rounded-xl bg-slate-800/90 border border-slate-700 hover:border-indigo-400 text-xs sm:text-sm font-medium text-slate-200 transition flex items-center gap-2 cursor-pointer shadow-sm active:scale-95';
+        btn.dataset.checked = 'false';
+        btn.innerHTML = `<span class="check-icon w-4 h-4 rounded border border-slate-500 flex items-center justify-center text-xs"></span><span class="tag-text">${tag}</span>`;
+        dom.displayChecklistTags.appendChild(btn);
+      });
+      bindChecklistTagEvents();
+
+      // 2. 미디어 (이미지 & 영상)
+      if (dom.inputImageUrl.value.trim()) {
+        dom.displayClassImage.src = dom.inputImageUrl.value.trim();
+      }
+      dom.displayImageCaption.textContent = dom.inputImageCaption.value;
+
+      // 유튜브 영상 처리
+      let videoInput = dom.inputVideoUrl.value.trim();
+      if (videoInput) {
+        let videoId = '';
+        if (videoInput.includes('<iframe')) {
+          const srcMatch = videoInput.match(/src=["'](.*?)["']/);
+          if (srcMatch && srcMatch[1]) videoInput = srcMatch[1];
+        }
+        if (videoInput.includes('youtu.be/')) {
+          videoId = videoInput.split('youtu.be/')[1].split('?')[0];
+        } else if (videoInput.includes('v=')) {
+          videoId = videoInput.split('v=')[1].split('&')[0];
+        } else if (videoInput.includes('embed/')) {
+          videoId = videoInput.split('embed/')[1].split('?')[0];
+        }
+
+        if (videoId) {
+          dom.displayClassVideo.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1`;
+        }
+      }
+
+      // 3. 오디오 및 백색소음
+      state.alarmSound = dom.selectAlarmSound.value;
+      state.warningEnabled = dom.chkWarningAlert.checked;
+      state.ambientType = dom.selectAmbientType.value;
+      state.ambientVolume = parseInt(dom.sliderAmbientVolume.value);
+      audioSynth.setAmbientVolume(state.ambientVolume / 100);
+
+      // 4. QR 코드
+      state.qrUrl = dom.inputQrUrl.value.trim();
+      state.qrTitle = dom.inputQrTitle.value.trim();
+
+      closeSettingsModal();
+    }
+
+    // 앱 시작
+    document.addEventListener('DOMContentLoaded', initEvents);
+  </script>
+</body>
+</html>
