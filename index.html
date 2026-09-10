@@ -200,20 +200,14 @@
       border: 2px solid #475569 !important;
     }
 
-    /* 디지털 시계 및 타이머 핵심 숫자: 라이트 테마(딥 차콜 #0f172a), 다크 테마(순백색 #ffffff) */
-    #clockHourMinute,
-    #timerDisplayMinutes,
-    #timerDisplaySeconds {
+    /* 디지털 시계 핵심 숫자: 라이트 테마(딥 차콜 #0f172a), 다크 테마(순백색 #ffffff) */
+    #clockHourMinute {
       transition: color 0.2s ease;
     }
-    body.theme-light #clockHourMinute,
-    body.theme-light #timerDisplayMinutes,
-    body.theme-light #timerDisplaySeconds {
+    body.theme-light #clockHourMinute {
       color: #0f172a !important;
     }
-    body.theme-dark #clockHourMinute,
-    body.theme-dark #timerDisplayMinutes,
-    body.theme-dark #timerDisplaySeconds {
+    body.theme-dark #clockHourMinute {
       color: #ffffff !important;
     }
 
@@ -224,11 +218,77 @@
       color: #818cf8 !important;
     }
 
-    body.theme-light .timer-colon {
-      color: #4338ca !important;
+    /* 폭탄 타이머 내부 숫자: 입체 구형 폭탄 본체 위에서 항상 눈부신 순백색 고대비 유지 */
+    #timerDisplayMinutes,
+    #timerDisplaySeconds {
+      color: #ffffff !important;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
     }
-    body.theme-dark .timer-colon {
-      color: #a5b4fc !important;
+    .timer-colon {
+      color: #fbbf24 !important;
+      text-shadow: 0 0 12px rgba(251, 191, 36, 0.7);
+    }
+
+    /* ==========================================================
+       💣 폭탄 & 타들어가는 도화선 타이머 (Bomb & Burning Fuse Timer)
+       ========================================================== */
+    @keyframes flameFlicker {
+      0% {
+        transform: scale(1) rotate(0deg);
+        filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.85)) drop-shadow(0 0 12px rgba(239, 68, 68, 0.65));
+      }
+      25% {
+        transform: scale(1.18) rotate(8deg);
+        filter: drop-shadow(0 0 10px rgba(251, 191, 36, 1)) drop-shadow(0 0 16px rgba(245, 158, 11, 0.9));
+      }
+      50% {
+        transform: scale(0.9) rotate(-6deg);
+        filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.75)) drop-shadow(0 0 8px rgba(239, 68, 68, 0.5));
+      }
+      75% {
+        transform: scale(1.24) rotate(11deg);
+        filter: drop-shadow(0 0 12px rgba(254, 240, 138, 1)) drop-shadow(0 0 20px rgba(239, 68, 68, 0.95));
+      }
+      100% {
+        transform: scale(1) rotate(0deg);
+        filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.85)) drop-shadow(0 0 12px rgba(239, 68, 68, 0.65));
+      }
+    }
+
+    .fuse-flame-group {
+      animation: flameFlicker 0.22s infinite alternate ease-in-out;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    @keyframes bombTickingUrgent {
+      0% { transform: rotate(0deg) scale(1); }
+      20% { transform: rotate(-3.5deg) scale(1.02); }
+      40% { transform: rotate(3.5deg) scale(1.02); }
+      60% { transform: rotate(-2.5deg) scale(1.01); }
+      80% { transform: rotate(2.5deg) scale(1.01); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+
+    .bomb-ticking-urgent {
+      animation: bombTickingUrgent 0.45s infinite ease-in-out;
+      transform-origin: 120px 146px;
+    }
+
+    .bomb-glow-urgent {
+      filter: drop-shadow(0 0 18px rgba(245, 158, 11, 0.85)) drop-shadow(0 0 28px rgba(239, 68, 68, 0.65)) !important;
+    }
+
+    @keyframes bombExplosionBurst {
+      0% { transform: scale(1); filter: drop-shadow(0 0 0px #ef4444); }
+      30% { transform: scale(1.12); filter: drop-shadow(0 0 35px #ef4444) drop-shadow(0 0 55px #f59e0b) brightness(1.35); }
+      60% { transform: scale(0.96); filter: drop-shadow(0 0 22px #f59e0b) brightness(1.15); }
+      100% { transform: scale(1); filter: drop-shadow(0 0 0px transparent); }
+    }
+
+    .bomb-explosion-burst {
+      animation: bombExplosionBurst 0.85s ease-out;
+      transform-origin: 120px 146px;
     }
 
     body.theme-light .donut-track {
@@ -602,28 +662,131 @@
           </button>
         </div>
 
-        <!-- 중앙 대형 원형 도넛 게이지 (시원하고 균형 잡힌 비주얼) -->
-        <div class="relative my-1.5 sm:my-2.5 flex items-center justify-center w-36 h-36 sm:w-44 sm:h-44 md:w-46 md:h-46 select-none">
-          <svg class="w-full h-full donut-gauge" viewBox="0 0 240 240">
-            <!-- 배경 트랙 원 -->
-            <circle cx="120" cy="120" r="100" class="donut-track stroke-slate-200 dark:stroke-slate-800/90" stroke-width="14" fill="transparent" />
-            <!-- 진행도 원형 바 -->
-            <circle id="donutGaugeCircle" cx="120" cy="120" r="100" class="donut-circle stroke-indigo-500" stroke-width="14" 
-                    stroke-linecap="round" fill="transparent" stroke-dasharray="628.3" stroke-dashoffset="0" />
+        <!-- 중앙: 정밀 벡터 폭탄 & 타들어가는 도화선 타이머 (Bomb & Burning Fuse Timer) -->
+        <div id="bombTimerContainer" class="relative my-1 sm:my-1.5 flex items-center justify-center w-40 h-40 sm:w-48 sm:h-48 md:w-52 md:h-52 select-none">
+          <svg id="bombTimerSvg" class="w-full h-full overflow-visible" viewBox="0 0 240 240">
+            <defs>
+              <!-- 입체 방사형 그라디언트 (구형 폭탄 본체 3D 질감) -->
+              <radialGradient id="bombBodyGrad" cx="35%" cy="30%" r="70%" fx="30%" fy="25%">
+                <stop offset="0%" stop-color="#475569" />
+                <stop offset="25%" stop-color="#334155" />
+                <stop offset="55%" stop-color="#1e293b" />
+                <stop offset="85%" stop-color="#0f172a" />
+                <stop offset="100%" stop-color="#020617" />
+              </radialGradient>
+
+              <!-- 폭탄 상단 광택 하이라이트 (Glossy Highlight) -->
+              <radialGradient id="bombHighlightGrad" cx="30%" cy="25%" r="50%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.65" />
+                <stop offset="45%" stop-color="#ffffff" stop-opacity="0.15" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+              </radialGradient>
+
+              <!-- 폭탄 하단 반사광 (Ambient Rim Light) -->
+              <radialGradient id="bombRimLight" cx="50%" cy="90%" r="50%">
+                <stop offset="0%" stop-color="#6366f1" stop-opacity="0.35" />
+                <stop offset="100%" stop-color="#6366f1" stop-opacity="0" />
+              </radialGradient>
+
+              <!-- 금속 노즐/칼라 그라디언트 -->
+              <linearGradient id="bombNozzleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#64748b" />
+                <stop offset="35%" stop-color="#94a3b8" />
+                <stop offset="70%" stop-color="#475569" />
+                <stop offset="100%" stop-color="#1e293b" />
+              </linearGradient>
+
+              <!-- 타들어가는 도화선 로프 질감 그라디언트 -->
+              <linearGradient id="fuseRopeGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#78350f" />
+                <stop offset="30%" stop-color="#b45309" />
+                <stop offset="70%" stop-color="#d97706" />
+                <stop offset="100%" stop-color="#f59e0b" />
+              </linearGradient>
+
+              <!-- 불꽃 스파크 방사형 빛 번짐 (Glow) -->
+              <radialGradient id="sparkGlowGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#ffffff" />
+                <stop offset="25%" stop-color="#fef08a" />
+                <stop offset="55%" stop-color="#f59e0b" stop-opacity="0.8" />
+                <stop offset="85%" stop-color="#ef4444" stop-opacity="0.4" />
+                <stop offset="100%" stop-color="#ef4444" stop-opacity="0" />
+              </radialGradient>
+
+              <!-- 폭탄 섀도우 필터 -->
+              <filter id="bombShadowFilter" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.45" />
+              </filter>
+            </defs>
+
+            <!-- 1. 타들어가는 도화선 트랙 (전체 경로 가이드/재 가루 잔상) -->
+            <path id="fuseTrackPath"
+                  d="M 120 72 C 120 44, 146 25, 172 34 C 194 42, 212 32, 202 14"
+                  fill="none"
+                  stroke="rgba(148, 163, 184, 0.25)"
+                  stroke-width="5"
+                  stroke-linecap="round"
+                  stroke-dasharray="3 4" />
+
+            <!-- 2. 실시간으로 타들어가는 활성 도화선 (Burning Fuse) -->
+            <path id="fuseActivePath"
+                  d="M 120 72 C 120 44, 146 25, 172 34 C 194 42, 212 32, 202 14"
+                  fill="none"
+                  stroke="url(#fuseRopeGrad)"
+                  stroke-width="5.5"
+                  stroke-linecap="round"
+                  class="transition-all duration-300" />
+
+            <!-- 3. 도화선 끝 불꽃 스파크 & 빛 번짐 애니메이션 (Flickering Flame Spark) -->
+            <g id="fuseFlameSpark" class="fuse-flame-group" transform="translate(202, 14)">
+              <!-- 외부 빛 번짐 (Glow Aura) -->
+              <circle cx="0" cy="0" r="14" fill="url(#sparkGlowGrad)" class="animate-pulse" />
+              <!-- 이중 별빛 불꽃 (Outer Star Spark) -->
+              <path d="M 0 -9 Q 2 -2 9 0 Q 2 2 0 9 Q -2 2 -9 0 Q -2 -2 0 -9 Z" fill="#f59e0b" class="fuse-star-outer" />
+              <!-- 내부 코어 불꽃 (Inner Core Spark) -->
+              <path d="M 0 -5 Q 1 -1 5 0 Q 1 1 0 5 Q -1 1 -5 0 Q -1 -1 0 -5 Z" fill="#ffffff" class="fuse-star-inner" />
+              <!-- 깜빡이는 스파크 파편들 -->
+              <circle cx="6" cy="-6" r="1.5" fill="#fde047" class="spark-dot spark-dot-1" />
+              <circle cx="-5" cy="-7" r="1.2" fill="#ef4444" class="spark-dot spark-dot-2" />
+              <circle cx="7" cy="4" r="1" fill="#fb923c" class="spark-dot spark-dot-3" />
+            </g>
+
+            <!-- 4. 폭탄 본체 그룹 (1분 전 틱-톡 흔들림 제어 대상) -->
+            <g id="bombSvgGroup" class="transition-transform origin-[120px_146px]">
+              <!-- 폭탄 금속 노즐/칼라 (Collar & Rim) -->
+              <rect x="108" y="70" width="24" height="12" rx="3" fill="url(#bombNozzleGrad)" stroke="#334155" stroke-width="1.2" />
+              <ellipse cx="120" cy="70" rx="13" ry="4" fill="#64748b" stroke="#1e293b" stroke-width="1" />
+              <!-- 도화선 진입 홀 (Dark Hole) -->
+              <ellipse cx="120" cy="70" rx="4.5" ry="2" fill="#020617" />
+
+              <!-- 클래식 구형 폭탄 본체 (Spherical Bomb Body) -->
+              <circle cx="120" cy="146" r="64" fill="url(#bombBodyGrad)" filter="url(#bombShadowFilter)" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5" />
+
+              <!-- 하단 은은한 앰비언트 반사광 -->
+              <circle cx="120" cy="146" r="62" fill="url(#bombRimLight)" />
+
+              <!-- 상단 입체 하이라이트 광택 (3D Glossy Specular Highlight) -->
+              <ellipse cx="98" cy="116" rx="30" ry="16" transform="rotate(-35 98 116)" fill="url(#bombHighlightGrad)" />
+            </g>
           </svg>
 
-          <!-- 게이지 내부 텍스트 (테마 반응형: 라이트 딥 차콜 #0f172a, 다크 백색 #ffffff) -->
-          <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <span class="timer-label-sub text-xs sm:text-sm uppercase tracking-widest text-slate-900 dark:text-slate-100 font-black mb-0.5">남은 쉬는 시간</span>
-            <div class="flex items-baseline font-mono tracking-tighter">
-              <span id="timerDisplayMinutes" class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white drop-shadow-sm">10</span>
-              <span class="timer-colon text-3xl sm:text-4xl font-black text-indigo-600 dark:text-indigo-400 mx-0.5">:</span>
-              <span id="timerDisplaySeconds" class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white drop-shadow-sm">00</span>
-            </div>
-            <!-- 하단 진행율 퍼센트 -->
-            <span id="timerPercentText" class="mt-1 text-[10px] sm:text-[11px] font-black text-indigo-900 dark:text-indigo-200 bg-indigo-100 dark:bg-indigo-950/80 px-2.5 py-0.5 rounded-full border border-indigo-300 dark:border-indigo-500/40 shadow-xs">
-              100% 잔여
+          <!-- 폭탄 중앙 텍스트 & 남은 시간 / 퍼센트 오버레이 (선명 폰트) -->
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none select-none pt-8 sm:pt-9">
+            <span class="text-[10px] sm:text-[11px] uppercase tracking-widest text-slate-300 font-extrabold drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-0.5">
+              남은 쉬는 시간
             </span>
+            <!-- 디지털 카운트다운 타이머 -->
+            <div class="flex items-baseline font-mono tracking-tighter drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+              <span id="timerDisplayMinutes" class="text-3xl sm:text-4xl lg:text-5xl font-black text-white">10</span>
+              <span class="timer-colon text-2xl sm:text-3xl lg:text-4xl font-black text-amber-400 mx-0.5 animate-pulse">:</span>
+              <span id="timerDisplaySeconds" class="text-3xl sm:text-4xl lg:text-5xl font-black text-white">00</span>
+            </div>
+            <!-- 폭탄 중앙 잔여 퍼센트 배지 (사용자 요청: 97% 남음 선명 폰트) -->
+            <div class="mt-1 flex items-center justify-center">
+              <span id="timerPercentText" class="text-[10px] sm:text-[11px] font-black text-amber-300 bg-black/60 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-amber-400/50 shadow-sm">
+                100% 남음
+              </span>
+            </div>
           </div>
         </div>
 
@@ -2642,8 +2805,12 @@
       currentDateText: document.getElementById('currentDateText'),
       currentAmPm: document.getElementById('currentAmPm'),
 
-      // 타이머
+      // 타이머 & 폭탄 도화선
       timerCard: document.getElementById('timerCard'),
+      bombTimerContainer: document.getElementById('bombTimerContainer'),
+      bombSvgGroup: document.getElementById('bombSvgGroup'),
+      fuseActivePath: document.getElementById('fuseActivePath'),
+      fuseFlameSpark: document.getElementById('fuseFlameSpark'),
       donutCircle: document.getElementById('donutGaugeCircle'),
       timerMinutes: document.getElementById('timerDisplayMinutes'),
       timerSeconds: document.getElementById('timerDisplaySeconds'),
@@ -2862,36 +3029,86 @@
       dom.clockSeconds.textContent = `:${ss}`;
     }
 
-    // 도넛 게이지 원 둘레 계산 (r=100 -> 2 * PI * 100 ≈ 628.318)
-    const CIRCLE_CIRCUMFERENCE = 628.318;
-
+    // 도화선 & 폭탄 타이머 표시 업데이트
     function updateTimerDisplay() {
       const mins = Math.floor(state.remainingSeconds / 60);
       const secs = state.remainingSeconds % 60;
 
-      dom.timerMinutes.textContent = String(mins).padStart(2, '0');
-      dom.timerSeconds.textContent = String(secs).padStart(2, '0');
+      if (dom.timerMinutes) dom.timerMinutes.textContent = String(mins).padStart(2, '0');
+      if (dom.timerSeconds) dom.timerSeconds.textContent = String(secs).padStart(2, '0');
 
-      // 진행율 계산
+      // 진행율 계산 (0.0 ~ 1.0)
       const percent = state.totalSeconds > 0 ? (state.remainingSeconds / state.totalSeconds) : 0;
-      const offset = CIRCLE_CIRCUMFERENCE * (1 - percent);
-      dom.donutCircle.style.strokeDashoffset = offset;
-      dom.linearProgressBar.style.width = `${Math.round(percent * 100)}%`;
-      dom.timerPercentText.textContent = `${Math.round(percent * 100)}% 잔여`;
-
-      // 게이지 색상 동적 변경 (30% 미만: 앰버, 10% 미만: 로즈)
-      if (percent <= 0.15) {
-        dom.donutCircle.classList.remove('stroke-indigo-500', 'stroke-amber-400');
-        dom.donutCircle.classList.add('stroke-rose-500');
-      } else if (percent <= 0.35) {
-        dom.donutCircle.classList.remove('stroke-indigo-500', 'stroke-rose-500');
-        dom.donutCircle.classList.add('stroke-amber-400');
-      } else {
-        dom.donutCircle.classList.remove('stroke-amber-400', 'stroke-rose-500');
-        dom.donutCircle.classList.add('stroke-indigo-500');
+      
+      if (dom.linearProgressBar) {
+        dom.linearProgressBar.style.width = `${Math.round(percent * 100)}%`;
+      }
+      if (dom.timerPercentText) {
+        dom.timerPercentText.textContent = `${Math.round(percent * 100)}% 남음`;
       }
 
-      // 1분 전(60초) 착석 경고 로직
+      // 💣 타들어가는 도화선 (Burning Fuse) & 불꽃 스파크 (Flickering Flame Spark) 연동
+      if (dom.fuseActivePath) {
+        if (!dom.fuseActivePath._cachedLength) {
+          try {
+            const len = dom.fuseActivePath.getTotalLength();
+            if (len && len > 0) dom.fuseActivePath._cachedLength = len;
+          } catch (e) {
+            dom.fuseActivePath._cachedLength = 125;
+          }
+        }
+        const totalLen = dom.fuseActivePath._cachedLength || 125;
+        const activeLen = Math.max(0, Math.min(totalLen, totalLen * percent));
+
+        // 도화선 잔여 길이 그리기 (120,72 노즐부터 타들어간 지점까지 연결 유지)
+        dom.fuseActivePath.style.strokeDasharray = `${activeLen} ${totalLen + 20}`;
+
+        // 불꽃 스파크 위치 이동 (도화선 끝단 좌표 추적)
+        if (dom.fuseFlameSpark) {
+          if (state.remainingSeconds <= 0) {
+            dom.fuseFlameSpark.setAttribute('transform', 'translate(120, 72)');
+            dom.fuseFlameSpark.style.opacity = '0';
+          } else {
+            dom.fuseFlameSpark.style.opacity = '1';
+            try {
+              const pt = dom.fuseActivePath.getPointAtLength(activeLen);
+              if (pt && typeof pt.x === 'number' && typeof pt.y === 'number') {
+                dom.fuseFlameSpark.setAttribute('transform', `translate(${pt.x.toFixed(2)}, ${pt.y.toFixed(2)})`);
+              }
+            } catch (e) {
+              dom.fuseFlameSpark.setAttribute('transform', 'translate(202, 14)');
+            }
+          }
+        }
+      }
+
+      // 💣 1분 전(60초 이하) 긴장감 틱-톡 흔들림 및 앰버 글로우 연출
+      if (dom.bombSvgGroup) {
+        if (state.remainingSeconds <= 60 && state.remainingSeconds > 0 && state.isRunning) {
+          dom.bombSvgGroup.classList.add('bomb-ticking-urgent', 'bomb-glow-urgent');
+        } else {
+          dom.bombSvgGroup.classList.remove('bomb-ticking-urgent', 'bomb-glow-urgent');
+        }
+      }
+
+      // 레거시 도넛 게이지 호환 처리
+      if (dom.donutCircle) {
+        const CIRCLE_CIRCUMFERENCE = 628.318;
+        const offset = CIRCLE_CIRCUMFERENCE * (1 - percent);
+        dom.donutCircle.style.strokeDashoffset = offset;
+        if (percent <= 0.15) {
+          dom.donutCircle.classList.remove('stroke-indigo-500', 'stroke-amber-400');
+          dom.donutCircle.classList.add('stroke-rose-500');
+        } else if (percent <= 0.35) {
+          dom.donutCircle.classList.remove('stroke-indigo-500', 'stroke-rose-500');
+          dom.donutCircle.classList.add('stroke-amber-400');
+        } else {
+          dom.donutCircle.classList.remove('stroke-amber-400', 'stroke-rose-500');
+          dom.donutCircle.classList.add('stroke-indigo-500');
+        }
+      }
+
+      // 1분 전(60초) 착석 경고 음향 및 배지 로직
       if (state.remainingSeconds === 60 && !state.warningFired && state.isRunning) {
         state.warningFired = true;
         if (state.warningEnabled) {
@@ -2903,21 +3120,31 @@
       }
 
       // 종료 예정 시각 업데이트
-      const targetDate = new Date(Date.now() + state.remainingSeconds * 1000);
-      const thh = String(targetDate.getHours()).padStart(2, '0');
-      const tmm = String(targetDate.getMinutes()).padStart(2, '0');
-      dom.timerTargetTimeText.textContent = `${thh}:${tmm}`;
+      if (dom.timerTargetTimeText) {
+        const targetDate = new Date(Date.now() + state.remainingSeconds * 1000);
+        const thh = String(targetDate.getHours()).padStart(2, '0');
+        const tmm = String(targetDate.getMinutes()).padStart(2, '0');
+        dom.timerTargetTimeText.textContent = `${thh}:${tmm}`;
+      }
     }
 
     function show1MinWarning(show) {
       if (show) {
-        dom.warningBadge.classList.remove('hidden');
-        dom.warningBadge.classList.add('flex');
-        dom.timerCard.classList.add('amber-warning-border');
+        if (dom.warningBadge) {
+          dom.warningBadge.classList.remove('hidden');
+          dom.warningBadge.classList.add('flex');
+        }
+        if (dom.timerCard) {
+          dom.timerCard.classList.add('amber-warning-border');
+        }
       } else {
-        dom.warningBadge.classList.add('hidden');
-        dom.warningBadge.classList.remove('flex');
-        dom.timerCard.classList.remove('amber-warning-border');
+        if (dom.warningBadge) {
+          dom.warningBadge.classList.add('hidden');
+          dom.warningBadge.classList.remove('flex');
+        }
+        if (dom.timerCard) {
+          dom.timerCard.classList.remove('amber-warning-border');
+        }
       }
     }
 
@@ -2944,6 +3171,18 @@
           dom.timerStatusLabel.className = 'text-xs sm:text-sm font-bold tracking-wider text-rose-400 uppercase animate-pulse';
           show1MinWarning(false);
 
+          // 폭탄 틱톡 흔들림 해제 및 폭발 버스트 연출
+          if (dom.bombSvgGroup) {
+            dom.bombSvgGroup.classList.remove('bomb-ticking-urgent', 'bomb-glow-urgent');
+            dom.bombSvgGroup.classList.add('bomb-explosion-burst');
+            setTimeout(() => {
+              if (dom.bombSvgGroup) dom.bombSvgGroup.classList.remove('bomb-explosion-burst');
+            }, 1000);
+          }
+          if (dom.fuseFlameSpark) {
+            dom.fuseFlameSpark.style.opacity = '0';
+          }
+
           // 설정된 알람 종소리 시퀀스 재생 (기본 3회 또는 설정된 횟수/해제시까지)
           startAlarmSequence(false);
         }
@@ -2958,6 +3197,9 @@
       dom.playText.textContent = '계속';
       dom.timerStatusLabel.textContent = '일시정지됨';
       dom.timerStatusLabel.className = 'text-xs sm:text-sm font-bold tracking-wider text-amber-300 uppercase';
+      if (dom.bombSvgGroup) {
+        dom.bombSvgGroup.classList.remove('bomb-ticking-urgent', 'bomb-glow-urgent');
+      }
     }
 
     function togglePlay() {
@@ -2982,6 +3224,12 @@
       state.remainingSeconds = state.totalSeconds;
       state.warningFired = false;
       show1MinWarning(false);
+      if (dom.bombSvgGroup) {
+        dom.bombSvgGroup.classList.remove('bomb-ticking-urgent', 'bomb-glow-urgent', 'bomb-explosion-burst');
+      }
+      if (dom.fuseFlameSpark) {
+        dom.fuseFlameSpark.style.opacity = '1';
+      }
       updateTimerDisplay();
       dom.timerStatusLabel.textContent = '대기 중';
       dom.timerStatusLabel.className = 'text-xs sm:text-sm font-bold tracking-wider text-slate-400 uppercase';
@@ -2994,6 +3242,12 @@
       state.remainingSeconds = state.totalSeconds;
       state.warningFired = false;
       show1MinWarning(false);
+      if (dom.bombSvgGroup) {
+        dom.bombSvgGroup.classList.remove('bomb-ticking-urgent', 'bomb-glow-urgent', 'bomb-explosion-burst');
+      }
+      if (dom.fuseFlameSpark) {
+        dom.fuseFlameSpark.style.opacity = '1';
+      }
       updateTimerDisplay();
       startTimer();
     }
@@ -3004,6 +3258,9 @@
         state.totalSeconds = state.remainingSeconds;
       }
       state.warningFired = state.remainingSeconds <= 60;
+      if (dom.fuseFlameSpark && state.remainingSeconds > 0) {
+        dom.fuseFlameSpark.style.opacity = '1';
+      }
       updateTimerDisplay();
     }
 
