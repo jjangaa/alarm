@@ -54,7 +54,7 @@
     :root {
       /* 기본 라이트 테마: 은은하게 밝고 편안한 파스텔 글래스모피즘 */
       --card-rgb: 255, 255, 255;
-      --card-opacity: 0.82;
+      --card-opacity: 0.45;
       --card-border-rgb: 226, 232, 240;
       --card-border-opacity: 0.85;
       --card-shadow: 0 16px 36px rgba(15, 23, 42, 0.07);
@@ -68,12 +68,12 @@
       --text-heading: #0f172a;
       
       --dimmer-bg: 248, 250, 252;
-      --dimmer-opacity: 0.52;
+      --dimmer-opacity: 0.15;
     }
 
     body.theme-light {
       --card-rgb: 255, 255, 255;
-      --card-opacity: 0.82;
+      --card-opacity: 0.45;
       --card-border-rgb: 226, 232, 240;
       --card-border-opacity: 0.85;
       --card-shadow: 0 16px 36px rgba(15, 23, 42, 0.07);
@@ -87,14 +87,14 @@
       --text-heading: #0f172a;
 
       --dimmer-bg: 248, 250, 252;
-      --dimmer-opacity: 0.52;
+      --dimmer-opacity: 0.15;
       color: #1e293b;
     }
 
     body.theme-dark {
       /* 다크 테마: 차분하고 몰입감 넘치는 다크 글래스모피즘 */
       --card-rgb: 15, 23, 42;
-      --card-opacity: 0.75;
+      --card-opacity: 0.55;
       --card-border-rgb: 255, 255, 255;
       --card-border-opacity: 0.12;
       --card-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
@@ -108,7 +108,7 @@
       --text-heading: #ffffff;
       
       --dimmer-bg: 3, 7, 18;
-      --dimmer-opacity: 0.72;
+      --dimmer-opacity: 0.35;
       color: #f8fafc;
     }
 
@@ -176,8 +176,8 @@
     /* Glassmorphism 효과 */
     .glass-card {
       background: rgba(var(--card-rgb), var(--card-opacity));
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border: 1px solid rgba(var(--card-border-rgb), var(--card-border-opacity));
       box-shadow: var(--card-shadow);
       color: var(--text-main);
@@ -274,15 +274,15 @@
 
   <!-- 동적 배경 레이어 & 딤머 오버레이 -->
   <div id="bgLayer" class="absolute inset-0 bg-cover bg-center transition-all duration-700 -z-20 scale-105" 
-       style="background-image: url('https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=2560&auto=format&fit=crop');"></div>
+       style="background-image: url('https://i.imgur.com/VXI1sTq.jpeg');"></div>
   <div id="bgDimmer" class="absolute inset-0 transition-opacity duration-300 -z-10" style="background-color: rgb(var(--dimmer-bg)); opacity: var(--dimmer-opacity);"></div>
 
   <!-- 최상단 헤더 바 (명언 / 모바일 QR / 전체화면 / 설정 바로가기) -->
   <header class="w-full px-6 pt-4 pb-2 flex items-center justify-between z-10 gap-4">
     <!-- 좌측 브랜드 로고 & 소음 신호등 미니 인디케이터 -->
-    <div class="flex items-center gap-3">
-      <!-- 짱아(Zzang_AA) 시그니처 로고 & 브랜드 뱃지 -->
-      <div id="brandBadge" class="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-900/85 border border-slate-700/70 shadow-lg group hover:border-indigo-400/50 transition cursor-pointer" title="Zzang_AA 시그니처 로고 (스마트 교실 디스플레이)">
+    <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+      <!-- 짱아(Zzang_AA) 시그니처 로고 & 브랜드 뱃지 (v1.3) -->
+      <div id="brandBadge" class="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-900/85 border border-slate-700/70 shadow-lg group hover:border-indigo-400/50 transition cursor-pointer" title="Zzang_AA 시그니처 로고 (스마트 교실 디스플레이 v1.3)">
         <div class="h-6 flex items-center justify-center overflow-hidden py-0.5">
           <img id="zzangSignatureLogo" 
                src="https://i.imgur.com/gJEMRHe.jpeg" 
@@ -291,6 +291,7 @@
                onerror="this.onerror=null; this.src='https://imgur.com/gJEMRHe.jpeg';" />
         </div>
         <span class="font-bold text-sm tracking-wide bg-gradient-to-r from-indigo-300 via-white to-sky-300 bg-clip-text text-transparent group-hover:text-white transition">스마트 교실 디스플레이</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-400 dark:text-indigo-300 border border-indigo-500/30 font-mono font-bold">v1.3</span>
       </div>
 
       <!-- 소음 측정 신호등 뱃지 -->
@@ -298,6 +299,12 @@
         <span id="noiseLightDot" class="w-3 h-3 rounded-full bg-slate-500 shadow-sm"></span>
         <span id="noiseText" class="text-xs font-semibold text-slate-300">소음계 OFF</span>
         <span id="noiseDbValue" class="text-xs text-slate-400 font-mono hidden">-- dB</span>
+      </button>
+
+      <!-- 쉿 경고음 ON/OFF 독립 제어 토글 (상단 제어 바) -->
+      <button id="btnToggleShhSound" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/60 transition shadow-lg cursor-pointer text-xs font-semibold text-indigo-300" title="75dB 초과 시 '쉿!' 경고 효과음 켜기/끄기 (자율학습 및 시험 시 무음 가능)">
+        <span id="headerShhIcon">🔔</span>
+        <span id="headerShhText">쉿 소리 ON</span>
       </button>
 
       <!-- 백색소음 앰비언트 버튼 -->
@@ -354,10 +361,10 @@
   </header>
 
   <!-- 메인 1 : 2 비대칭 분할 레이아웃 (좌측 시계&타이머 1 : 우측 미디어센터 2) -->
-  <main class="flex-1 w-full max-w-7xl mx-auto px-4 md:px-6 py-2 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch justify-center">
+  <main class="flex-1 w-full max-w-[1700px] mx-auto px-4 md:px-6 py-2 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch justify-center">
 
-    <!-- 좌측 영역: 시계(상단) + 알람 타이머(하단) 수직 스택 (1 / 3 = lg:col-span-4) -->
-    <div class="lg:col-span-4 flex flex-col gap-4">
+    <!-- 좌측 영역: 시계(상단) + 알람 타이머(하단) 수직 스택 (col-span-12 lg:col-span-4 xl:col-span-3) -->
+    <div class="col-span-12 lg:col-span-4 xl:col-span-3 flex flex-col gap-4">
       
       <!-- 1) 실시간 디지털 표준시 시계 카드 (상단) -->
       <section class="glass-card rounded-3xl p-5 flex flex-col justify-center relative overflow-hidden transition-all duration-300 shadow-xl">
@@ -393,6 +400,20 @@
             <span>종료:</span>
             <span id="timerTargetTimeText" class="font-mono font-bold text-white">--:--</span>
           </div>
+        </div>
+
+        <!-- 알람 울림 중 해제 배너 (울림 시 동적 등장) -->
+        <div id="alarmRingingBanner" class="hidden w-full my-2 p-2.5 rounded-2xl bg-rose-600/95 border border-rose-400 text-white items-center justify-between shadow-xl shadow-rose-900/50 animate-bounce z-20">
+          <div class="flex items-center gap-2">
+            <span class="text-xl animate-spin">🔔</span>
+            <div class="text-left">
+              <div class="text-xs font-black tracking-wide">쉬는 시간 종료! 수업 시작</div>
+              <div id="alarmRepeatStatusText" class="text-[11px] text-rose-100 font-semibold">종료음 울림 중 (1/3회)</div>
+            </div>
+          </div>
+          <button id="btnDismissAlarm" type="button" class="px-3 py-1.5 bg-white hover:bg-rose-100 active:scale-95 text-rose-700 font-black text-xs rounded-xl shadow transition cursor-pointer flex items-center gap-1">
+            <span>🔕</span><span>알람 끄기 (Space)</span>
+          </button>
         </div>
 
         <!-- 중앙 대형 원형 도넛 게이지 -->
@@ -453,16 +474,16 @@
 
     </div>
 
-    <!-- 우측 영역: 대화면 수업 미디어 센터 (2 / 3 = lg:col-span-8) -->
-    <section id="mediaCenterCard" class="lg:col-span-8 glass-card rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-300 shadow-2xl">
+    <!-- 우측 영역: 대화면 수업 미디어 센터 (col-span-12 lg:col-span-8 xl:col-span-9) -->
+    <section id="mediaCenterCard" class="col-span-12 lg:col-span-8 xl:col-span-9 glass-card rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-300 shadow-2xl">
       
       <!-- 미디어 탭 네비게이션 헤더 -->
       <div class="flex items-center justify-between mb-3 border-b border-white/10 pb-3">
         <div class="flex items-center gap-2 overflow-x-auto text-xs sm:text-sm font-semibold">
-          <button id="tabBtnNotice" class="media-tab-btn active px-4 py-2 rounded-xl bg-indigo-600 text-white shadow-md transition flex items-center gap-1.5 whitespace-nowrap">
+          <button id="tabBtnNotice" class="media-tab-btn px-4 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
             <span>📝</span><span>수업 안내문</span>
           </button>
-          <button id="tabBtnImage" class="media-tab-btn px-4 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
+          <button id="tabBtnImage" class="media-tab-btn active px-4 py-2 rounded-xl bg-indigo-600 text-white shadow-md transition flex items-center gap-1.5 whitespace-nowrap">
             <span>🖼️</span><span>수업 이미지</span>
           </button>
           <button id="tabBtnVideo" class="media-tab-btn px-4 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
@@ -470,6 +491,9 @@
           </button>
           <button id="tabBtnStretch" class="media-tab-btn px-4 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
             <span>🧘</span><span>1분 스트레칭</span>
+          </button>
+          <button id="tabBtnBouncy" class="media-tab-btn px-4 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
+            <span>🎾</span><span>바운시 소음계</span>
           </button>
         </div>
         <!-- 우측 배지 표시 -->
@@ -480,7 +504,7 @@
       <div class="flex-1 flex flex-col min-h-[440px] overflow-hidden">
         
         <!-- 탭 1: 수업 안내문 & 인터랙티브 체크리스트 -->
-        <div id="tabContentNotice" class="flex-1 flex flex-col justify-between overflow-y-auto pr-2">
+        <div id="tabContentNotice" class="hidden flex-1 flex-col justify-between overflow-y-auto pr-2">
           <div>
             <div class="flex items-center justify-between mb-2">
               <span class="sm:hidden text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 font-bold">다음 수업 안내</span>
@@ -518,15 +542,15 @@
           </div>
         </div>
 
-        <!-- 탭 2: 대화면 수업 이미지 디스플레이 -->
-        <div id="tabContentImage" class="hidden flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl bg-black/30 border border-white/10 p-3 relative group">
+        <!-- 탭 2: 대화면 수업 이미지 디스플레이 (기본 홈 화면) -->
+        <div id="tabContentImage" class="flex flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl bg-black/30 border border-white/10 p-3 relative group">
           <img id="displayClassImage" 
-               src="https://i.imgur.com/CGbcRRW.jpeg" 
+               src="https://i.imgur.com/gEGX67K.jpeg" 
                alt="수업 준비 이미지" 
                class="w-full h-full max-h-[460px] object-contain rounded-xl shadow-lg transition duration-300"
-               onerror="this.onerror=null; this.src='https://imgur.com/CGbcRRW.jpeg';" />
+               onerror="this.onerror=null; this.src='https://imgur.com/gEGX67K.jpeg';" />
           <div id="displayImageCaption" class="absolute bottom-4 left-4 right-4 bg-slate-900/85 backdrop-blur-md px-4 py-2 rounded-xl text-xs sm:text-sm text-center font-medium text-slate-200 border border-white/10 shadow-lg">
-            기본 수업 안내 이미지 (Zzang_AA 스마트 교실)
+            고래_자존심보다 자존감
           </div>
         </div>
 
@@ -572,6 +596,64 @@
             <button class="stretch-step-btn active p-2.5 rounded-xl bg-indigo-900/60 border border-indigo-500/50 text-indigo-200 font-semibold text-center" data-step="1">1. 깍지 기지개</button>
             <button class="stretch-step-btn p-2.5 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-400 font-semibold text-center" data-step="2">2. 먼 곳 응시</button>
             <button class="stretch-step-btn p-2.5 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-400 font-semibold text-center" data-step="3">3. 부드러운 목 회전</button>
+          </div>
+        </div>
+
+        <!-- 탭 5: 물리 엔진 기반 바운시(Bouncy Balls) 소음측정기 -->
+        <div id="tabContentBouncy" class="hidden flex-1 flex-col justify-between overflow-hidden rounded-2xl bg-slate-950/60 border border-white/10 p-3 relative">
+          <!-- 상단 제어 툴바 -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-white/10 z-10">
+            <!-- 좌측: 실시간 dB 및 상태 배지 -->
+            <div class="flex items-center gap-2.5">
+              <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" id="bouncyStatusDot"></span>
+                <span>교실 소음 물리 시뮬레이터</span>
+              </span>
+              <span id="bouncyDbBadge" class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-xs font-mono font-bold">
+                -- dB
+              </span>
+            </div>
+
+            <!-- 중앙: 공 테마 선택기 (컬러 / 이모지 / 버블) -->
+            <div class="flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800 text-xs">
+              <button id="themeBtnColor" class="bouncy-theme-btn active px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-semibold transition cursor-pointer" data-theme="color">🎨 컬러볼</button>
+              <button id="themeBtnEmoji" class="bouncy-theme-btn px-2.5 py-1 rounded-lg hover:bg-white/10 text-slate-300 font-semibold transition cursor-pointer" data-theme="emoji">😀 이모지</button>
+              <button id="themeBtnBubble" class="bouncy-theme-btn px-2.5 py-1 rounded-lg hover:bg-white/10 text-slate-300 font-semibold transition cursor-pointer" data-theme="bubble">🫧 비눗방울</button>
+            </div>
+
+            <!-- 우측 도구: 감도 조절 & 쉿 경고음 토글 & 마이크 버튼 -->
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="flex items-center gap-1.5 bg-slate-900/80 px-2.5 py-1 rounded-xl border border-slate-800 text-xs text-slate-300">
+                <span class="text-[11px] text-slate-400">감도:</span>
+                <input id="sliderBouncySensitivity" type="range" min="0.5" max="3.0" step="0.1" value="1.5" class="w-16 sm:w-20 accent-indigo-500 cursor-pointer" />
+                <span id="labelBouncySensitivity" class="text-[11px] font-mono text-indigo-300">1.5x</span>
+              </div>
+              <!-- 쉿 소리 ON/OFF 독립 버튼 -->
+              <button id="btnTabShhToggle" class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-400/40 text-indigo-200 text-xs font-bold transition cursor-pointer" title="75dB 초과 시 '쉿!' 경고 효과음 ON/OFF">
+                <span id="tabShhIcon">🔔</span>
+                <span id="tabShhText">쉿 소리 ON</span>
+              </button>
+              <!-- 마이크 ON/OFF -->
+              <button id="btnBouncyMicToggle" class="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow cursor-pointer">
+                마이크 시작
+              </button>
+            </div>
+          </div>
+
+          <!-- Canvas 2D 물리 엔진 시뮬레이션 영역 -->
+          <div class="flex-1 w-full h-full min-h-[340px] relative overflow-hidden my-1 rounded-xl">
+            <canvas id="bouncyCanvas" class="w-full h-full block rounded-xl"></canvas>
+
+            <!-- 75dB 초과 시 시각적 정숙 유도 팝업 (쉿! 조용히 해주세요) -->
+            <div id="shhAlertPopup" class="absolute inset-0 bg-rose-950/85 backdrop-blur-sm flex flex-col items-center justify-center transition-all duration-300 opacity-0 pointer-events-none z-30">
+              <div class="text-6xl sm:text-7xl mb-3 animate-bounce">🤫</div>
+              <h3 class="text-2xl sm:text-4xl font-black text-rose-300 drop-shadow-[0_0_20px_rgba(244,63,94,0.6)]">
+                쉿! 조용히 해주세요
+              </h3>
+              <p class="text-sm sm:text-base text-rose-200 font-medium mt-2 bg-rose-900/60 px-4 py-1 rounded-full border border-rose-500/40">
+                교실 소음이 75dB을 초과했습니다. 목소리를 조금만 낮춰주세요!
+              </p>
+            </div>
           </div>
         </div>
 
@@ -629,6 +711,15 @@
     </div>
   </footer>
 
+  <!-- 최하단 저작권 & 버전 정보 바닥글 (Footer Bar) -->
+  <footer id="appFooterBar" class="w-full text-center pb-2 pt-0 z-10 select-none transition-all duration-300">
+    <div class="inline-flex items-center justify-center gap-2 text-xs font-normal tracking-wide text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors">
+      <span>© 2026 <strong class="font-bold text-slate-700 dark:text-slate-200">Zzang_AA</strong> • All rights reserved.</span>
+      <span class="text-slate-400 dark:text-slate-600">•</span>
+      <span class="px-2 py-0.5 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 font-mono text-[11px] font-bold border border-indigo-400/25 shadow-sm">v1.3</span>
+    </div>
+  </footer>
+
   <!-- ======================= 모달 창 영역 ======================= -->
 
   <!-- 1. 환경설정 모달 (Settings Modal) -->
@@ -642,7 +733,7 @@
             <img src="https://i.imgur.com/gJEMRHe.jpeg" alt="Zzang_AA Logo" class="h-5 w-auto zzang-logo-adaptive" onerror="this.onerror=null; this.src='https://imgur.com/gJEMRHe.jpeg';" />
           </div>
           <h2 class="text-xl font-bold text-white">디스플레이 및 수업 알람 설정</h2>
-          <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">Zzang_AA Edition</span>
+          <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">Zzang_AA Edition v1.3</span>
         </div>
         <button id="btnCloseSettings" class="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition">✕</button>
       </div>
@@ -718,7 +809,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs text-slate-300 mb-1">웹 이미지 URL 링크</label>
-                <input id="inputImageUrl" type="url" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs" placeholder="https://..." value="https://imgur.com/CGbcRRW.jpeg" />
+                <input id="inputImageUrl" type="url" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs" placeholder="https://..." value="https://imgur.com/gEGX67K.jpeg" />
               </div>
               <div>
                 <label class="block text-xs text-slate-300 mb-1">또는 PC 로컬 이미지 파일 업로드</label>
@@ -727,7 +818,7 @@
             </div>
             <div>
               <label class="block text-xs text-slate-300 mb-1">이미지 캡션 / 부연 설명</label>
-              <input id="inputImageCaption" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" value="기본 수업 안내 이미지 (Zzang_AA 스마트 교실)" />
+              <input id="inputImageCaption" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" value="고래_자존심보다 자존감" />
             </div>
           </div>
 
@@ -746,7 +837,7 @@
 
         <!-- 섹션 3: Web Audio 신디사이저 & 백색소음 -->
         <div id="sec-stAudio" class="settings-section hidden space-y-4">
-          <!-- 알람 벨소리 선택 -->
+          <!-- 알람 벨소리 및 반복 횟수 선택 -->
           <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
             <div class="flex items-center justify-between">
               <label class="font-bold text-white flex items-center gap-2">
@@ -764,6 +855,25 @@
               <option value="marimba">경쾌한 마림바 아르페지오</option>
               <option value="digitalBeep">디지털 시계 비프음</option>
             </select>
+
+            <!-- 종료 알람음 반복 횟수 설정 -->
+            <div class="pt-2 border-t border-white/10">
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                  <span>🔁</span><span>종료 알람음 반복 횟수</span>
+                </label>
+                <span class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-medium">기본: 3회 반복</span>
+              </div>
+              <select id="selectAlarmRepeat" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs">
+                <option value="1">1회 (한 번만 울림)</option>
+                <option value="3" selected>3회 반복 (기본 권장)</option>
+                <option value="5">5회 반복</option>
+                <option value="untilDismissed">해제시까지 계속 반복 (무한 반복)</option>
+              </select>
+              <p class="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                💡 알람이 울리는 중 화면의 <strong>[🔕 알람 끄기]</strong> 버튼이나 키보드 <strong>Space</strong>, <strong>Esc</strong>를 누르면 즉시 무음으로 멈춥니다.
+              </p>
+            </div>
           </div>
 
           <!-- 1분 전 예비령 및 앰버 펄스 설정 -->
@@ -828,10 +938,10 @@
               <span class="font-semibold flex items-center gap-1.5">
                 <span>🪟</span><span>카드 & 메뉴 스타일배경 투명도</span>
               </span>
-              <span id="labelCardOpacity" class="font-bold text-indigo-400">82%</span>
+              <span id="labelCardOpacity" class="font-bold text-indigo-400">45%</span>
             </div>
-            <input id="sliderCardOpacity" type="range" min="15" max="95" value="82" class="w-full accent-indigo-500" />
-            <p class="text-[11px] text-slate-400">💡 배경 사진이 은은하게 비치는 글래스모피즘 투명도를 15%(투명)부터 95%(선명)까지 조절합니다.</p>
+            <input id="sliderCardOpacity" type="range" min="0" max="95" value="45" class="w-full accent-indigo-500" />
+            <p class="text-[11px] text-slate-400">💡 배경 사진이 은은하게 비치는 글래스모피즘 투명도를 0%(완전 투명)부터 95%(선명)까지 자유롭게 조절합니다.</p>
           </div>
 
           <!-- 3) 배경 테마 선택 -->
@@ -840,8 +950,8 @@
               <span>🎨</span><span>배경화면 테마 프리셋</span>
             </h4>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <button class="preset-bg-btn p-2 rounded-xl bg-slate-800/80 hover:border-indigo-400 border border-slate-700 text-xs font-semibold text-slate-200 transition text-center" data-bg="https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=2560&auto=format&fit=crop">
-                🏫 따뜻한 교실
+              <button class="preset-bg-btn p-2 rounded-xl bg-slate-800/80 hover:border-indigo-400 border border-slate-700 text-xs font-semibold text-slate-200 transition text-center" data-bg="https://i.imgur.com/VXI1sTq.jpeg">
+                🏫 기본 교실 (Zzang_AA)
               </button>
               <button class="preset-bg-btn p-2 rounded-xl bg-slate-800/80 hover:border-indigo-400 border border-slate-700 text-xs font-semibold text-slate-200 transition text-center" data-bg="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=2560&auto=format&fit=crop">
                 📚 아늑한 도서관
@@ -864,9 +974,9 @@
             <div class="pt-2">
               <div class="flex items-center justify-between text-xs text-slate-300 mb-1">
                 <span>배경 틴트 / 어둡기 조절</span>
-                <span id="labelBgDimmer" class="font-bold text-indigo-300">52%</span>
+                <span id="labelBgDimmer" class="font-bold text-indigo-300">15%</span>
               </div>
-              <input id="sliderBgDimmer" type="range" min="10" max="95" value="52" class="w-full accent-indigo-500" />
+              <input id="sliderBgDimmer" type="range" min="0" max="85" value="15" class="w-full accent-indigo-500" />
             </div>
           </div>
 
@@ -962,6 +1072,7 @@
         this.ambientNode = null;
         this.ambientGain = null;
         this.isAmbientPlaying = false;
+        this.activeOscillators = [];
       }
 
       initContext() {
@@ -994,6 +1105,10 @@
         gain.connect(this.ctx.destination);
         osc.start(now);
         osc.stop(now + duration);
+        this.activeOscillators.push(osc);
+        osc.onended = () => {
+          this.activeOscillators = this.activeOscillators.filter(o => o !== osc);
+        };
 
         // 2. 청동 차임벨 2.76배 비화성 배음 (Overtone) 합성으로 맑은 금속성 잔향 생성
         if (isBronzeHarmonic) {
@@ -1010,6 +1125,33 @@
           overtoneGain.connect(this.ctx.destination);
           overtoneOsc.start(now);
           overtoneOsc.stop(now + duration * 0.7);
+          this.activeOscillators.push(overtoneOsc);
+          overtoneOsc.onended = () => {
+            this.activeOscillators = this.activeOscillators.filter(o => o !== overtoneOsc);
+          };
+        }
+      }
+
+      // 현재 연주 중인 모든 종소리/신디 음향 즉각 중단
+      stopAll() {
+        this.activeOscillators.forEach(osc => {
+          try {
+            osc.stop();
+            osc.disconnect();
+          } catch (e) {}
+        });
+        this.activeOscillators = [];
+      }
+
+      // 사운드별 총 지속시간(초) 계산
+      getSoundDuration(soundType) {
+        switch (soundType) {
+          case 'koreanSchoolBell': return 5.8;
+          case 'westminster': return 5.2;
+          case 'dingDong': return 2.6;
+          case 'marimba': return 1.6;
+          case 'digitalBeep': return 1.2;
+          default: return 5.8;
         }
       }
 
@@ -1092,60 +1234,19 @@
         this.playTone(987.77, t + 0.35, 1.5, true, 0.8); // B5
       }
 
-      // 백색소음 시작 (Rain / Breeze)
+      // 백색소음 위임 (NatureAmbientAudioEngine 연결)
       startAmbient(type = 'rain', volume = 0.4) {
-        this.initContext();
-        this.stopAmbient();
-
-        // 5초 화이트 노이즈 버퍼 생성 후 루핑
-        const bufferSize = this.ctx.sampleRate * 5;
-        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-        const output = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          output[i] = Math.random() * 2 - 1;
-        }
-
-        const whiteNoise = this.ctx.createBufferSource();
-        whiteNoise.buffer = noiseBuffer;
-        whiteNoise.loop = true;
-
-        const filter = this.ctx.createBiquadFilter();
-        if (type === 'rain') {
-          filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(900, this.ctx.currentTime);
-        } else {
-          filter.type = 'bandpass';
-          filter.frequency.setValueAtTime(450, this.ctx.currentTime);
-          filter.Q.setValueAtTime(1.8, this.ctx.currentTime);
-        }
-
-        this.ambientGain = this.ctx.createGain();
-        this.ambientGain.gain.setValueAtTime(volume * 0.4, this.ctx.currentTime);
-
-        whiteNoise.connect(filter);
-        filter.connect(this.ambientGain);
-        this.ambientGain.connect(this.ctx.destination);
-
-        whiteNoise.start();
-        this.ambientNode = whiteNoise;
+        natureEngine.start(type, volume);
         this.isAmbientPlaying = true;
       }
 
       stopAmbient() {
-        if (this.ambientNode) {
-          try {
-            this.ambientNode.stop();
-            this.ambientNode.disconnect();
-          } catch (e) {}
-          this.ambientNode = null;
-        }
+        natureEngine.stop();
         this.isAmbientPlaying = false;
       }
 
       setAmbientVolume(vol) {
-        if (this.ambientGain && this.ctx) {
-          this.ambientGain.gain.setValueAtTime(vol * 0.4, this.ctx.currentTime);
-        }
+        natureEngine.setVolume(vol);
       }
     }
 
@@ -1153,31 +1254,363 @@
 
 
     /* ==========================================================
-       2. 실시간 교실 소음 측정기 (Noise Traffic Light Meter)
+       1-B. 자연 앰비언스 사운드 엔진 (Nature Ambient Audio Engine)
+       - 빗소리: Low-Pass Filter (850Hz) + 랜덤 현실적 물방울(Plink) 글리산도
+       - 솔바람: 320Hz Band-Pass Filter + 0.18Hz LFO 바람결 유기적 변조
        ========================================================== */
-    class NoiseMeter {
+    class NatureAmbientAudioEngine {
       constructor() {
+        this.ctx = null;
+        this.isPlaying = false;
+        this.type = 'rain'; // 'rain' | 'breeze'
+        this.volume = 0.4;
+        this.noiseNode = null;
+        this.filterNode = null;
+        this.mainGainNode = null;
+        this.lfoOsc = null;
+        this.lfoGain = null;
+        this.plinkTimer = null;
+      }
+
+      initContext() {
+        if (!this.ctx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContextClass();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      start(type = 'rain', volume = 0.4) {
+        this.initContext();
+        this.stop();
+        this.type = type;
+        this.volume = volume;
+
+        const t = this.ctx.currentTime;
+        // 5초 화이트/핑크 노이즈 버퍼 생성 후 루핑
+        const bufferSize = this.ctx.sampleRate * 5;
+        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        let lastOut = 0.0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          data[i] = (lastOut + (0.025 * white)) / 1.025;
+          lastOut = data[i];
+          data[i] *= 3.8;
+        }
+
+        this.noiseNode = this.ctx.createBufferSource();
+        this.noiseNode.buffer = noiseBuffer;
+        this.noiseNode.loop = true;
+
+        this.filterNode = this.ctx.createBiquadFilter();
+        this.mainGainNode = this.ctx.createGain();
+        this.mainGainNode.gain.setValueAtTime(this.volume * 0.42, t);
+
+        if (type === 'rain') {
+          // 빗소리: 850Hz 로우패스 필터
+          this.filterNode.type = 'lowpass';
+          this.filterNode.frequency.setValueAtTime(850, t);
+          this.filterNode.Q.setValueAtTime(1.0, t);
+
+          this.noiseNode.connect(this.filterNode);
+          this.filterNode.connect(this.mainGainNode);
+          this.mainGainNode.connect(this.ctx.destination);
+          this.noiseNode.start(t);
+
+          // 물방울 '퐁당(Plink)' 스케줄링
+          this.scheduleDrops();
+        } else {
+          // 솔바람: 320Hz 밴드패스 필터 + 0.18Hz LFO 바람 파도
+          this.filterNode.type = 'bandpass';
+          this.filterNode.frequency.setValueAtTime(320, t);
+          this.filterNode.Q.setValueAtTime(2.2, t);
+
+          this.lfoOsc = this.ctx.createOscillator();
+          this.lfoOsc.type = 'sine';
+          this.lfoOsc.frequency.setValueAtTime(0.18, t);
+
+          this.lfoGain = this.ctx.createGain();
+          this.lfoGain.gain.setValueAtTime(140, t); // 320Hz ± 140Hz 변조
+
+          this.lfoOsc.connect(this.lfoGain);
+          this.lfoGain.connect(this.filterNode.frequency);
+          this.lfoOsc.start(t);
+
+          this.noiseNode.connect(this.filterNode);
+          this.filterNode.connect(this.mainGainNode);
+          this.mainGainNode.connect(this.ctx.destination);
+          this.noiseNode.start(t);
+        }
+
+        this.isPlaying = true;
+      }
+
+      scheduleDrops() {
+        if (!this.isPlaying || this.type !== 'rain') return;
+        const delay = 400 + Math.random() * 800;
+        this.plinkTimer = setTimeout(() => {
+          if (!this.isPlaying || this.type !== 'rain') return;
+          this.playSingleDrop();
+          this.scheduleDrops();
+        }, delay);
+      }
+
+      playSingleDrop() {
+        if (!this.ctx || this.ctx.state === 'suspended') return;
+        try {
+          const t = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const filter = this.ctx.createBiquadFilter();
+
+          const startFreq = 1400 + Math.random() * 600;
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(startFreq, t);
+          osc.frequency.exponentialRampToValueAtTime(750, t + 0.08);
+
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(startFreq, t);
+          filter.Q.setValueAtTime(4.0, t);
+
+          const dropVol = (this.volume * 0.14) * (0.6 + Math.random() * 0.4);
+          gain.gain.setValueAtTime(0.001, t);
+          gain.gain.linearRampToValueAtTime(dropVol, t + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(t);
+          osc.stop(t + 0.09);
+        } catch (e) {}
+      }
+
+      setVolume(vol) {
+        this.volume = vol;
+        if (this.mainGainNode && this.ctx) {
+          this.mainGainNode.gain.setValueAtTime(vol * 0.42, this.ctx.currentTime);
+        }
+      }
+
+      stop() {
+        if (this.plinkTimer) {
+          clearTimeout(this.plinkTimer);
+          this.plinkTimer = null;
+        }
+        if (this.lfoOsc) {
+          try { this.lfoOsc.stop(); this.lfoOsc.disconnect(); } catch (e) {}
+          this.lfoOsc = null;
+        }
+        if (this.noiseNode) {
+          try { this.noiseNode.stop(); this.noiseNode.disconnect(); } catch (e) {}
+          this.noiseNode = null;
+        }
+        this.isPlaying = false;
+      }
+    }
+
+    const natureEngine = new NatureAmbientAudioEngine();
+
+
+    /* ==========================================================
+       1-C. '쉿!' 정숙 유도 음성 합성기 (Shh Whisper Synthesizer)
+       - 2600Hz 밴드패스 필터(Q: 3.5) + 노이즈 버퍼 + 784Hz 차임 핑
+       - 독립 ON/OFF 제어 가능 (자율학습 및 시험 시 무음 지원)
+       ========================================================== */
+    class ShhWhisperSynthesizer {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+        this.lastPlayedTime = 0;
+      }
+
+      initContext() {
+        if (!this.ctx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContextClass();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      toggle() {
+        this.enabled = !this.enabled;
+        return this.enabled;
+      }
+
+      playShh() {
+        if (!this.enabled) return;
+        const now = Date.now();
+        if (now - this.lastPlayedTime < 2800) return; // 2.8초 쿨다운 중복 방지
+        this.lastPlayedTime = now;
+
+        this.initContext();
+        const t = this.ctx.currentTime;
+        const duration = 1.3;
+
+        // 1. '쉿~~~' (Shh~~) 숨소리 합성
+        const bufferSize = Math.floor(this.ctx.sampleRate * duration);
+        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * 0.75;
+        }
+
+        const noiseSrc = this.ctx.createBufferSource();
+        noiseSrc.buffer = noiseBuffer;
+
+        // 2600Hz 밴드패스 필터 (쉿 소리 공명)
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(2600, t);
+        filter.Q.setValueAtTime(3.5, t);
+
+        const gainNode = this.ctx.createGain();
+        gainNode.gain.setValueAtTime(0.001, t);
+        gainNode.gain.linearRampToValueAtTime(0.38, t + 0.12);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, t + duration);
+
+        noiseSrc.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.ctx.destination);
+
+        noiseSrc.start(t);
+        noiseSrc.stop(t + duration);
+
+        // 2. 다정하고 맑은 집중 차임벨 (784Hz - Sol음)
+        const chimeOsc = this.ctx.createOscillator();
+        const chimeGain = this.ctx.createGain();
+        chimeOsc.type = 'sine';
+        chimeOsc.frequency.setValueAtTime(783.99, t);
+        chimeGain.gain.setValueAtTime(0.001, t);
+        chimeGain.gain.linearRampToValueAtTime(0.12, t + 0.05);
+        chimeGain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+
+        chimeOsc.connect(chimeGain);
+        chimeGain.connect(this.ctx.destination);
+
+        chimeOsc.start(t);
+        chimeOsc.stop(t + 0.9);
+      }
+    }
+
+    const shhSynth = new ShhWhisperSynthesizer();
+
+
+    /* ==========================================================
+       2. 물리 엔진 기반 바운시 소음측정기 (Bouncy Physics Noise Meter)
+       - Canvas 2D 45개 공/이모지/버블 물리 시뮬레이션
+       - 마이크 RMS dB 비례 상향 안티그래비티 충격량
+       - 75dB 초과 시 쉿 팝업 & 폭발 상승 & 쉿 사운드 트리거
+       ========================================================== */
+    class BouncyPhysicsNoiseMeter {
+      constructor(canvas, onThresholdExceeded) {
+        this.canvas = canvas;
+        this.ctx = canvas ? canvas.getContext('2d') : null;
+        this.onThresholdExceeded = onThresholdExceeded;
+
         this.audioCtx = null;
         this.analyser = null;
         this.micStream = null;
         this.isRunning = false;
-        this.animationFrame = null;
+        this.animId = null;
+
+        this.currentDb = 35;
+        this.sensitivity = 1.5;
+        this.theme = 'color'; // 'color' | 'emoji' | 'bubble'
+        this.balls = [];
+        this.ballCount = 45;
+        this.threshold = 75;
+        this.lastExplosionTime = 0;
+
+        this.emojis = ['😀', '🤫', '🎈', '🐱', '⭐', '🌈', '🍎', '🚀', '🐶', '⚽'];
+        this.palette = [
+          '#6366f1', '#818cf8', '#06b6d4', '#10b981', '#f59e0b',
+          '#ec4899', '#8b5cf6', '#3b82f6', '#14b8a6', '#f43f5e'
+        ];
+
+        this.width = 600;
+        this.height = 360;
+
+        if (this.canvas) {
+          this.resize();
+          this.initBalls();
+          window.addEventListener('resize', () => this.resize());
+        }
+      }
+
+      resize() {
+        if (!this.canvas) return;
+        const rect = this.canvas.parentElement ? this.canvas.parentElement.getBoundingClientRect() : this.canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        this.width = rect.width || 600;
+        this.height = rect.height || 360;
+        this.canvas.width = this.width * dpr;
+        this.canvas.height = this.height * dpr;
+        if (this.ctx) {
+          this.ctx.scale(dpr, dpr);
+        }
+      }
+
+      initBalls() {
+        this.balls = [];
+        for (let i = 0; i < this.ballCount; i++) {
+          const radius = 14 + Math.random() * 12;
+          this.balls.push({
+            x: radius + Math.random() * Math.max(100, this.width - radius * 2),
+            y: this.height - radius - Math.random() * 60,
+            vx: (Math.random() - 0.5) * 2,
+            vy: -Math.random() * 3,
+            radius: radius,
+            color: this.palette[i % this.palette.length],
+            emoji: this.emojis[i % this.emojis.length],
+            rotation: 0,
+            vRot: (Math.random() - 0.5) * 0.05,
+            bubbleWobble: Math.random() * Math.PI * 2,
+          });
+        }
+      }
+
+      setTheme(theme) {
+        this.theme = theme;
+      }
+
+      setSensitivity(val) {
+        this.sensitivity = parseFloat(val);
       }
 
       async start() {
         try {
-          this.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          this.audioCtx = new AudioContextClass();
-          const source = this.audioCtx.createMediaStreamSource(this.micStream);
-          this.analyser = this.audioCtx.createAnalyser();
-          this.analyser.fftSize = 512;
-          source.connect(this.analyser);
+          if (!this.micStream) {
+            this.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          }
+          if (!this.audioCtx) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            this.audioCtx = new AudioContextClass();
+          }
+          if (this.audioCtx.state === 'suspended') {
+            await this.audioCtx.resume();
+          }
+
+          if (!this.analyser) {
+            const source = this.audioCtx.createMediaStreamSource(this.micStream);
+            this.analyser = this.audioCtx.createAnalyser();
+            this.analyser.fftSize = 512;
+            this.analyser.smoothingTimeConstant = 0.65;
+            source.connect(this.analyser);
+          }
+
           this.isRunning = true;
-          this.monitor();
+          this.resize();
+          this.loop();
           return true;
         } catch (err) {
-          console.warn('마이크 접근 불가:', err);
+          console.warn('소음계 마이크 연결 불가:', err);
           alert('마이크 접근 권한이 허용되지 않아 소음계를 켤 수 없습니다.');
           return false;
         }
@@ -1185,37 +1618,186 @@
 
       stop() {
         this.isRunning = false;
-        if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
+        if (this.animId) {
+          cancelAnimationFrame(this.animId);
+          this.animId = null;
+        }
         if (this.micStream) {
-          this.micStream.getTracks().forEach(track => track.stop());
+          this.micStream.getTracks().forEach(t => t.stop());
           this.micStream = null;
         }
         if (this.audioCtx) {
-          this.audioCtx.close();
+          try { this.audioCtx.close(); } catch (e) {}
           this.audioCtx = null;
+        }
+        this.analyser = null;
+        this.currentDb = 35;
+      }
+
+      loop() {
+        if (!this.isRunning) return;
+        this.updatePhysics();
+        this.render();
+        this.animId = requestAnimationFrame(() => this.loop());
+      }
+
+      updatePhysics() {
+        let db = 35;
+        if (this.analyser) {
+          const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+          this.analyser.getByteFrequencyData(dataArray);
+          let sum = 0;
+          for (let i = 0; i < dataArray.length; i++) {
+            sum += dataArray[i] * dataArray[i];
+          }
+          const rms = Math.sqrt(sum / dataArray.length);
+          db = Math.min(95, Math.max(35, Math.round(35 + (rms / 255) * 60)));
+        }
+        this.currentDb = db;
+
+        // 상단 헤더 소음 UI 동기화
+        updateNoiseUI(db);
+
+        // 바운시 탭 전용 배지 동기화
+        const bouncyDbBadge = document.getElementById('bouncyDbBadge');
+        if (bouncyDbBadge) {
+          bouncyDbBadge.textContent = `${db} dB`;
+          if (db < 58) bouncyDbBadge.className = 'px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-mono font-bold';
+          else if (db <= 74) bouncyDbBadge.className = 'px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-mono font-bold';
+          else bouncyDbBadge.className = 'px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-mono font-bold animate-pulse';
+        }
+
+        // 데시벨 기반 반중력 펄스 계산
+        const excess = Math.max(0, db - 45);
+        const impulse = Math.pow(excess / 30, 1.8) * 2.2 * this.sensitivity;
+
+        // 75dB 초과 시: 대폭발 충격 + 쉿 정숙 이벤트
+        const now = Date.now();
+        if (db >= this.threshold && (now - this.lastExplosionTime > 2600)) {
+          this.lastExplosionTime = now;
+          if (this.onThresholdExceeded) {
+            this.onThresholdExceeded(db);
+          }
+          this.balls.forEach(b => {
+            b.vy = -14 - Math.random() * 15;
+            b.vx = (Math.random() - 0.5) * 18;
+          });
+        }
+
+        const gravity = 0.40;
+        const bounceRestitution = 0.76;
+        const airFriction = 0.992;
+
+        for (let i = 0; i < this.balls.length; i++) {
+          const b = this.balls[i];
+
+          // 소리 크기에 따른 공 튀어오름
+          if (impulse > 0.05 && Math.random() < 0.7) {
+            b.vy -= impulse * (0.6 + Math.random() * 0.8);
+            b.vx += (Math.random() - 0.5) * impulse * 1.0;
+          }
+
+          b.vy += gravity;
+          b.vx *= airFriction;
+          b.vy *= airFriction;
+
+          b.x += b.vx;
+          b.y += b.vy;
+          b.rotation += b.vRot;
+          b.bubbleWobble += 0.05;
+
+          // 벽 충돌 (좌, 우)
+          if (b.x < b.radius) {
+            b.x = b.radius;
+            b.vx = -b.vx * bounceRestitution;
+          } else if (b.x > this.width - b.radius) {
+            b.x = this.width - b.radius;
+            b.vx = -b.vx * bounceRestitution;
+          }
+
+          // 바닥 충돌
+          if (b.y > this.height - b.radius) {
+            b.y = this.height - b.radius;
+            b.vy = -b.vy * bounceRestitution;
+            if (Math.abs(b.vy) < 0.6) b.vy = 0;
+          }
+
+          // 천장 충돌
+          if (b.y < b.radius) {
+            b.y = b.radius;
+            b.vy = -b.vy * bounceRestitution;
+          }
         }
       }
 
-      monitor() {
-        if (!this.isRunning || !this.analyser) return;
-        const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
-        this.analyser.getByteFrequencyData(dataArray);
+      render() {
+        if (!this.ctx) return;
+        this.ctx.clearRect(0, 0, this.width, this.height);
 
-        // RMS 및 데시벨(dB) 추정 계산
-        let sum = 0;
-        for (let i = 0; i < dataArray.length; i++) {
-          sum += dataArray[i] * dataArray[i];
+        // 바닥 기준선
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        this.ctx.lineWidth = 1;
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, this.height - 2);
+        this.ctx.lineTo(this.width, this.height - 2);
+        this.ctx.stroke();
+
+        for (let i = 0; i < this.balls.length; i++) {
+          const b = this.balls[i];
+
+          this.ctx.save();
+          this.ctx.translate(b.x, b.y);
+
+          if (this.theme === 'color') {
+            const grad = this.ctx.createRadialGradient(-b.radius * 0.3, -b.radius * 0.3, b.radius * 0.1, 0, 0, b.radius);
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.35, b.color);
+            grad.addColorStop(1, '#020617');
+            this.ctx.fillStyle = grad;
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+            this.ctx.lineWidth = 1.2;
+            this.ctx.stroke();
+
+          } else if (this.theme === 'emoji') {
+            this.ctx.rotate(b.rotation);
+            this.ctx.font = `${Math.round(b.radius * 1.8)}px sans-serif`;
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText(b.emoji, 0, 0);
+
+          } else if (this.theme === 'bubble') {
+            const wobbleR = b.radius + Math.sin(b.bubbleWobble) * 1.5;
+            const grad = this.ctx.createRadialGradient(-wobbleR * 0.3, -wobbleR * 0.3, wobbleR * 0.1, 0, 0, wobbleR);
+            grad.addColorStop(0, 'rgba(255, 255, 255, 0.75)');
+            grad.addColorStop(0.4, 'rgba(147, 197, 253, 0.35)');
+            grad.addColorStop(0.8, 'rgba(192, 132, 252, 0.3)');
+            grad.addColorStop(1, 'rgba(96, 165, 250, 0.12)');
+
+            this.ctx.fillStyle = grad;
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, wobbleR, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            this.ctx.lineWidth = 1.2;
+            this.ctx.stroke();
+
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            this.ctx.beginPath();
+            this.ctx.arc(-wobbleR * 0.35, -wobbleR * 0.35, wobbleR * 0.22, 0, Math.PI * 2);
+            this.ctx.fill();
+          }
+
+          this.ctx.restore();
         }
-        const rms = Math.sqrt(sum / dataArray.length);
-        // 35dB ~ 95dB 범위로 보정 맵핑
-        const db = Math.min(95, Math.max(35, Math.round(35 + (rms / 255) * 60)));
-
-        updateNoiseUI(db);
-        this.animationFrame = requestAnimationFrame(() => this.monitor());
       }
     }
 
-    const noiseMeter = new NoiseMeter();
+    let bouncyNoiseMeter = null;
 
 
     /* ==========================================================
@@ -1431,17 +2013,27 @@
 
       // 테마 및 디스플레이 모드
       themeMode: localStorage.getItem('zzang_themeMode') || 'light', // 'light' | 'dark' | 'system'
-      cardOpacity: parseInt(localStorage.getItem('zzang_cardOpacity')) || 82,
-      bgDimmer: parseInt(localStorage.getItem('zzang_bgDimmer')) || 52,
+      cardOpacity: parseInt(localStorage.getItem('zzang_cardOpacity')) || 45,
+      bgDimmer: parseInt(localStorage.getItem('zzang_bgDimmer')) || 15,
+      bgUrl: localStorage.getItem('zzang_bgUrl') || 'https://i.imgur.com/VXI1sTq.jpeg',
+      version: 'v1.3',
+      shhSoundEnabled: true,
+      bouncySensitivity: 1.5,
+      bouncyTheme: 'color',
 
       // 앱 설정
-      alarmSound: 'koreanSchoolBell',
+      alarmSound: localStorage.getItem('zzang_alarmSound') || 'koreanSchoolBell',
+      alarmRepeatCount: localStorage.getItem('zzang_alarmRepeat') || '3', // '1' | '3' | '5' | 'untilDismissed'
+      isAlarmRinging: false,
+      alarmCurrentIteration: 0,
+      alarmPlayTimeout: null,
+      classImageUrl: localStorage.getItem('zzang_classImageUrl') || 'https://i.imgur.com/gEGX67K.jpeg',
       warningEnabled: true,
       ambientType: 'rain',
       ambientVolume: 40,
       qrUrl: 'https://padlet.com',
       qrTitle: '모바일로 수업 패들렛 접속하기',
-      activeMediaTab: 'notice',
+      activeMediaTab: 'image',
       noticeMarkdown: `📌 **수업 개요**
 이번 시간에는 모둠별 생태계 현미경 관찰 실습이 진행됩니다.
 
@@ -1481,6 +2073,9 @@
       timerStatusLabel: document.getElementById('timerStatusLabel'),
       timerTargetTimeText: document.getElementById('timerTargetTimeText'),
       warningBadge: document.getElementById('warningBadge'),
+      alarmRingingBanner: document.getElementById('alarmRingingBanner'),
+      alarmRepeatStatusText: document.getElementById('alarmRepeatStatusText'),
+      btnDismissAlarm: document.getElementById('btnDismissAlarm'),
 
       // 퀵 컨트롤 독
       controlDock: document.getElementById('controlDock'),
@@ -1502,6 +2097,9 @@
       noiseLightDot: document.getElementById('noiseLightDot'),
       noiseText: document.getElementById('noiseText'),
       noiseDbValue: document.getElementById('noiseDbValue'),
+      btnToggleShhSound: document.getElementById('btnToggleShhSound'),
+      headerShhIcon: document.getElementById('headerShhIcon'),
+      headerShhText: document.getElementById('headerShhText'),
       btnToggleAmbient: document.getElementById('btnToggleAmbient'),
       ambientIcon: document.getElementById('ambientIcon'),
       ambientText: document.getElementById('ambientText'),
@@ -1515,10 +2113,25 @@
       tabBtnImage: document.getElementById('tabBtnImage'),
       tabBtnVideo: document.getElementById('tabBtnVideo'),
       tabBtnStretch: document.getElementById('tabBtnStretch'),
+      tabBtnBouncy: document.getElementById('tabBtnBouncy'),
       tabContentNotice: document.getElementById('tabContentNotice'),
       tabContentImage: document.getElementById('tabContentImage'),
       tabContentVideo: document.getElementById('tabContentVideo'),
       tabContentStretch: document.getElementById('tabContentStretch'),
+      tabContentBouncy: document.getElementById('tabContentBouncy'),
+      bouncyCanvas: document.getElementById('bouncyCanvas'),
+      shhAlertPopup: document.getElementById('shhAlertPopup'),
+      bouncyStatusDot: document.getElementById('bouncyStatusDot'),
+      bouncyDbBadge: document.getElementById('bouncyDbBadge'),
+      themeBtnColor: document.getElementById('themeBtnColor'),
+      themeBtnEmoji: document.getElementById('themeBtnEmoji'),
+      themeBtnBubble: document.getElementById('themeBtnBubble'),
+      sliderBouncySensitivity: document.getElementById('sliderBouncySensitivity'),
+      labelBouncySensitivity: document.getElementById('labelBouncySensitivity'),
+      btnTabShhToggle: document.getElementById('btnTabShhToggle'),
+      tabShhIcon: document.getElementById('tabShhIcon'),
+      tabShhText: document.getElementById('tabShhText'),
+      btnBouncyMicToggle: document.getElementById('btnBouncyMicToggle'),
       displayClassBadge: document.getElementById('displayClassBadge'),
       displayNoticeTitle: document.getElementById('displayNoticeTitle'),
       displayNoticeBody: document.getElementById('displayNoticeBody'),
@@ -1570,6 +2183,7 @@
       inputImageCaption: document.getElementById('inputImageCaption'),
       inputVideoUrl: document.getElementById('inputVideoUrl'),
       selectAlarmSound: document.getElementById('selectAlarmSound'),
+      selectAlarmRepeat: document.getElementById('selectAlarmRepeat'),
       btnPreviewAlarm: document.getElementById('btnPreviewAlarm'),
       chkWarningAlert: document.getElementById('chkWarningAlert'),
       selectAmbientType: document.getElementById('selectAmbientType'),
@@ -1584,6 +2198,7 @@
       inputQrTitle: document.getElementById('inputQrTitle'),
       bgLayer: document.getElementById('bgLayer'),
       bgDimmer: document.getElementById('bgDimmer'),
+      appFooterBar: document.getElementById('appFooterBar'),
     };
 
     /* 테마 및 투명도 제어 함수 */
@@ -1750,8 +2365,8 @@
           dom.timerStatusLabel.className = 'text-xs sm:text-sm font-bold tracking-wider text-rose-400 uppercase animate-pulse';
           show1MinWarning(false);
 
-          // 설정된 알람 종소리 재생
-          playSelectedAlarm();
+          // 설정된 알람 종소리 시퀀스 재생 (기본 3회 또는 설정된 횟수/해제시까지)
+          startAlarmSequence(false);
         }
       }, 1000);
     }
@@ -1767,6 +2382,11 @@
     }
 
     function togglePlay() {
+      // 알람이 울리고 있을 때 스페이스나 재생 버튼을 누르면 알람 즉시 해제
+      if (state.isAlarmRinging) {
+        stopAlarmSequence(true);
+        return;
+      }
       if (state.isRunning) {
         pauseTimer();
       } else {
@@ -1778,6 +2398,7 @@
     }
 
     function resetTimer() {
+      stopAlarmSequence(true);
       pauseTimer();
       state.remainingSeconds = state.totalSeconds;
       state.warningFired = false;
@@ -1788,6 +2409,7 @@
     }
 
     function setTimerMinutes(mins) {
+      stopAlarmSequence(true);
       pauseTimer();
       state.totalSeconds = mins * 60;
       state.remainingSeconds = state.totalSeconds;
@@ -1804,6 +2426,19 @@
       }
       state.warningFired = state.remainingSeconds <= 60;
       updateTimerDisplay();
+    }
+
+    // 이미지 주소 정규화 (Imgur 일반 링크를 직접 이미지 CDN 주소로 변환)
+    function formatDirectImageUrl(url) {
+      if (!url) return '';
+      url = url.trim();
+      const imgurMatch = url.match(/^https?:\/\/imgur\.com\/([a-zA-Z0-9]+)(\.[a-zA-Z]+)?$/);
+      if (imgurMatch) {
+        const id = imgurMatch[1];
+        const ext = imgurMatch[2] || '.jpeg';
+        return `https://i.imgur.com/${id}${ext}`;
+      }
+      return url;
     }
 
     function playSelectedAlarm() {
@@ -1825,6 +2460,89 @@
           break;
         default:
           audioSynth.playKoreanSchoolBell();
+      }
+    }
+
+    /* ==========================================================
+       5. 알람 종료음 반복 시퀀스 및 해제 관리
+       - 1회, 3회(기본), 5회, 해제시까지(untilDismissed)
+       - Space, Esc, [알람 끄기] 버튼 누를 시 즉시 무음 처리
+       ========================================================== */
+    function startAlarmSequence(isManual = false) {
+      stopAlarmSequence(true); // 이전 시퀀스 정리
+      state.isAlarmRinging = true;
+      state.alarmCurrentIteration = 0;
+
+      const target = state.alarmRepeatCount === 'untilDismissed' 
+        ? Infinity 
+        : (parseInt(state.alarmRepeatCount, 10) || 3);
+
+      function step() {
+        if (!state.isAlarmRinging) return;
+        state.alarmCurrentIteration++;
+
+        // UI 갱신 (반복 진행 상황 표시)
+        showAlarmRingingUI(state.alarmCurrentIteration, target);
+
+        // 벨소리 1회 연주
+        playSelectedAlarm();
+
+        if (state.alarmCurrentIteration < target) {
+          const duration = audioSynth.getSoundDuration(state.alarmSound);
+          const gap = 0.8; // 각 회차 사이 0.8초 여유 휴식
+          state.alarmPlayTimeout = setTimeout(step, Math.round((duration + gap) * 1000));
+        } else {
+          // 모든 설정 횟수 재생 완료 후 자연 종료
+          const duration = audioSynth.getSoundDuration(state.alarmSound);
+          state.alarmPlayTimeout = setTimeout(() => {
+            stopAlarmSequence(false);
+          }, Math.round(duration * 1000));
+        }
+      }
+
+      step();
+    }
+
+    function stopAlarmSequence(userInterrupted = true) {
+      state.isAlarmRinging = false;
+      if (state.alarmPlayTimeout) {
+        clearTimeout(state.alarmPlayTimeout);
+        state.alarmPlayTimeout = null;
+      }
+      state.alarmCurrentIteration = 0;
+      if (userInterrupted) {
+        audioSynth.stopAll();
+      }
+      hideAlarmRingingUI();
+    }
+
+    function showAlarmRingingUI(current, target) {
+      if (dom.alarmRingingBanner) {
+        dom.alarmRingingBanner.classList.remove('hidden');
+        dom.alarmRingingBanner.classList.add('flex');
+      }
+      if (dom.alarmRepeatStatusText) {
+        if (target === Infinity) {
+          dom.alarmRepeatStatusText.textContent = `종료음 울림 중 (${current}회차 • 해제시까지 계속 울림)`;
+        } else {
+          dom.alarmRepeatStatusText.textContent = `종료음 울림 중 (${current} / ${target}회 반복)`;
+        }
+      }
+      if (dom.timerStatusLabel) {
+        const targetStr = target === Infinity ? '무한' : target;
+        dom.timerStatusLabel.textContent = `쉬는 시간 종료! (${current}/${targetStr}회)`;
+        dom.timerStatusLabel.className = 'text-xs sm:text-sm font-bold tracking-wider text-rose-400 uppercase animate-pulse';
+      }
+    }
+
+    function hideAlarmRingingUI() {
+      if (dom.alarmRingingBanner) {
+        dom.alarmRingingBanner.classList.add('hidden');
+        dom.alarmRingingBanner.classList.remove('flex');
+      }
+      if (dom.timerStatusLabel && state.remainingSeconds <= 0) {
+        dom.timerStatusLabel.textContent = '쉬는 시간 종료! 수업 시작';
+        dom.timerStatusLabel.className = 'text-xs sm:text-sm font-bold tracking-wider text-rose-400 uppercase';
       }
     }
 
@@ -1874,17 +2592,83 @@
       }
     }
 
+    function initBouncyMeterIfNeeded() {
+      if (!bouncyNoiseMeter && dom.bouncyCanvas) {
+        bouncyNoiseMeter = new BouncyPhysicsNoiseMeter(dom.bouncyCanvas, (db) => {
+          // 75dB 초과 시: 시각적 팝업 & 쉿 효과음 트리거
+          triggerShhAlert(db);
+        });
+      }
+    }
+
+    function triggerShhAlert(db) {
+      if (dom.shhAlertPopup) {
+        dom.shhAlertPopup.classList.remove('opacity-0', 'pointer-events-none');
+        dom.shhAlertPopup.classList.add('opacity-100');
+        setTimeout(() => {
+          dom.shhAlertPopup.classList.remove('opacity-100');
+          dom.shhAlertPopup.classList.add('opacity-0', 'pointer-events-none');
+        }, 2600);
+      }
+      // '쉿!' 사운드 재생 (ON 상태일 때만)
+      if (shhSynth.enabled) {
+        shhSynth.playShh();
+      }
+    }
+
+    function updateShhSoundUI(enabled) {
+      state.shhSoundEnabled = enabled;
+      shhSynth.enabled = enabled;
+      if (enabled) {
+        if (dom.headerShhIcon) dom.headerShhIcon.textContent = '🔔';
+        if (dom.headerShhText) dom.headerShhText.textContent = '쉿 소리 ON';
+        if (dom.btnToggleShhSound) {
+          dom.btnToggleShhSound.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800/90 border border-indigo-500/50 text-indigo-300 transition shadow-lg cursor-pointer text-xs font-semibold';
+        }
+        if (dom.tabShhIcon) dom.tabShhIcon.textContent = '🔔';
+        if (dom.tabShhText) dom.tabShhText.textContent = '쉿 소리 ON';
+        if (dom.btnTabShhToggle) {
+          dom.btnTabShhToggle.className = 'flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-400/40 text-indigo-200 text-xs font-bold transition cursor-pointer';
+        }
+      } else {
+        if (dom.headerShhIcon) dom.headerShhIcon.textContent = '🔕';
+        if (dom.headerShhText) dom.headerShhText.textContent = '쉿 소리 OFF';
+        if (dom.btnToggleShhSound) {
+          dom.btnToggleShhSound.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/60 text-slate-400 transition shadow-lg cursor-pointer text-xs font-semibold';
+        }
+        if (dom.tabShhIcon) dom.tabShhIcon.textContent = '🔕';
+        if (dom.tabShhText) dom.tabShhText.textContent = '쉿 소리 OFF';
+        if (dom.btnTabShhToggle) {
+          dom.btnTabShhToggle.className = 'flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-400 text-xs font-bold transition cursor-pointer';
+        }
+      }
+    }
+
+    function toggleShhSound() {
+      const nextState = !shhSynth.enabled;
+      updateShhSoundUI(nextState);
+    }
+
     async function toggleNoiseMeter() {
-      if (noiseMeter.isRunning) {
-        noiseMeter.stop();
+      initBouncyMeterIfNeeded();
+      if (bouncyNoiseMeter.isRunning) {
+        bouncyNoiseMeter.stop();
         dom.noiseLightDot.className = 'w-3 h-3 rounded-full bg-slate-500';
         dom.noiseText.textContent = '소음계 OFF';
         dom.noiseText.className = 'text-xs font-semibold text-slate-300';
         dom.noiseDbValue.classList.add('hidden');
+        if (dom.btnBouncyMicToggle) {
+          dom.btnBouncyMicToggle.textContent = '마이크 시작';
+          dom.btnBouncyMicToggle.className = 'px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow cursor-pointer';
+        }
       } else {
-        const ok = await noiseMeter.start();
+        const ok = await bouncyNoiseMeter.start();
         if (ok) {
           dom.noiseText.textContent = '측정 중...';
+          if (dom.btnBouncyMicToggle) {
+            dom.btnBouncyMicToggle.textContent = '마이크 중지';
+            dom.btnBouncyMicToggle.className = 'px-3 py-1 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition shadow cursor-pointer';
+          }
         }
       }
     }
@@ -1900,19 +2684,27 @@
         { name: 'image', btn: dom.tabBtnImage, content: dom.tabContentImage },
         { name: 'video', btn: dom.tabBtnVideo, content: dom.tabContentVideo },
         { name: 'stretch', btn: dom.tabBtnStretch, content: dom.tabContentStretch },
+        { name: 'bouncy', btn: dom.tabBtnBouncy, content: dom.tabContentBouncy },
       ];
 
       tabs.forEach(t => {
         if (t.name === tabName) {
-          t.btn.className = 'media-tab-btn active px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white shadow-md transition flex items-center gap-1.5 whitespace-nowrap';
+          t.btn.className = 'media-tab-btn active px-4 py-2 rounded-xl bg-indigo-600 text-white shadow-md transition flex items-center gap-1.5 whitespace-nowrap';
           t.content.classList.remove('hidden');
           t.content.classList.add('flex');
         } else {
-          t.btn.className = 'media-tab-btn px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap';
+          t.btn.className = 'media-tab-btn px-4 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap';
           t.content.classList.add('hidden');
           t.content.classList.remove('flex');
         }
       });
+
+      if (tabName === 'bouncy') {
+        initBouncyMeterIfNeeded();
+        setTimeout(() => {
+          if (bouncyNoiseMeter) bouncyNoiseMeter.resize();
+        }, 60);
+      }
     }
 
     const stretchSteps = [
@@ -2032,6 +2824,7 @@
     function resetInactivityTimer() {
       dom.controlDock.classList.remove('auto-hide-inactive');
       dom.controlDock.classList.add('auto-hide-active');
+      if (dom.appFooterBar) dom.appFooterBar.style.opacity = '1';
       document.body.classList.remove('cursor-none');
 
       clearTimeout(state.inactivityTimer);
@@ -2039,6 +2832,7 @@
         // 3.5초간 무조작 시 컨트롤 독 페이드아웃 및 커서 숨김
         dom.controlDock.classList.remove('auto-hide-active');
         dom.controlDock.classList.add('auto-hide-inactive');
+        if (dom.appFooterBar) dom.appFooterBar.style.opacity = '0.4';
         document.body.classList.add('cursor-none');
       }, 3500);
     }
@@ -2053,10 +2847,26 @@
       updateClock();
       updateTimerDisplay();
 
-      // 테마 및 투명도 초기 적용
+      // 테마 및 투명도, 배경 이미지 초기 적용
       applyThemeMode(state.themeMode);
       applyCardOpacity(state.cardOpacity);
       if (dom.bgDimmer) dom.bgDimmer.style.opacity = (state.bgDimmer / 100).toFixed(2);
+      if (dom.bgLayer && state.bgUrl) {
+        dom.bgLayer.style.backgroundImage = `url('${state.bgUrl}')`;
+      }
+      // 고래 수업 이미지(gEGX67K.jpeg) 정합성 동기화
+      if (state.classImageUrl) {
+        if (state.classImageUrl.includes('CGbcRRW')) {
+          state.classImageUrl = 'https://i.imgur.com/gEGX67K.jpeg';
+          localStorage.setItem('zzang_classImageUrl', state.classImageUrl);
+        }
+        if (dom.displayClassImage) dom.displayClassImage.src = formatDirectImageUrl(state.classImageUrl);
+      }
+      if (dom.btnDismissAlarm) {
+        dom.btnDismissAlarm.addEventListener('click', () => stopAlarmSequence(true));
+      }
+      updateShhSoundUI(state.shhSoundEnabled);
+      initBouncyMeterIfNeeded();
 
       // 상단 테마 빠른 토글 버튼 (라이트 <-> 다크)
       if (dom.btnToggleTheme) {
@@ -2167,6 +2977,53 @@
       // 소음계 토글
       dom.btnToggleNoise.addEventListener('click', toggleNoiseMeter);
 
+      // 쉿 사운드 독립 제어 토글 (상단 헤더 & 바운시 탭 제어바 동기화)
+      if (dom.btnToggleShhSound) {
+        dom.btnToggleShhSound.addEventListener('click', toggleShhSound);
+      }
+      if (dom.btnTabShhToggle) {
+        dom.btnTabShhToggle.addEventListener('click', toggleShhSound);
+      }
+
+      // 바운시 탭 마이크 토글 버튼
+      if (dom.btnBouncyMicToggle) {
+        dom.btnBouncyMicToggle.addEventListener('click', toggleNoiseMeter);
+      }
+
+      // 바운시 물리 공 테마 전환 (컬러볼 / 이모지 / 비눗방울)
+      const themeButtons = [
+        { btn: dom.themeBtnColor, theme: 'color' },
+        { btn: dom.themeBtnEmoji, theme: 'emoji' },
+        { btn: dom.themeBtnBubble, theme: 'bubble' },
+      ];
+      themeButtons.forEach(item => {
+        if (item.btn) {
+          item.btn.addEventListener('click', () => {
+            initBouncyMeterIfNeeded();
+            if (bouncyNoiseMeter) bouncyNoiseMeter.setTheme(item.theme);
+            themeButtons.forEach(t => {
+              if (t.btn) {
+                if (t.theme === item.theme) {
+                  t.btn.className = 'bouncy-theme-btn active px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-semibold transition cursor-pointer';
+                } else {
+                  t.btn.className = 'bouncy-theme-btn px-2.5 py-1 rounded-lg hover:bg-white/10 text-slate-300 font-semibold transition cursor-pointer';
+                }
+              }
+            });
+          });
+        }
+      });
+
+      // 바운시 마이크 감도 슬라이더 (0.5x ~ 3.0x)
+      if (dom.sliderBouncySensitivity) {
+        dom.sliderBouncySensitivity.addEventListener('input', (e) => {
+          const val = e.target.value;
+          if (dom.labelBouncySensitivity) dom.labelBouncySensitivity.textContent = `${val}x`;
+          initBouncyMeterIfNeeded();
+          if (bouncyNoiseMeter) bouncyNoiseMeter.setSensitivity(val);
+        });
+      }
+
       // 백색소음 토글
       dom.btnToggleAmbient.addEventListener('click', () => {
         if (audioSynth.isAmbientPlaying) {
@@ -2192,6 +3049,9 @@
       dom.tabBtnImage.addEventListener('click', () => switchMediaTab('image'));
       dom.tabBtnVideo.addEventListener('click', () => switchMediaTab('video'));
       dom.tabBtnStretch.addEventListener('click', () => switchMediaTab('stretch'));
+      if (dom.tabBtnBouncy) {
+        dom.tabBtnBouncy.addEventListener('click', () => switchMediaTab('bouncy'));
+      }
 
       // 인터랙티브 체크리스트 항목 클릭 토글
       bindChecklistTagEvents();
@@ -2307,6 +3167,8 @@
       document.querySelectorAll('.preset-bg-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const url = btn.dataset.bg;
+          state.bgUrl = url;
+          localStorage.setItem('zzang_bgUrl', url);
           dom.bgLayer.style.backgroundImage = `url('${url}')`;
         });
       });
@@ -2317,6 +3179,8 @@
         if (file) {
           const reader = new FileReader();
           reader.onload = (event) => {
+            state.bgUrl = event.target.result;
+            localStorage.setItem('zzang_bgUrl', event.target.result);
             dom.bgLayer.style.backgroundImage = `url('${event.target.result}')`;
           };
           reader.readAsDataURL(file);
@@ -2388,6 +3252,13 @@
         return;
       }
 
+      // 알람 울림 중 Space 또는 Esc 누르면 즉시 알람 해제 (무음 처리)
+      if (state.isAlarmRinging && (e.key === ' ' || e.key === 'Escape')) {
+        e.preventDefault();
+        stopAlarmSequence(true);
+        return;
+      }
+
       switch (e.key) {
         case ' ': // Space: 일시정지 / 재개
           e.preventDefault();
@@ -2406,7 +3277,8 @@
         case '=': // +: 1분 연장
           addMinutes(1);
           break;
-        case '-': // -: 1분 단축
+        case '-':
+        case '_': // - / _: 1분 단축
           addMinutes(-1);
           break;
         case 'Escape': // Esc: 모달 닫기
@@ -2423,6 +3295,12 @@
       dom.inputNoticeTitle.value = dom.displayNoticeTitle.textContent;
       dom.inputNoticeBody.value = state.noticeMarkdown;
       dom.selectAlarmSound.value = state.alarmSound;
+      if (dom.selectAlarmRepeat) {
+        dom.selectAlarmRepeat.value = state.alarmRepeatCount;
+      }
+      if (dom.inputImageUrl) {
+        dom.inputImageUrl.value = state.classImageUrl || 'https://imgur.com/gEGX67K.jpeg';
+      }
       dom.chkWarningAlert.checked = state.warningEnabled;
       dom.selectAmbientType.value = state.ambientType;
       dom.sliderAmbientVolume.value = state.ambientVolume;
@@ -2467,8 +3345,12 @@
       bindChecklistTagEvents();
 
       // 2. 미디어 (이미지 & 영상)
-      if (dom.inputImageUrl.value.trim()) {
-        dom.displayClassImage.src = dom.inputImageUrl.value.trim();
+      let imgInput = dom.inputImageUrl.value.trim();
+      if (imgInput) {
+        const formattedUrl = formatDirectImageUrl(imgInput);
+        dom.displayClassImage.src = formattedUrl;
+        state.classImageUrl = formattedUrl;
+        localStorage.setItem('zzang_classImageUrl', formattedUrl);
       }
       dom.displayImageCaption.textContent = dom.inputImageCaption.value;
 
@@ -2495,6 +3377,11 @@
 
       // 3. 오디오 및 백색소음
       state.alarmSound = dom.selectAlarmSound.value;
+      localStorage.setItem('zzang_alarmSound', state.alarmSound);
+      if (dom.selectAlarmRepeat) {
+        state.alarmRepeatCount = dom.selectAlarmRepeat.value;
+        localStorage.setItem('zzang_alarmRepeat', state.alarmRepeatCount);
+      }
       state.warningEnabled = dom.chkWarningAlert.checked;
       state.ambientType = dom.selectAmbientType.value;
       state.ambientVolume = parseInt(dom.sliderAmbientVolume.value);
