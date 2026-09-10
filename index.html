@@ -45,6 +45,11 @@
       box-sizing: border-box;
     }
     
+    /* 앱 속 모든 버튼: 사각형 형태로 모서리만 살짝 깎은 사각 라운드 (6px) */
+    button, .dock-btn, .media-tab-btn, .checklist-tag-btn, .preset-btn, .stretch-step-btn, .bouncy-theme-btn, .theme-mode-btn, .settings-tab-btn {
+      border-radius: 6px !important;
+    }
+    
     /* 부드러운 스크롤 & 선택 방지 */
     body {
       user-select: none;
@@ -167,7 +172,12 @@
     body.theme-light .donut-track {
       stroke: rgba(226, 232, 240, 0.9) !important;
     }
-    body.theme-light #brandBadge span {
+    body.theme-light #brandBadge {
+      background-color: rgba(255, 255, 255, 0.9) !important;
+      border-color: rgba(203, 213, 225, 0.8) !important;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08) !important;
+    }
+    body.theme-light #brandBadgeTitle {
       background: linear-gradient(to right, #4338ca, #6366f1);
       -webkit-background-clip: text;
       color: transparent !important;
@@ -221,20 +231,52 @@
       transition: stroke-dashoffset 0.8s ease-in-out, stroke 0.5s ease;
     }
 
-    /* 오토 하이드 모드 */
-    .auto-hide-inactive {
-      opacity: 0 !important;
-      pointer-events: none !important;
-      cursor: none !important;
-      transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    /* 하단 조작바: 오버레이 제거 & 고정 슬림 독 & 버튼 투명도 낮춤(솔리드화) */
+    #controlDock {
+      position: static;
     }
-    .auto-hide-active {
-      opacity: 1;
-      pointer-events: auto;
-      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    body.theme-light #controlDock {
+      background: rgba(255, 255, 255, 0.96) !important;
+      border-color: rgba(203, 213, 225, 0.95) !important;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08) !important;
+    }
+    body.theme-light .dock-btn {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #1e293b !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    }
+    body.theme-light .dock-btn:hover {
+      background-color: #f1f5f9 !important;
+      border-color: #94a3b8 !important;
+      color: #0f172a !important;
+    }
+    body.theme-dark #controlDock {
+      background: rgba(15, 23, 42, 0.94) !important;
+      border-color: rgba(255, 255, 255, 0.15) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+    }
+    body.theme-dark .dock-btn {
+      background-color: rgba(30, 41, 59, 0.95) !important;
+      border-color: rgba(71, 85, 105, 0.8) !important;
+      color: #f1f5f9 !important;
+    }
+    body.theme-dark .dock-btn:hover {
+      background-color: rgba(51, 65, 85, 0.95) !important;
+      border-color: rgba(148, 163, 184, 0.6) !important;
     }
 
-    /* 짱아(Zzang_AA) 시그니처 로고: 테마별 반응형 색상 자동 전환 */
+    /* 짱아(Zzang_AA) 시그니처 로고 규격: 잘림 방지 및 가로 비율 전체 온전 노출 */
+    #zzangSignatureLogo,
+    .zzang-logo-adaptive {
+      height: 24px !important;
+      max-height: 26px !important;
+      width: auto !important;
+      max-width: 140px !important;
+      object-fit: contain !important;
+      flex-shrink: 0 !important;
+      display: block !important;
+    }
     /* 라이트 테마: 흰색 배경 투명화 + 선명한 블랙 잉크 라인 */
     .zzang-logo-adaptive {
       filter: contrast(1.25);
@@ -270,7 +312,7 @@
     }
   </style>
 </head>
-<body class="theme-light min-h-screen w-screen bg-slate-100 text-slate-800 flex flex-col justify-between relative overflow-hidden select-none transition-all duration-300">
+<body class="theme-light min-h-screen h-screen w-screen bg-slate-100 text-slate-800 flex flex-col justify-between relative overflow-x-hidden overflow-y-auto lg:overflow-y-hidden select-none transition-all duration-300">
 
   <!-- 동적 배경 레이어 & 딤머 오버레이 -->
   <div id="bgLayer" class="absolute inset-0 bg-cover bg-center transition-all duration-700 -z-20 scale-105" 
@@ -278,96 +320,99 @@
   <div id="bgDimmer" class="absolute inset-0 transition-opacity duration-300 -z-10" style="background-color: rgb(var(--dimmer-bg)); opacity: var(--dimmer-opacity);"></div>
 
   <!-- 최상단 헤더 바 (명언 / 모바일 QR / 전체화면 / 설정 바로가기) -->
-  <header class="w-full px-6 pt-4 pb-2 flex items-center justify-between z-10 gap-4">
-    <!-- 좌측 브랜드 로고 & 소음 신호등 미니 인디케이터 -->
-    <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-      <!-- 짱아(Zzang_AA) 시그니처 로고 & 브랜드 뱃지 (v1.3) -->
-      <div id="brandBadge" class="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-900/85 border border-slate-700/70 shadow-lg group hover:border-indigo-400/50 transition cursor-pointer" title="Zzang_AA 시그니처 로고 (스마트 교실 디스플레이 v1.3)">
-        <div class="h-6 flex items-center justify-center overflow-hidden py-0.5">
+  <header class="w-full px-3 sm:px-6 pt-2 pb-1 flex items-center justify-between z-10 gap-2 sm:gap-4 flex-nowrap">
+    <!-- 좌측 브랜드 로고 & 소음 신호등 미니 인디케이터 (단일 가로 행 유지 flex-nowrap) -->
+    <div class="flex items-center gap-1.5 sm:gap-2 flex-nowrap flex-shrink-0">
+      <!-- 짱아(Zzang_AA) 시그니처 로고 & 브랜드 뱃지 - 잘림 없이 온전하게 노출 & 사각 라운드 -->
+      <div id="brandBadge" class="flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-700/70 shadow-lg group hover:border-indigo-400/60 transition cursor-pointer select-none" title="Zzang_AA 시그니처 로고 (스마트 교실 디스플레이)">
+        <div class="h-6 sm:h-7 flex-shrink-0 flex items-center justify-center">
           <img id="zzangSignatureLogo" 
                src="https://i.imgur.com/gJEMRHe.jpeg" 
                alt="Zzang_AA Signature Logo" 
-               class="h-5 w-auto object-contain zzang-logo-adaptive group-hover:scale-110 transition-all duration-300"
+               class="zzang-logo-adaptive group-hover:scale-105 transition-all duration-300"
                onerror="this.onerror=null; this.src='https://imgur.com/gJEMRHe.jpeg';" />
         </div>
-        <span class="font-bold text-sm tracking-wide bg-gradient-to-r from-indigo-300 via-white to-sky-300 bg-clip-text text-transparent group-hover:text-white transition">스마트 교실 디스플레이</span>
-        <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-400 dark:text-indigo-300 border border-indigo-500/30 font-mono font-bold">v1.3</span>
+        <span id="brandBadgeTitle" class="font-bold text-xs sm:text-sm tracking-wide bg-gradient-to-r from-indigo-300 via-white to-sky-300 bg-clip-text text-transparent group-hover:text-white transition whitespace-nowrap">스마트 교실 디스플레이</span>
       </div>
 
-      <!-- 소음 측정 신호등 뱃지 -->
-      <button id="btnToggleNoise" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/60 transition shadow-lg cursor-pointer" title="클릭하여 교실 소음 측정기 켜기/끄기">
-        <span id="noiseLightDot" class="w-3 h-3 rounded-full bg-slate-500 shadow-sm"></span>
-        <span id="noiseText" class="text-xs font-semibold text-slate-300">소음계 OFF</span>
-        <span id="noiseDbValue" class="text-xs text-slate-400 font-mono hidden">-- dB</span>
+      <!-- 소음 측정 신호등 뱃지 (사각 라운드) -->
+      <button id="btnToggleNoise" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-900/85 dark:hover:bg-slate-800/90 border border-slate-300 dark:border-slate-700/70 transition shadow-sm cursor-pointer whitespace-nowrap text-[11px] font-semibold text-slate-700 dark:text-slate-200" title="클릭하여 교실 소음 측정기 켜기/끄기">
+        <span id="noiseLightDot" class="w-2.5 h-2.5 rounded-md bg-slate-400 shadow-sm flex-shrink-0"></span>
+        <span id="noiseText" class="whitespace-nowrap">소음계 OFF</span>
+        <span id="noiseDbValue" class="text-slate-500 dark:text-slate-400 font-mono hidden">-- dB</span>
       </button>
 
-      <!-- 쉿 경고음 ON/OFF 독립 제어 토글 (상단 제어 바) -->
-      <button id="btnToggleShhSound" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/60 transition shadow-lg cursor-pointer text-xs font-semibold text-indigo-300" title="75dB 초과 시 '쉿!' 경고 효과음 켜기/끄기 (자율학습 및 시험 시 무음 가능)">
-        <span id="headerShhIcon">🔔</span>
-        <span id="headerShhText">쉿 소리 ON</span>
+      <!-- 쉿 경고음 ON/OFF 독립 제어 토글 (사각 라운드) -->
+      <button id="btnToggleShhSound" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-indigo-50 dark:bg-slate-900/85 dark:hover:bg-slate-800/90 border border-indigo-400/50 transition shadow-sm cursor-pointer text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 whitespace-nowrap" title="75dB 초과 시 '쉿!' 경고 효과음 켜기/끄기 (자율학습 및 시험 시 무음 가능)">
+        <span id="headerShhIcon" class="flex-shrink-0">🔔</span>
+        <span id="headerShhText" class="whitespace-nowrap">쉿 소리 ON</span>
       </button>
 
-      <!-- 백색소음 앰비언트 버튼 -->
-      <button id="btnToggleAmbient" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/60 transition shadow-lg cursor-pointer" title="휴식 집중 백색소음 (빗소리/바람소리)">
-        <span id="ambientIcon" class="text-xs">🌧️</span>
-        <span id="ambientText" class="text-xs font-semibold text-slate-300">백색소음 OFF</span>
+      <!-- 백색소음 앰비언트 버튼 (사각 라운드) -->
+      <button id="btnToggleAmbient" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-900/85 dark:hover:bg-slate-800/90 border border-slate-300 dark:border-slate-700/70 transition shadow-sm cursor-pointer whitespace-nowrap text-[11px] font-semibold text-slate-700 dark:text-slate-300" title="휴식 집중 백색소음 (빗소리/바람소리)">
+        <span id="ambientIcon" class="text-xs flex-shrink-0">🌧️</span>
+        <span id="ambientText" class="whitespace-nowrap">백색소음 OFF</span>
       </button>
     </div>
 
-    <!-- 중앙 확장형 동기부여 명언 / 휴식 팁 위젯 -->
-    <div id="quoteWidget" class="flex-1 max-w-2xl px-5 py-2 rounded-2xl glass-card-subtle hover:bg-white/10 transition-all cursor-pointer flex items-center justify-center gap-3 group border border-white/10 shadow-lg text-center" title="클릭하면 다음 명언과 팁으로 바뀝니다">
-      <span class="text-amber-400 text-sm group-hover:scale-125 transition-transform duration-300">✨</span>
-      <p id="quoteText" class="text-sm md:text-base font-medium text-slate-200 tracking-normal truncate transition-all duration-300">
+    <!-- 중앙 확장형 동기부여 명언 / 휴식 팁 위젯 (사각 라운드) -->
+    <div id="quoteWidget" class="flex-1 max-w-xl px-3.5 py-1.5 rounded-xl glass-card-subtle hover:bg-white/10 transition-all cursor-pointer flex items-center justify-center gap-2 group border border-white/15 shadow-md text-center" title="클릭하면 다음 명언과 팁으로 바뀝니다">
+      <span class="text-amber-400 text-xs group-hover:scale-125 transition-transform duration-300">✨</span>
+      <p id="quoteText" class="text-xs sm:text-sm font-medium text-slate-200 tracking-normal truncate transition-all duration-300">
         "충분한 휴식은 더 멀리 나아가기 위한 가장 현명한 준비입니다."
       </p>
-      <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 group-hover:bg-indigo-500/50 transition">Next</span>
+      <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 group-hover:bg-indigo-500/50 transition font-bold">Next</span>
     </div>
 
-    <!-- 우측 도구: QR 코드 팝업 / 전체화면 / 설정 열기 -->
-    <div class="flex items-center gap-2">
+    <!-- 우측 도구: 선명하고 또렷한 컬러 버튼 (QR / 테마 / 전체화면 / 설정) -->
+    <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
       <!-- 1분 전 경고 뱃지 (기본 숨김) -->
-      <div id="warningBadge" class="hidden items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500 text-amber-950 font-bold text-xs animate-bounce shadow-lg border border-amber-300">
+      <div id="warningBadge" class="hidden items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500 text-amber-950 font-bold text-[11px] animate-bounce shadow-lg border border-amber-300">
         <span>⚠️</span>
-        <span>1분 전! 착석 및 수업 준비</span>
+        <span>1분 전! 착석 및 준비</span>
       </div>
 
-      <!-- 모바일 연동 QR 팝업 버튼 -->
-      <button id="btnShowQr" class="p-2.5 rounded-xl glass-card-subtle hover:bg-white/15 active:scale-95 transition shadow-lg border border-white/10" title="수업 참여 모바일 QR 코드 보기">
-        <svg class="w-5 h-5 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+      <!-- 1) 모바일 연동 QR 팝업 버튼 (선명한 스카이 블루) -->
+      <button id="btnShowQr" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-bold text-xs shadow-md shadow-sky-600/30 border border-sky-400/60 transition cursor-pointer" title="수업 참여 모바일 QR 코드 보기">
+        <svg class="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
         </svg>
+        <span class="whitespace-nowrap hidden sm:inline">QR</span>
       </button>
 
-      <!-- 화면 테마 토글 (라이트/다크) -->
-      <button id="btnToggleTheme" class="p-2.5 rounded-xl glass-card-subtle hover:bg-white/15 active:scale-95 transition shadow-lg border border-white/10" title="테마 전환 (라이트/다크)">
-        <span id="themeToggleIcon" class="text-base">☀️</span>
+      <!-- 2) 화면 테마 토글 (선명한 앰버 옐로우) -->
+      <button id="btnToggleTheme" class="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-white font-bold text-xs shadow-md shadow-amber-500/30 border border-amber-300/70 transition cursor-pointer" title="화면 테마 전환 (라이트/다크)">
+        <span id="themeToggleIcon" class="text-sm flex-shrink-0">☀️</span>
+        <span class="whitespace-nowrap hidden sm:inline">테마</span>
       </button>
 
-      <!-- 전체화면 토글 (F) -->
-      <button id="btnFullscreen" class="p-2.5 rounded-xl glass-card-subtle hover:bg-white/15 active:scale-95 transition shadow-lg border border-white/10" title="전체화면 토글 (F)">
-        <svg id="fullscreenIcon" class="w-5 h-5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+      <!-- 3) 전체화면 토글 F (선명한 로열 인디고) -->
+      <button id="btnFullscreen" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold text-xs shadow-md shadow-indigo-600/30 border border-indigo-400/60 transition cursor-pointer" title="전체화면 토글 (단축키: F)">
+        <svg id="fullscreenIcon" class="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
         </svg>
+        <span class="whitespace-nowrap hidden sm:inline">전체화면</span>
       </button>
 
-      <!-- 설정창 열기 (S) -->
-      <button id="btnOpenSettings" class="p-2.5 rounded-xl glass-card-subtle hover:bg-white/15 active:scale-95 transition shadow-lg border border-white/10" title="디스플레이 & 알람 설정 (S)">
-        <svg class="w-5 h-5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      <!-- 4) 설정창 열기 S (선명한 딥 퍼플) -->
+      <button id="btnOpenSettings" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 active:scale-95 text-white font-bold text-xs shadow-md shadow-purple-600/30 border border-purple-400/60 transition cursor-pointer" title="디스플레이 & 수업 알람 설정 (단축키: S)">
+        <svg class="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
+        <span class="whitespace-nowrap hidden sm:inline">설정</span>
       </button>
     </div>
   </header>
 
-  <!-- 메인 1 : 2 비대칭 분할 레이아웃 (좌측 시계&타이머 1 : 우측 미디어센터 2) -->
-  <main class="flex-1 w-full max-w-[1700px] mx-auto px-4 md:px-6 py-2 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch justify-center">
+  <!-- 메인 1 : 2 비대칭 분할 레이아웃 (좌측 시계&타이머 1 : 우측 미디어센터 2) - 여백 50% 축소 & 최적 비율 배분 -->
+  <main class="flex-1 w-full max-w-[1700px] mx-auto px-3 sm:px-6 py-1.5 pb-2.5 sm:pb-3 grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 items-stretch justify-center overflow-hidden">
 
     <!-- 좌측 영역: 시계(상단) + 알람 타이머(하단) 수직 스택 (col-span-12 lg:col-span-4 xl:col-span-3) -->
-    <div class="col-span-12 lg:col-span-4 xl:col-span-3 flex flex-col gap-4">
+    <div class="col-span-12 lg:col-span-4 xl:col-span-3 flex flex-col gap-2.5 sm:gap-3">
       
       <!-- 1) 실시간 디지털 표준시 시계 카드 (상단) -->
-      <section class="glass-card rounded-3xl p-5 flex flex-col justify-center relative overflow-hidden transition-all duration-300 shadow-xl">
+      <section class="glass-card rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 flex flex-col justify-center relative overflow-hidden transition-all duration-300 shadow-xl">
         <!-- 날짜 및 요일 -->
         <div class="flex items-center justify-between text-slate-300 text-xs sm:text-sm font-semibold mb-1">
           <span id="currentDateText" class="tracking-wide">2026년 9월 10일 (목)</span>
@@ -377,47 +422,47 @@
           </div>
         </div>
         <!-- 초대형 디지털 시계 폰트 -->
-        <div class="flex items-baseline justify-center sm:justify-start gap-1 font-mono tracking-tighter select-none my-1">
+        <div class="flex items-baseline justify-center sm:justify-start gap-1.5 font-mono tracking-tighter select-none my-1">
           <span id="clockHourMinute" class="text-5xl sm:text-6xl font-black text-white drop-shadow-md">10:40</span>
           <span id="clockSeconds" class="text-2xl sm:text-3xl font-extrabold text-indigo-400 drop-shadow-[0_0_15px_rgba(99,102,241,0.6)]">:25</span>
         </div>
-        <p class="text-[11px] text-slate-400 text-center sm:text-left flex items-center gap-1 mt-0.5">
+        <p class="text-[10px] sm:text-[11px] text-slate-400 text-center sm:text-left flex items-center gap-1 mt-0.5">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>정확한 대한민국 표준시(KST) 실시간 동기화</span>
+          <span>대한민국 표준시(KST) 실시간 동기화</span>
         </p>
       </section>
 
       <!-- 2) 타이머 & 듀얼 비주얼 게이지 카드 (하단) -->
-      <section id="timerCard" class="glass-card rounded-3xl p-5 flex-1 flex flex-col justify-between items-center relative overflow-hidden transition-all duration-500 shadow-xl">
+      <section id="timerCard" class="glass-card rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 flex-1 flex flex-col justify-between items-center relative overflow-hidden transition-all duration-500 shadow-xl">
         <!-- 카드 상단: 상태 배지 & 스케줄 정보 -->
-        <div class="w-full flex items-center justify-between pb-2 border-b border-white/10">
+        <div class="w-full flex items-center justify-between pb-1.5 border-b border-white/10">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
             <span id="timerStatusLabel" class="text-xs sm:text-sm font-bold tracking-wider text-emerald-300 uppercase">쉬는 시간 진행 중</span>
           </div>
           <!-- 종료 예정 시각 -->
-          <div class="text-xs text-slate-300 flex items-center gap-1.5 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700">
+          <div class="text-[11px] sm:text-xs text-slate-300 flex items-center gap-1 bg-slate-800/80 px-2 py-0.5 rounded-full border border-slate-700">
             <span>종료:</span>
             <span id="timerTargetTimeText" class="font-mono font-bold text-white">--:--</span>
           </div>
         </div>
 
         <!-- 알람 울림 중 해제 배너 (울림 시 동적 등장) -->
-        <div id="alarmRingingBanner" class="hidden w-full my-2 p-2.5 rounded-2xl bg-rose-600/95 border border-rose-400 text-white items-center justify-between shadow-xl shadow-rose-900/50 animate-bounce z-20">
+        <div id="alarmRingingBanner" class="hidden w-full my-1.5 p-2 rounded-2xl bg-rose-600/95 border border-rose-400 text-white items-center justify-between shadow-xl shadow-rose-900/50 animate-bounce z-20">
           <div class="flex items-center gap-2">
-            <span class="text-xl animate-spin">🔔</span>
+            <span class="text-lg animate-spin">🔔</span>
             <div class="text-left">
               <div class="text-xs font-black tracking-wide">쉬는 시간 종료! 수업 시작</div>
-              <div id="alarmRepeatStatusText" class="text-[11px] text-rose-100 font-semibold">종료음 울림 중 (1/3회)</div>
+              <div id="alarmRepeatStatusText" class="text-[10px] sm:text-[11px] text-rose-100 font-semibold">종료음 울림 중 (1/3회)</div>
             </div>
           </div>
-          <button id="btnDismissAlarm" type="button" class="px-3 py-1.5 bg-white hover:bg-rose-100 active:scale-95 text-rose-700 font-black text-xs rounded-xl shadow transition cursor-pointer flex items-center gap-1">
+          <button id="btnDismissAlarm" type="button" class="px-2.5 py-1 bg-white hover:bg-rose-100 active:scale-95 text-rose-700 font-black text-xs rounded-xl shadow transition cursor-pointer flex items-center gap-1">
             <span>🔕</span><span>알람 끄기 (Space)</span>
           </button>
         </div>
 
-        <!-- 중앙 대형 원형 도넛 게이지 -->
-        <div class="relative my-2.5 flex items-center justify-center w-48 h-48 sm:w-52 sm:h-52 select-none">
+        <!-- 중앙 대형 원형 도넛 게이지 (시원하고 균형 잡힌 비주얼) -->
+        <div class="relative my-1.5 sm:my-2.5 flex items-center justify-center w-36 h-36 sm:w-44 sm:h-44 md:w-46 md:h-46 select-none">
           <svg class="w-full h-full donut-gauge" viewBox="0 0 240 240">
             <!-- 배경 트랙 원 -->
             <circle cx="120" cy="120" r="100" class="donut-track stroke-slate-800/90" stroke-width="14" fill="transparent" />
@@ -428,44 +473,44 @@
 
           <!-- 게이지 내부 텍스트 -->
           <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <span class="text-[11px] uppercase tracking-widest text-slate-400 font-semibold mb-0.5">남은 쉬는 시간</span>
+            <span class="text-[10px] sm:text-[11px] uppercase tracking-widest text-slate-400 font-semibold mb-0.5">남은 쉬는 시간</span>
             <div class="flex items-baseline font-mono tracking-tighter">
               <span id="timerDisplayMinutes" class="text-4xl sm:text-5xl font-black text-white drop-shadow-lg">10</span>
               <span class="text-3xl sm:text-4xl font-black text-indigo-300 mx-0.5">:</span>
               <span id="timerDisplaySeconds" class="text-4xl sm:text-5xl font-black text-white drop-shadow-lg">00</span>
             </div>
             <!-- 하단 진행율 퍼센트 -->
-            <span id="timerPercentText" class="mt-1.5 text-xs font-semibold text-indigo-300 bg-indigo-950/60 px-2 py-0.5 rounded-full border border-indigo-500/30">
+            <span id="timerPercentText" class="mt-1 text-[10px] sm:text-[11px] font-semibold text-indigo-300 bg-indigo-950/60 px-2 py-0.5 rounded-full border border-indigo-500/30">
               100% 잔여
             </span>
           </div>
         </div>
 
         <!-- 하단 선형 그라디언트 바 -->
-        <div class="w-full mb-3">
+        <div class="w-full mb-1.5 sm:mb-2">
           <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden border border-white/10 p-0.5">
             <div id="linearProgressBar" class="h-full rounded-full bg-gradient-to-r from-indigo-500 via-sky-400 to-emerald-400 transition-all duration-500" style="width: 100%;"></div>
           </div>
         </div>
 
         <!-- 타이머 빠른 설정 프리셋 버튼군 -->
-        <div class="w-full flex flex-col gap-2">
-          <div class="grid grid-cols-4 gap-1.5">
-            <button class="preset-btn px-1.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-indigo-600 border border-slate-700/80 hover:border-indigo-400 text-xs font-bold text-slate-200 hover:text-white transition shadow-sm active:scale-95 text-center" data-mins="5">+5분</button>
-            <button class="preset-btn px-1.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-indigo-600 border border-slate-700/80 hover:border-indigo-400 text-xs font-bold text-slate-200 hover:text-white transition shadow-sm active:scale-95 text-center" data-mins="10">+10분</button>
-            <button class="preset-btn px-1.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-indigo-600 border border-slate-700/80 hover:border-indigo-400 text-xs font-bold text-slate-200 hover:text-white transition shadow-sm active:scale-95 text-center" data-mins="15">+15분</button>
-            <button class="preset-btn px-1.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-indigo-600 border border-slate-700/80 hover:border-indigo-400 text-xs font-bold text-slate-200 hover:text-white transition shadow-sm active:scale-95 text-center" data-mins="20">+20분</button>
+        <div class="w-full flex flex-col gap-1.5">
+          <div class="grid grid-cols-4 gap-1 sm:gap-1.5">
+            <button class="preset-btn px-1 py-1.5 rounded-lg sm:rounded-xl bg-slate-800/90 hover:bg-indigo-600 border border-slate-700/80 hover:border-indigo-400 text-xs font-bold text-slate-200 hover:text-white transition shadow-sm active:scale-95 text-center" data-mins="5">+5분</button>
+            <button class="preset-btn px-1 py-1.5 rounded-lg sm:rounded-xl bg-slate-800/90 hover:bg-indigo-600 border border-slate-700/80 hover:border-indigo-400 text-xs font-bold text-slate-200 hover:text-white transition shadow-sm active:scale-95 text-center" data-mins="10">+10분</button>
+            <button class="preset-btn px-1 py-1.5 rounded-lg sm:rounded-xl bg-slate-800/90 hover:bg-indigo-600 border border-slate-700/80 hover:border-indigo-400 text-xs font-bold text-slate-200 hover:text-white transition shadow-sm active:scale-95 text-center" data-mins="15">+15분</button>
+            <button class="preset-btn px-1 py-1.5 rounded-lg sm:rounded-xl bg-slate-800/90 hover:bg-indigo-600 border border-slate-700/80 hover:border-indigo-400 text-xs font-bold text-slate-200 hover:text-white transition shadow-sm active:scale-95 text-center" data-mins="20">+20분</button>
           </div>
 
           <!-- 학교 종 맞춤 스케줄러 & 직접 입력 -->
-          <div class="grid grid-cols-3 gap-1.5">
-            <button id="btnNext50" class="px-1.5 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-indigo-500/40 text-[11px] font-semibold text-indigo-300 hover:text-white transition flex items-center justify-center gap-1 shadow-sm active:scale-95" title="다음 :50분 학교 종에 맞추기">
+          <div class="grid grid-cols-3 gap-1 sm:gap-1.5">
+            <button id="btnNext50" class="px-1 py-1.5 rounded-lg sm:rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-indigo-500/40 text-[10px] sm:text-[11px] font-semibold text-indigo-300 hover:text-white transition flex items-center justify-center gap-1 shadow-sm active:scale-95" title="다음 :50분 학교 종에 맞추기">
               <span>🔔</span><span>:50분</span>
             </button>
-            <button id="btnNext00" class="px-1.5 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-sky-500/40 text-[11px] font-semibold text-sky-300 hover:text-white transition flex items-center justify-center gap-1 shadow-sm active:scale-95" title="다음 정각 :00 학교 종에 맞추기">
+            <button id="btnNext00" class="px-1 py-1.5 rounded-lg sm:rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-sky-500/40 text-[10px] sm:text-[11px] font-semibold text-sky-300 hover:text-white transition flex items-center justify-center gap-1 shadow-sm active:scale-95" title="다음 정각 :00 학교 종에 맞추기">
               <span>⏰</span><span>정각(:00)</span>
             </button>
-            <button id="btnCustomTime" class="px-1.5 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-[11px] font-semibold text-slate-300 hover:text-white transition flex items-center justify-center gap-1 shadow-sm active:scale-95">
+            <button id="btnCustomTime" class="px-1 py-1.5 rounded-lg sm:rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-[10px] sm:text-[11px] font-semibold text-slate-300 hover:text-white transition flex items-center justify-center gap-1 shadow-sm active:scale-95">
               <span>✏️</span><span>직접설정</span>
             </button>
           </div>
@@ -475,89 +520,109 @@
     </div>
 
     <!-- 우측 영역: 대화면 수업 미디어 센터 (col-span-12 lg:col-span-8 xl:col-span-9) -->
-    <section id="mediaCenterCard" class="col-span-12 lg:col-span-8 xl:col-span-9 glass-card rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-300 shadow-2xl">
+    <section id="mediaCenterCard" class="col-span-12 lg:col-span-8 xl:col-span-9 glass-card rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 flex flex-col justify-between relative overflow-hidden transition-all duration-300 shadow-2xl">
       
       <!-- 미디어 탭 네비게이션 헤더 -->
-      <div class="flex items-center justify-between mb-3 border-b border-white/10 pb-3">
-        <div class="flex items-center gap-2 overflow-x-auto text-xs sm:text-sm font-semibold">
-          <button id="tabBtnNotice" class="media-tab-btn px-4 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
+      <div class="flex items-center justify-between mb-2 border-b border-white/10 pb-2">
+        <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto text-xs sm:text-sm font-semibold">
+          <button id="tabBtnNotice" class="media-tab-btn px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
             <span>📝</span><span>수업 안내문</span>
           </button>
-          <button id="tabBtnImage" class="media-tab-btn active px-4 py-2 rounded-xl bg-indigo-600 text-white shadow-md transition flex items-center gap-1.5 whitespace-nowrap">
+          <button id="tabBtnImage" class="media-tab-btn active px-3 py-1.5 rounded-xl bg-indigo-600 text-white shadow-md transition flex items-center gap-1.5 whitespace-nowrap">
             <span>🖼️</span><span>수업 이미지</span>
           </button>
-          <button id="tabBtnVideo" class="media-tab-btn px-4 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
+          <button id="tabBtnVideo" class="media-tab-btn px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
             <span>🎬</span><span>수업 영상</span>
           </button>
-          <button id="tabBtnStretch" class="media-tab-btn px-4 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
+          <button id="tabBtnStretch" class="media-tab-btn px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
             <span>🧘</span><span>1분 스트레칭</span>
           </button>
-          <button id="tabBtnBouncy" class="media-tab-btn px-4 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
+          <button id="tabBtnBouncy" class="media-tab-btn px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 transition flex items-center gap-1.5 whitespace-nowrap">
             <span>🎾</span><span>바운시 소음계</span>
           </button>
         </div>
         <!-- 우측 배지 표시 -->
-        <span id="displayClassBadge" class="hidden sm:inline-flex text-xs px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 font-bold">다음 3교시 : 과학</span>
+        <span id="displayClassBadge" class="hidden sm:inline-flex text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 font-bold">🤙 우리들의 약속</span>
       </div>
 
       <!-- 컨텐츠 영역 (수업 안내문 / 이미지 / 영상 / 스트레칭) -->
-      <div class="flex-1 flex flex-col min-h-[440px] overflow-hidden">
+      <div class="flex-1 flex flex-col min-h-[320px] sm:min-h-[360px] lg:min-h-[410px] overflow-hidden">
         
         <!-- 탭 1: 수업 안내문 & 인터랙티브 체크리스트 -->
         <div id="tabContentNotice" class="hidden flex-1 flex-col justify-between overflow-y-auto pr-2">
           <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="sm:hidden text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 font-bold">다음 수업 안내</span>
-              <span class="text-xs text-slate-400 flex items-center gap-1">
-                <span>💡</span><span>체크리스트를 클릭하여 완료(✓) 표시를 해보세요</span>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="sm:hidden text-xs px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-400/30 font-bold">수업 규칙 안내</span>
+              <span class="text-xs text-slate-600 dark:text-slate-300 flex items-center gap-1 font-medium">
+                <span>💡</span><span>약속 항목을 클릭하여 실천 완료(✓) 표시를 해보세요</span>
               </span>
             </div>
-            <h3 id="displayNoticeTitle" class="text-2xl sm:text-3xl font-black text-white mb-3 leading-tight tracking-tight">
-              실험복 착용 및 과학 탐구 키트 수령 안내
+            <h3 id="displayNoticeTitle" class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white mb-2 leading-tight tracking-tight">
+              🤙 함께 지켜요! 우리들의 약속 (약속해줘~!!)
             </h3>
-            <!-- 마크다운 서식 단락 렌더링 컨테이너 (여유로운 세로 공간과 줄바꿈) -->
-            <div id="displayNoticeBody" class="space-y-3 mb-4 max-h-[340px] overflow-y-auto pr-2 text-slate-200"></div>
+            <!-- 마크다운 서식 단락 렌더링 컨테이너 (내용량에 맞춰 반응형 폰트 자동 스케일) -->
+            <div id="displayNoticeBody" class="space-y-2 sm:space-y-2.5 mb-2 max-h-[280px] sm:max-h-[340px] lg:max-h-[400px] overflow-y-auto pr-2 text-slate-900 dark:text-slate-100"></div>
           </div>
 
-          <!-- 인터랙티브 체크리스트 뱃지 목록 -->
-          <div class="pt-3 border-t border-white/10 mt-auto">
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-              <span>준비물 & 학생 행동 체크리스트</span>
-              <span class="text-[10px] text-indigo-300 bg-indigo-900/40 px-2 py-0.5 rounded-full border border-indigo-500/30">클릭 토글</span>
+          <!-- 인터랙티브 체크리스트 뱃지 목록 (8대 우리들의 약속) -->
+          <div class="pt-2 border-t border-slate-300/60 dark:border-white/10 mt-auto">
+            <div class="text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-2">
+              <span>우리들의 실천 약속 체크리스트</span>
+              <span class="text-[10px] text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900/50 px-1.5 py-0.5 rounded-md border border-indigo-300 dark:border-indigo-500/40 font-bold">클릭 토글</span>
             </div>
-            <div id="displayChecklistTags" class="flex flex-wrap gap-2.5">
-              <button class="checklist-tag-btn px-3.5 py-2 rounded-xl bg-slate-800/90 border border-slate-700 hover:border-indigo-400 text-xs sm:text-sm font-medium text-slate-200 transition flex items-center gap-2 cursor-pointer shadow-sm active:scale-95" data-checked="false">
-                <span class="check-icon w-4 h-4 rounded border border-slate-500 flex items-center justify-center text-xs"></span>
-                <span class="tag-text">실험복 및 보안경 착용</span>
+            <div id="displayChecklistTags" class="flex flex-wrap gap-1.5 sm:gap-2">
+              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
+                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
+                <span class="tag-text">🚫 장난치지 않기</span>
               </button>
-              <button class="checklist-tag-btn px-3.5 py-2 rounded-xl bg-slate-800/90 border border-slate-700 hover:border-indigo-400 text-xs sm:text-sm font-medium text-slate-200 transition flex items-center gap-2 cursor-pointer shadow-sm active:scale-95" data-checked="false">
-                <span class="check-icon w-4 h-4 rounded border border-slate-500 flex items-center justify-center text-xs"></span>
-                <span class="tag-text">교탁 앞 키트 수령</span>
+              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
+                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
+                <span class="tag-text">🤫 떠들지 않기</span>
               </button>
-              <button class="checklist-tag-btn px-3.5 py-2 rounded-xl bg-slate-800/90 border border-slate-700 hover:border-indigo-400 text-xs sm:text-sm font-medium text-slate-200 transition flex items-center gap-2 cursor-pointer shadow-sm active:scale-95" data-checked="false">
-                <span class="check-icon w-4 h-4 rounded border border-slate-500 flex items-center justify-center text-xs"></span>
-                <span class="tag-text">교과서 74p 펼치기</span>
+              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
+                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
+                <span class="tag-text">💬 예쁜 말, 바른 자세하기</span>
+              </button>
+              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
+                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
+                <span class="tag-text">🛑 위험한 행동하지 않기</span>
+              </button>
+              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
+                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
+                <span class="tag-text">✅ 규칙 잘 지키기</span>
+              </button>
+              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
+                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
+                <span class="tag-text">🎁 교구 소중히 다루기</span>
+              </button>
+              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
+                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
+                <span class="tag-text">🧹 활동 후 뒷정리 잘하기</span>
+              </button>
+              <button class="checklist-tag-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-700 hover:border-indigo-500 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" data-checked="false">
+                <span class="check-icon w-3.5 h-3.5 rounded border border-slate-400 dark:border-slate-500 flex items-center justify-center text-xs"></span>
+                <span class="tag-text">🙋‍♂️ 인사 잘하기</span>
               </button>
             </div>
           </div>
         </div>
 
         <!-- 탭 2: 대화면 수업 이미지 디스플레이 (기본 홈 화면) -->
-        <div id="tabContentImage" class="flex flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl bg-black/30 border border-white/10 p-3 relative group">
+        <div id="tabContentImage" class="flex flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl bg-black/30 border border-white/10 p-2 relative group">
           <img id="displayClassImage" 
                src="https://i.imgur.com/gEGX67K.jpeg" 
                alt="수업 준비 이미지" 
-               class="w-full h-full max-h-[460px] object-contain rounded-xl shadow-lg transition duration-300"
+               class="w-full h-full max-h-[330px] sm:max-h-[370px] lg:max-h-[430px] object-contain rounded-xl shadow-lg transition duration-300"
                onerror="this.onerror=null; this.src='https://imgur.com/gEGX67K.jpeg';" />
-          <div id="displayImageCaption" class="absolute bottom-4 left-4 right-4 bg-slate-900/85 backdrop-blur-md px-4 py-2 rounded-xl text-xs sm:text-sm text-center font-medium text-slate-200 border border-white/10 shadow-lg">
-            고래_자존심보다 자존감
+          <div id="displayImageCaption" class="absolute bottom-3 left-4 right-4 bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-lg text-xs sm:text-sm text-center font-semibold text-slate-100 border border-white/20 shadow-xl leading-relaxed">
+            자존심은 다른 사람이 나를 어떻게 보는지에 따라 흔들립니다.<br class="hidden sm:inline"> 하지만, 자존감은 내가 나를 믿는 마음이라서 쉽게 흔들리지 않습니다.
           </div>
         </div>
 
         <!-- 탭 3: 대화면 수업 영상 플레이어 (YouTube 16:9) -->
         <div id="tabContentVideo" class="hidden flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl bg-black/60 border border-white/10 relative p-1">
-          <div id="videoContainer" class="w-full h-full min-h-[380px] sm:min-h-[440px] flex items-center justify-center">
-            <iframe id="displayClassVideo" class="w-full h-full min-h-[380px] sm:min-h-[440px] rounded-xl shadow-2xl" 
+          <div id="videoContainer" class="w-full h-full min-h-[310px] sm:min-h-[350px] lg:min-h-[410px] flex items-center justify-center">
+            <iframe id="displayClassVideo" class="w-full h-full min-h-[310px] sm:min-h-[350px] lg:min-h-[410px] rounded-xl shadow-2xl" 
                     src="https://www.youtube-nocookie.com/embed/ZVrayy5g608?autoplay=0&mute=1&loop=1&playlist=ZVrayy5g608&controls=1" 
                     title="수업 영상" frameborder="0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
@@ -566,91 +631,92 @@
         </div>
 
         <!-- 탭 4: 1분 브레인 스트레칭 3단계 애니메이션 -->
-        <div id="tabContentStretch" class="hidden flex-1 flex-col justify-between overflow-y-auto p-3">
-          <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div id="tabContentStretch" class="hidden flex-1 flex-col justify-between overflow-y-auto p-2 sm:p-3">
+          <div class="flex items-center justify-between pb-2 border-b border-white/10">
             <div class="flex items-center gap-2">
-              <span class="text-2xl">🧘‍♂️</span>
-              <span class="font-bold text-base text-indigo-300">몸과 뇌를 깨우는 1분 리셋 체조</span>
+              <span class="text-xl sm:text-2xl">🧘‍♂️</span>
+              <span class="font-bold text-sm sm:text-base text-indigo-300">몸과 뇌를 깨우는 1분 리셋 체조</span>
             </div>
             <div class="flex items-center gap-2">
-              <span id="stretchStepIndicator" class="text-xs px-2.5 py-1 rounded-md bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-400/30">1단계 / 3단계</span>
-              <button id="btnStretchStartStop" class="text-xs sm:text-sm px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow-md">체조 시작</button>
+              <span id="stretchStepIndicator" class="text-xs px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-400/30">1단계 / 3단계</span>
+              <button id="btnStretchStartStop" class="text-xs sm:text-sm px-3.5 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow-md">체조 시작</button>
             </div>
           </div>
 
           <!-- 스트레칭 애니메이션 카드 -->
-          <div class="flex-1 flex flex-col items-center justify-center my-4 text-center p-6 rounded-2xl bg-white/5 border border-white/10 relative overflow-hidden">
-            <div id="stretchIcon" class="text-7xl mb-3 animate-bounce-subtle transition-all duration-500">🙆‍♂️</div>
-            <h4 id="stretchTitle" class="text-xl sm:text-2xl font-bold text-white mb-2">1단계: 손 깍지 위로 쭉 기지개</h4>
-            <p id="stretchDesc" class="text-sm sm:text-base text-slate-300 max-w-md leading-relaxed">양손을 깍지 끼고 머리 위로 힘껏 밀어 올리며 숨을 깊게 들이마시고 내쉽니다. 척추를 길게 펴주세요!</p>
+          <div class="flex-1 flex flex-col items-center justify-center my-2 text-center p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10 relative overflow-hidden">
+            <div id="stretchIcon" class="text-5xl sm:text-6xl mb-2 animate-bounce-subtle transition-all duration-500">🙆‍♂️</div>
+            <h4 id="stretchTitle" class="text-lg sm:text-xl font-bold text-white mb-1">1단계: 손 깍지 위로 쭉 기지개</h4>
+            <p id="stretchDesc" class="text-xs sm:text-sm text-slate-300 max-w-md leading-relaxed">양손을 깍지 끼고 머리 위로 힘껏 밀어 올리며 숨을 깊게 들이마시고 내쉽니다. 척추를 길게 펴주세요!</p>
             
             <!-- 스트레칭 카운트다운 게이지 -->
-            <div class="mt-4 flex items-center gap-2 font-mono text-sm text-indigo-300 bg-indigo-950/40 px-3 py-1 rounded-full border border-indigo-500/20">
+            <div class="mt-2.5 flex items-center gap-2 font-mono text-xs sm:text-sm text-indigo-300 bg-indigo-950/40 px-2.5 py-0.5 rounded-full border border-indigo-500/20">
               <span>남은 시간:</span>
-              <span id="stretchSeconds" class="text-xl font-bold text-white">20</span>초
+              <span id="stretchSeconds" class="text-lg sm:text-xl font-bold text-white">20</span>초
             </div>
           </div>
 
           <!-- 3단계 수동 점프 버튼들 -->
-          <div class="grid grid-cols-3 gap-3 text-xs sm:text-sm">
-            <button class="stretch-step-btn active p-2.5 rounded-xl bg-indigo-900/60 border border-indigo-500/50 text-indigo-200 font-semibold text-center" data-step="1">1. 깍지 기지개</button>
-            <button class="stretch-step-btn p-2.5 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-400 font-semibold text-center" data-step="2">2. 먼 곳 응시</button>
-            <button class="stretch-step-btn p-2.5 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-400 font-semibold text-center" data-step="3">3. 부드러운 목 회전</button>
+          <div class="grid grid-cols-3 gap-2 text-xs">
+            <button class="stretch-step-btn active p-2 rounded-xl bg-indigo-900/60 border border-indigo-500/50 text-indigo-200 font-semibold text-center" data-step="1">1. 깍지 기지개</button>
+            <button class="stretch-step-btn p-2 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-400 font-semibold text-center" data-step="2">2. 먼 곳 응시</button>
+            <button class="stretch-step-btn p-2 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-400 font-semibold text-center" data-step="3">3. 부드러운 목 회전</button>
           </div>
         </div>
 
         <!-- 탭 5: 물리 엔진 기반 바운시(Bouncy Balls) 소음측정기 -->
-        <div id="tabContentBouncy" class="hidden flex-1 flex-col justify-between overflow-hidden rounded-2xl bg-slate-950/60 border border-white/10 p-3 relative">
+        <div id="tabContentBouncy" class="hidden flex-1 flex-col justify-between overflow-hidden rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/80 dark:border-white/15 p-2 sm:p-3 relative shadow-inner">
           <!-- 상단 제어 툴바 -->
-          <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-white/10 z-10">
+          <div class="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 pb-2 border-b border-slate-200/80 dark:border-white/10 z-10">
             <!-- 좌측: 실시간 dB 및 상태 배지 -->
-            <div class="flex items-center gap-2.5">
-              <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" id="bouncyStatusDot"></span>
-                <span>교실 소음 물리 시뮬레이터</span>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" id="bouncyStatusDot"></span>
+                <span class="hidden sm:inline">교실 소음 물리 시뮬레이터</span>
+                <span class="sm:hidden">소음계</span>
               </span>
-              <span id="bouncyDbBadge" class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-xs font-mono font-bold">
+              <span id="bouncyDbBadge" class="px-2.5 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 text-xs font-mono font-bold">
                 -- dB
               </span>
             </div>
 
             <!-- 중앙: 공 테마 선택기 (컬러 / 이모지 / 버블) -->
-            <div class="flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800 text-xs">
-              <button id="themeBtnColor" class="bouncy-theme-btn active px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-semibold transition cursor-pointer" data-theme="color">🎨 컬러볼</button>
-              <button id="themeBtnEmoji" class="bouncy-theme-btn px-2.5 py-1 rounded-lg hover:bg-white/10 text-slate-300 font-semibold transition cursor-pointer" data-theme="emoji">😀 이모지</button>
-              <button id="themeBtnBubble" class="bouncy-theme-btn px-2.5 py-1 rounded-lg hover:bg-white/10 text-slate-300 font-semibold transition cursor-pointer" data-theme="bubble">🫧 비눗방울</button>
+            <div class="flex items-center gap-1 bg-white/90 dark:bg-slate-900/80 p-0.5 sm:p-1 rounded-lg border border-slate-300 dark:border-slate-800 text-xs shadow-sm">
+              <button id="themeBtnColor" class="bouncy-theme-btn active px-2.5 py-1 rounded-md bg-indigo-600 text-white font-bold transition cursor-pointer" data-theme="color">🎨 컬러볼</button>
+              <button id="themeBtnEmoji" class="bouncy-theme-btn px-2.5 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 font-bold transition cursor-pointer" data-theme="emoji">😀 이모지</button>
+              <button id="themeBtnBubble" class="bouncy-theme-btn px-2.5 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 font-bold transition cursor-pointer" data-theme="bubble">🫧 비눗방울</button>
             </div>
 
             <!-- 우측 도구: 감도 조절 & 쉿 경고음 토글 & 마이크 버튼 -->
-            <div class="flex items-center gap-2 flex-wrap">
-              <div class="flex items-center gap-1.5 bg-slate-900/80 px-2.5 py-1 rounded-xl border border-slate-800 text-xs text-slate-300">
-                <span class="text-[11px] text-slate-400">감도:</span>
-                <input id="sliderBouncySensitivity" type="range" min="0.5" max="3.0" step="0.1" value="1.5" class="w-16 sm:w-20 accent-indigo-500 cursor-pointer" />
-                <span id="labelBouncySensitivity" class="text-[11px] font-mono text-indigo-300">1.5x</span>
+            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <div class="flex items-center gap-1 bg-white/90 dark:bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 shadow-sm">
+                <span class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">감도:</span>
+                <input id="sliderBouncySensitivity" type="range" min="0.5" max="3.0" step="0.1" value="1.5" class="w-14 sm:w-18 accent-indigo-500 cursor-pointer" />
+                <span id="labelBouncySensitivity" class="text-[10px] sm:text-[11px] font-mono text-indigo-600 dark:text-indigo-300 font-bold">1.5x</span>
               </div>
               <!-- 쉿 소리 ON/OFF 독립 버튼 -->
-              <button id="btnTabShhToggle" class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-400/40 text-indigo-200 text-xs font-bold transition cursor-pointer" title="75dB 초과 시 '쉿!' 경고 효과음 ON/OFF">
+              <button id="btnTabShhToggle" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-600/30 hover:bg-indigo-100 dark:hover:bg-indigo-600/50 border border-indigo-300 dark:border-indigo-400/40 text-indigo-700 dark:text-indigo-200 text-xs font-bold transition cursor-pointer" title="75dB 초과 시 '쉿!' 경고 효과음 ON/OFF">
                 <span id="tabShhIcon">🔔</span>
-                <span id="tabShhText">쉿 소리 ON</span>
+                <span id="tabShhText" class="hidden sm:inline">쉿 소리 ON</span>
               </button>
               <!-- 마이크 ON/OFF -->
-              <button id="btnBouncyMicToggle" class="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow cursor-pointer">
+              <button id="btnBouncyMicToggle" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow cursor-pointer">
                 마이크 시작
               </button>
             </div>
           </div>
 
           <!-- Canvas 2D 물리 엔진 시뮬레이션 영역 -->
-          <div class="flex-1 w-full h-full min-h-[340px] relative overflow-hidden my-1 rounded-xl">
+          <div class="flex-1 w-full h-full min-h-[270px] sm:min-h-[310px] lg:min-h-[360px] relative overflow-hidden my-1 rounded-xl bg-white/40 dark:bg-slate-950/40 border border-slate-200/70 dark:border-white/10 shadow-inner">
             <canvas id="bouncyCanvas" class="w-full h-full block rounded-xl"></canvas>
 
             <!-- 75dB 초과 시 시각적 정숙 유도 팝업 (쉿! 조용히 해주세요) -->
             <div id="shhAlertPopup" class="absolute inset-0 bg-rose-950/85 backdrop-blur-sm flex flex-col items-center justify-center transition-all duration-300 opacity-0 pointer-events-none z-30">
-              <div class="text-6xl sm:text-7xl mb-3 animate-bounce">🤫</div>
-              <h3 class="text-2xl sm:text-4xl font-black text-rose-300 drop-shadow-[0_0_20px_rgba(244,63,94,0.6)]">
+              <div class="text-5xl sm:text-6xl mb-2 animate-bounce">🤫</div>
+              <h3 class="text-2xl sm:text-3xl font-black text-rose-300 drop-shadow-[0_0_20px_rgba(244,63,94,0.6)]">
                 쉿! 조용히 해주세요
               </h3>
-              <p class="text-sm sm:text-base text-rose-200 font-medium mt-2 bg-rose-900/60 px-4 py-1 rounded-full border border-rose-500/40">
+              <p class="text-xs sm:text-sm text-rose-200 font-medium mt-1.5 bg-rose-900/60 px-3.5 py-1 rounded-full border border-rose-500/40">
                 교실 소음이 75dB을 초과했습니다. 목소리를 조금만 낮춰주세요!
               </p>
             </div>
@@ -662,347 +728,439 @@
 
   </main>
 
-  <!-- 하단 퀵 컨트롤 독 (Quick Dock) - 3.5초 무조작 시 오토 하이드 -->
-  <footer id="controlDock" class="w-full max-w-4xl mx-auto px-6 py-3 mb-3 glass-dock rounded-2xl flex items-center justify-between gap-4 z-20 shadow-2xl transition-all duration-300">
-    <!-- 좌측: 타이머 시간 조절 (-1m, +1m, +3m) -->
-    <div class="flex items-center gap-1.5">
-      <button id="btnSub1Min" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition text-xs sm:text-sm font-bold text-slate-200 border border-white/10" title="1분 단축 (-)">
-        -1분
-      </button>
-      <button id="btnAdd1Min" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition text-xs sm:text-sm font-bold text-slate-200 border border-white/10" title="1분 연장 (+)">
-        +1분
-      </button>
-      <button id="btnAdd3Min" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition text-xs sm:text-sm font-bold text-indigo-300 border border-indigo-400/20" title="3분 연장">
-        +3분
-      </button>
+  <!-- 하단 1:2 일렬 정렬 바 (좌측 시계박스 하단: 저작권 명시 중앙정렬 / 우측 수업안내 박스 하단: 컨트롤 독 중앙정렬) -->
+  <footer id="bottomUnifiedRow" class="w-full max-w-[1700px] mx-auto px-3 sm:px-6 pb-1.5 pt-0.5 grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 items-center z-20 select-none transition-all duration-300">
+    
+    <!-- 좌측: 시계/타이머 박스 폭(col-span-12 lg:col-span-4 xl:col-span-3) 아래 좌우 끝 칼각 일치 저작권 명시 바 -->
+    <div id="appFooterBar" class="col-span-12 lg:col-span-4 xl:col-span-3 w-full h-10 px-3 sm:px-4 rounded-lg bg-white/80 dark:bg-slate-900/85 border border-slate-300/80 dark:border-white/10 shadow-sm flex items-center justify-center text-center transition-all backdrop-blur-sm">
+      <div class="inline-flex items-center justify-center gap-1.5 sm:gap-2 text-xs font-medium text-slate-700 dark:text-slate-200 whitespace-nowrap">
+        <span>© 2026 <strong class="font-bold text-slate-900 dark:text-white">Zzang_AA</strong></span>
+        <span class="text-slate-400 dark:text-slate-600">•</span>
+        <span>All rights reserved.</span>
+        <span class="text-slate-400 dark:text-slate-600">•</span>
+        <span class="px-1.5 py-0.5 rounded-md bg-indigo-500/15 dark:bg-indigo-500/25 text-indigo-600 dark:text-indigo-300 font-mono text-[11px] font-bold border border-indigo-400/30">v1.8</span>
+      </div>
     </div>
 
-    <!-- 중앙: 메인 재생 / 일시정지 / 리셋 -->
-    <div class="flex items-center gap-3">
-      <!-- 리셋 -->
-      <button id="btnResetTimer" class="p-2.5 rounded-full bg-white/10 hover:bg-rose-500/30 text-slate-300 hover:text-rose-300 active:scale-95 transition border border-white/10" title="타이머 리셋">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-      </button>
+    <!-- 우측: 수업안내/미디어 박스 폭(col-span-12 lg:col-span-8 xl:col-span-9) 아래 좌우 끝 칼각 일치 슬림 조작바 -->
+    <div class="col-span-12 lg:col-span-8 xl:col-span-9 w-full">
+      <div id="controlDock" class="w-full h-10 px-3 sm:px-4 rounded-lg bg-white/80 dark:bg-slate-900/85 border border-slate-300/80 dark:border-white/10 shadow-sm flex items-center justify-between gap-2 sm:gap-4 transition-all duration-300 backdrop-blur-sm">
+        <!-- 좌측: 타이머 시간 조절 (-1m, +1m, +3m) -->
+        <div class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+          <button id="btnSub1Min" class="dock-btn h-7 px-2.5 rounded-md bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 active:scale-95 transition text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm whitespace-nowrap cursor-pointer" title="1분 단축 (-)">
+            -1분
+          </button>
+          <button id="btnAdd1Min" class="dock-btn h-7 px-2.5 rounded-md bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 active:scale-95 transition text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm whitespace-nowrap cursor-pointer" title="1분 연장 (+)">
+            +1분
+          </button>
+          <button id="btnAdd3Min" class="dock-btn h-7 px-2.5 rounded-md bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/70 border border-indigo-300 dark:border-indigo-600 active:scale-95 transition text-xs font-bold text-indigo-700 dark:text-indigo-300 shadow-sm whitespace-nowrap cursor-pointer" title="3분 연장">
+            +3분
+          </button>
+        </div>
 
-      <!-- 일시정지 / 재개 버튼 (Space) -->
-      <button id="btnTogglePlay" class="px-6 py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-700 hover:from-indigo-600 hover:to-indigo-800 text-white font-bold text-sm sm:text-base flex items-center gap-2 shadow-lg shadow-indigo-600/40 active:scale-95 transition" title="타이머 시작 / 일시정지 (스페이스바)">
-        <span id="playIcon">⏸️</span>
-        <span id="playText">일시정지</span>
-      </button>
+        <!-- 중앙: 메인 재생 / 일시정지 / 리셋 / 수동 종소리 -->
+        <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+          <!-- 리셋 -->
+          <button id="btnResetTimer" class="dock-btn h-7 w-7 sm:w-8 rounded-md bg-white hover:bg-rose-50 dark:bg-slate-800 dark:hover:bg-rose-950/50 border border-slate-300 dark:border-slate-600 text-slate-600 hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400 active:scale-95 transition shadow-sm flex items-center justify-center cursor-pointer" title="타이머 리셋">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
 
-      <!-- 수동 종소리 울리기 버튼 -->
-      <button id="btnRingBellNow" class="p-2.5 rounded-full bg-white/10 hover:bg-amber-500/30 text-amber-300 active:scale-95 transition border border-white/10" title="학교 종소리 즉시 울리기">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
-      </button>
+          <!-- 일시정지 / 재개 버튼 (Space) -->
+          <button id="btnTogglePlay" class="h-7 px-3.5 sm:px-4 rounded-md bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm shadow-indigo-600/30 transition whitespace-nowrap cursor-pointer" title="타이머 시작 / 일시정지 (스페이스바)">
+            <span id="playIcon" class="text-xs">⏸️</span>
+            <span id="playText" class="whitespace-nowrap text-xs font-bold">일시정지</span>
+          </button>
+
+          <!-- 수동 종소리 울리기 버튼 -->
+          <button id="btnRingBellNow" class="dock-btn h-7 w-7 sm:w-8 rounded-md bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/70 border border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-300 active:scale-95 transition shadow-sm flex items-center justify-center cursor-pointer" title="학교 종소리 즉시 울리기">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- 우측: 클린 뷰 안내 & 단축키 안내 힌트 -->
+        <div class="hidden sm:flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 font-mono whitespace-nowrap flex-shrink-0">
+          <span class="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-semibold text-slate-700 dark:text-slate-300">Space</span>
+          <span>일시정지</span>
+          <span class="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-semibold text-slate-700 dark:text-slate-300 ml-1">F</span>
+          <span>전체화면</span>
+          <span class="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-semibold text-slate-700 dark:text-slate-300 ml-1">S</span>
+          <span>설정</span>
+        </div>
+      </div>
     </div>
 
-    <!-- 우측: 클린 뷰 안내 & 단축키 안내 힌트 -->
-    <div class="hidden sm:flex items-center gap-2 text-xs text-slate-400 font-mono">
-      <span class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700">Space</span>
-      <span>일시정지</span>
-      <span class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 ml-1">F</span>
-      <span>전체화면</span>
-      <span class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 ml-1">S</span>
-      <span>설정</span>
-    </div>
-  </footer>
-
-  <!-- 최하단 저작권 & 버전 정보 바닥글 (Footer Bar) -->
-  <footer id="appFooterBar" class="w-full text-center pb-2 pt-0 z-10 select-none transition-all duration-300">
-    <div class="inline-flex items-center justify-center gap-2 text-xs font-normal tracking-wide text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors">
-      <span>© 2026 <strong class="font-bold text-slate-700 dark:text-slate-200">Zzang_AA</strong> • All rights reserved.</span>
-      <span class="text-slate-400 dark:text-slate-600">•</span>
-      <span class="px-2 py-0.5 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 font-mono text-[11px] font-bold border border-indigo-400/25 shadow-sm">v1.3</span>
-    </div>
   </footer>
 
   <!-- ======================= 모달 창 영역 ======================= -->
 
-  <!-- 1. 환경설정 모달 (Settings Modal) -->
-  <div id="settingsModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="glass-card max-w-3xl w-full max-h-[90vh] rounded-3xl p-6 sm:p-8 flex flex-col justify-between overflow-hidden shadow-2xl border border-white/20">
+  <!-- 1. 환경설정 모달 (Settings Modal - 16:9 와이드 대화면 최적화) -->
+  <div id="settingsModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 hidden">
+    <div class="glass-card w-[96vw] max-w-6xl h-[90vh] max-h-[860px] rounded-3xl p-4 sm:p-6 md:p-7 flex flex-col justify-between overflow-hidden shadow-2xl border border-white/20">
       
-      <!-- 모달 헤더 -->
-      <div class="flex items-center justify-between pb-4 border-b border-white/10">
+      <!-- 모달 헤더 (16:9 와이드 헤더) -->
+      <div class="flex items-center justify-between pb-3 sm:pb-4 border-b border-white/10">
         <div class="flex items-center gap-3">
-          <div class="h-6 flex items-center justify-center">
-            <img src="https://i.imgur.com/gJEMRHe.jpeg" alt="Zzang_AA Logo" class="h-5 w-auto zzang-logo-adaptive" onerror="this.onerror=null; this.src='https://imgur.com/gJEMRHe.jpeg';" />
+          <div class="h-7 flex items-center justify-center">
+            <img src="https://i.imgur.com/gJEMRHe.jpeg" alt="Zzang_AA Logo" class="h-6 w-auto zzang-logo-adaptive" onerror="this.onerror=null; this.src='https://imgur.com/gJEMRHe.jpeg';" />
           </div>
-          <h2 class="text-xl font-bold text-white">디스플레이 및 수업 알람 설정</h2>
-          <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">Zzang_AA Edition v1.3</span>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg sm:text-xl font-black text-white">디스플레이 및 수업 알람 설정</h2>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">16:9 Widescreen</span>
+            </div>
+            <p class="text-[11px] text-slate-400 hidden sm:block">교실 전자칠판 및 노트북 화면 비율에 최적화된 올인원 제어판</p>
+          </div>
+          <span class="text-[10px] px-2.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">Zzang_AA Edition v1.8</span>
         </div>
-        <button id="btnCloseSettings" class="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition">✕</button>
+        <button id="btnCloseSettings" class="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition text-lg cursor-pointer" title="설정 닫기 (Esc)">✕</button>
       </div>
 
       <!-- 설정 탭 네비게이션 -->
-      <div class="flex items-center gap-2 my-4 border-b border-white/10 pb-2 text-xs sm:text-sm font-semibold overflow-x-auto">
-        <button class="settings-tab-btn active px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white" data-tab="stNotice">수업 안내 & 자동변환</button>
-        <button class="settings-tab-btn px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300" data-tab="stMedia">미디어(이미지/영상)</button>
-        <button class="settings-tab-btn px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300" data-tab="stAudio">알람음 & 백색소음</button>
-        <button class="settings-tab-btn px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300" data-tab="stDisplay">배경 & QR 코드</button>
+      <div class="flex items-center gap-2 my-3 border-b border-white/10 pb-2 text-xs sm:text-sm font-semibold overflow-x-auto">
+        <button class="settings-tab-btn active px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white flex items-center gap-1.5 whitespace-nowrap cursor-pointer" data-tab="stNotice">
+          <span>📝</span><span>수업 안내 & 자동변환</span>
+        </button>
+        <button class="settings-tab-btn px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 flex items-center gap-1.5 whitespace-nowrap cursor-pointer" data-tab="stMedia">
+          <span>🎬</span><span>미디어(이미지/영상)</span>
+        </button>
+        <button class="settings-tab-btn px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 flex items-center gap-1.5 whitespace-nowrap cursor-pointer" data-tab="stAudio">
+          <span>🔔</span><span>알람음 & 백색소음</span>
+        </button>
+        <button class="settings-tab-btn px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 flex items-center gap-1.5 whitespace-nowrap cursor-pointer" data-tab="stDisplay">
+          <span>🎨</span><span>배경 & QR 코드</span>
+        </button>
       </div>
 
       <!-- 모달 바디 스크롤 영역 -->
-      <div class="flex-1 overflow-y-auto pr-2 space-y-6 text-sm">
+      <div class="flex-1 overflow-y-auto pr-1 sm:pr-2 space-y-4 sm:space-y-5 text-sm">
 
-        <!-- 섹션 1: 수업 안내 및 지능형 상호 변환기 -->
-        <div id="sec-stNotice" class="settings-section space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1">상단 교시/과목 뱃지</label>
-              <input id="inputClassBadge" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" value="다음 3교시 : 과학" />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1">수업 공지 제목</label>
-              <input id="inputNoticeTitle" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" value="실험복 착용 및 과학 탐구 키트 수령 안내" />
-            </div>
-          </div>
-
-          <!-- 본문 입력 및 체크리스트 상호 변환 -->
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <div class="flex items-center gap-2">
-                <label class="text-xs font-semibold text-slate-300">수업 안내 상세 본문 (마크다운 단락 지원)</label>
-                <span class="text-[10px] text-indigo-300 bg-indigo-950 px-1.5 py-0.5 rounded border border-indigo-800">서식/단락 지원</span>
+        <!-- 섹션 1: 수업 안내 및 지능형 상호 변환기 (16:9 와이드 2열 레이아웃) -->
+        <div id="sec-stNotice" class="settings-section">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-start">
+            
+            <!-- 좌측 열 (5/12): 교시 배지, 제목, 체크리스트 태그 및 자동 변환 도구 -->
+            <div class="lg:col-span-5 flex flex-col gap-3.5">
+              <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                <h4 class="font-bold text-white text-xs uppercase tracking-wider flex items-center gap-1.5 text-indigo-300">
+                  <span>📌</span><span>수업 기본 식별 정보</span>
+                </h4>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">상단 교시/과목 뱃지</label>
+                  <input id="inputClassBadge" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs sm:text-sm" value="🤙 우리들의 약속" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">수업 공지 제목</label>
+                  <input id="inputNoticeTitle" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs sm:text-sm" value="🤙 함께 지켜요! 우리들의 약속 (약속해줘~!!)" />
+                </div>
               </div>
-              <!-- 본문 -> 체크리스트 변환 버튼 (⚡) -->
-              <button id="btnParseBodyToChecklist" type="button" class="text-xs px-2.5 py-1 rounded-lg bg-indigo-600/80 hover:bg-indigo-600 text-indigo-100 font-bold flex items-center gap-1 transition" title="작성된 긴 안내문에서 핵심 체크리스트 키워드를 자동 추출합니다">
-                <span>⚡</span><span>본문 ➔ 체크리스트 자동 추출</span>
-              </button>
-            </div>
-            <!-- 마크다운 퀵 서식 툴바 -->
-            <div class="flex items-center gap-1.5 mb-1.5 text-xs">
-              <span class="text-[11px] text-slate-400 mr-1">단락 서식 삽입:</span>
-              <button id="btnInsertMdNum" type="button" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition">+ 번호 목록 (1.)</button>
-              <button id="btnInsertMdBullet" type="button" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition">+ 불릿 목록 (-)</button>
-              <button id="btnInsertMdBold" type="button" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition">+ 강조 (**굵게**)</button>
-              <button id="btnInsertMdQuote" type="button" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition">+ 주의 박스 (>)</button>
-            </div>
-            <textarea id="inputNoticeBody" rows="6" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none leading-relaxed font-sans text-xs sm:text-sm" placeholder="수업 안내 내용을 입력하세요..."></textarea>
-          </div>
 
-          <!-- 체크리스트 태그 목록 및 문장 생성 -->
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="text-xs font-semibold text-slate-300">체크리스트 태그 (쉼표로 구분)</label>
-              <!-- 체크리스트 -> 본문 문장 생성 버튼 (⚡) -->
-              <button id="btnGenerateSentenceFromChecklist" class="text-xs px-2.5 py-1 rounded-lg bg-sky-600/70 hover:bg-sky-600 text-sky-100 font-bold flex items-center gap-1 transition" title="체크리스트 단어들을 바탕으로 매끄러운 안내 문장을 자동 조합합니다">
-                <span>⚡</span><span>체크리스트 ➔ 본문 문장 자동 생성</span>
-              </button>
+              <!-- 체크리스트 태그 및 양방향 스마트 변환기 -->
+              <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                <div class="flex items-center justify-between">
+                  <h4 class="font-bold text-white text-xs uppercase tracking-wider flex items-center gap-1.5 text-sky-300">
+                    <span>✅</span><span>학생 행동 체크리스트 태그</span>
+                  </h4>
+                  <span class="text-[10px] text-indigo-300 bg-indigo-950 px-2 py-0.5 rounded border border-indigo-800">쉼표(,) 구분</span>
+                </div>
+                <input id="inputChecklistTags" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs sm:text-sm" value="장난치지 않기, 떠들지 않기, 예쁜 말 바른 자세하기, 위험한 행동하지 않기, 규칙 잘 지키기, 교구 소중히 다루기, 활동 후 뒷정리 잘하기, 인사 잘하기" />
+                
+                <!-- 상호 변환 액션 버튼들 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                  <button id="btnGenerateSentenceFromChecklist" type="button" class="px-2.5 py-1.5 rounded-xl bg-sky-600/80 hover:bg-sky-600 active:scale-95 text-sky-100 font-bold text-xs flex items-center justify-center gap-1 transition shadow cursor-pointer" title="체크리스트 단어들을 바탕으로 매끄러운 안내 문장을 우측 본문에 자동 조합합니다">
+                    <span>⚡</span><span>태그 ➔ 본문 자동생성</span>
+                  </button>
+                  <button id="btnParseBodyToChecklist" type="button" class="px-2.5 py-1.5 rounded-xl bg-indigo-600/80 hover:bg-indigo-600 active:scale-95 text-indigo-100 font-bold text-xs flex items-center justify-center gap-1 transition shadow cursor-pointer" title="작성된 긴 안내문에서 핵심 체크리스트 키워드를 자동 추출합니다">
+                    <span>⚡</span><span>본문 ➔ 태그 자동추출</span>
+                  </button>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  💡 태그를 입력하고 생성 버튼을 누르면 한국어 조사(을/를)를 맞춘 자연스러운 문장이 우측 본문에 자동 삽입됩니다.
+                </p>
+              </div>
             </div>
-            <input id="inputChecklistTags" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" value="실험복 착용, 키트 수령, 교과서 74p 펼치기" />
-            <p class="text-[11px] text-slate-400 mt-1">💡 예: "실험복 착용, 키트 수령, 교과서 74p 펼치기"를 입력하고 버튼을 누르면 한국어 조사(을/를)를 맞춘 친절한 문장이 생성됩니다.</p>
+
+            <!-- 우측 열 (7/12): 넉넉한 대형 마크다운 본문 에디터 -->
+            <div class="lg:col-span-7 flex flex-col p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                    <span>📝</span><span>수업 안내 상세 본문 (마크다운 서식 지원)</span>
+                  </label>
+                  <span class="text-[10px] text-indigo-300 bg-indigo-950 px-1.5 py-0.5 rounded border border-indigo-800">줄바꿈 & 단락 지원</span>
+                </div>
+                <span class="text-[11px] text-slate-400 hidden sm:inline">16:9 와이드 에디터</span>
+              </div>
+
+              <!-- 마크다운 퀵 서식 툴바 -->
+              <div class="flex flex-wrap items-center gap-1.5 text-xs pb-1 border-b border-white/10">
+                <span class="text-[11px] text-slate-400 mr-1">단락 서식:</span>
+                <button id="btnInsertMdNum" type="button" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition active:scale-95 cursor-pointer">+ 번호 목록 (1.)</button>
+                <button id="btnInsertMdBullet" type="button" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition active:scale-95 cursor-pointer">+ 불릿 목록 (-)</button>
+                <button id="btnInsertMdBold" type="button" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition active:scale-95 cursor-pointer">+ 강조 (**굵게**)</button>
+                <button id="btnInsertMdQuote" type="button" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition active:scale-95 cursor-pointer">+ 주의 박스 (&gt;)</button>
+              </div>
+
+              <!-- 넉넉한 높이의 텍스트에어리어 -->
+              <textarea id="inputNoticeBody" rows="9" class="w-full px-3.5 py-3 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none leading-relaxed font-sans text-xs sm:text-sm" placeholder="수업 안내 내용을 마크다운 단락 형식으로 입력하세요..."></textarea>
+              <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+                <span>단락 사이는 한 줄 띄우기(Enter 2번)를 하면 시원하게 분리됩니다.</span>
+                <span class="text-indigo-300 font-mono">Markdown Engine</span>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <!-- 섹션 2: 수업 미디어(이미지 및 동영상) 설정 -->
-        <div id="sec-stMedia" class="settings-section hidden space-y-4">
-          <!-- 이미지 설정 -->
-          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
-            <h4 class="font-bold text-white flex items-center gap-2">
-              <span>🖼️</span><span>수업 이미지 설정</span>
-            </h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- 섹션 2: 수업 미디어(이미지 및 동영상) 설정 (16:9 와이드 2열) -->
+        <div id="sec-stMedia" class="settings-section hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <!-- 이미지 설정 -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3.5">
+              <h4 class="font-bold text-white flex items-center gap-2">
+                <span>🖼️</span><span>수업 이미지 디스플레이 설정</span>
+              </h4>
+              <p class="text-xs text-slate-400">쉬는 시간 대기 화면의 메인으로 노출될 교육 일러스트를 지정합니다.</p>
+              
               <div>
-                <label class="block text-xs text-slate-300 mb-1">웹 이미지 URL 링크</label>
-                <input id="inputImageUrl" type="url" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs" placeholder="https://..." value="https://imgur.com/gEGX67K.jpeg" />
+                <label class="block text-xs font-semibold text-slate-300 mb-1">웹 이미지 URL 링크 (Imgur 등)</label>
+                <input id="inputImageUrl" type="url" class="w-full px-3 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs" placeholder="https://..." value="https://imgur.com/gEGX67K.jpeg" />
               </div>
               <div>
-                <label class="block text-xs text-slate-300 mb-1">또는 PC 로컬 이미지 파일 업로드</label>
-                <input id="inputFileImage" type="file" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500" />
+                <label class="block text-xs font-semibold text-slate-300 mb-1">또는 PC 로컬 이미지 파일 업로드</label>
+                <input id="inputFileImage" type="file" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">이미지 캡션 / 하단 문구</label>
+                <input id="inputImageCaption" type="text" class="w-full px-3 py-2.5 rounded-lg bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs sm:text-sm" value="자존심은 다른 사람이 나를 어떻게 보는지에 따라 흔들립니다. 하지만, 자존감은 내가 나를 믿는 마음이라서 쉽게 흔들리지 않습니다." />
               </div>
             </div>
-            <div>
-              <label class="block text-xs text-slate-300 mb-1">이미지 캡션 / 부연 설명</label>
-              <input id="inputImageCaption" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" value="고래_자존심보다 자존감" />
-            </div>
-          </div>
 
-          <!-- 비디오 설정 -->
-          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
-            <h4 class="font-bold text-white flex items-center gap-2">
-              <span>🎬</span><span>수업 영상 (YouTube 등) 설정</span>
-            </h4>
-            <div>
-              <label class="block text-xs text-slate-300 mb-1">유튜브 링크 또는 iframe 태그</label>
-              <input id="inputVideoUrl" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" placeholder="https://www.youtube.com/watch?v=... 또는 <iframe ...>" value="https://www.youtube.com/watch?v=ZVrayy5g608" />
-              <p class="text-[11px] text-slate-400 mt-1">💡 일반 유튜브 주소, 짧은 주소(youtu.be), 또는 퍼가기 HTML 태그를 넣으면 자동으로 무음/반복 최적화 코드로 변환됩니다.</p>
+            <!-- 비디오 설정 -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3.5">
+              <h4 class="font-bold text-white flex items-center gap-2">
+                <span>🎬</span><span>수업 영상 (YouTube 등) 설정</span>
+              </h4>
+              <p class="text-xs text-slate-400">쉬는 시간 동안 자동 재생될 학습 동기부여 또는 배경 영상을 지정합니다.</p>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">유튜브 링크 또는 iframe 태그</label>
+                <input id="inputVideoUrl" type="text" class="w-full px-3 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs sm:text-sm font-mono" placeholder="https://www.youtube.com/watch?v=... 또는 <iframe ...>" value="https://www.youtube.com/watch?v=ZVrayy5g608" />
+              </div>
+              <div class="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/20 text-xs text-indigo-200 space-y-1 leading-relaxed">
+                <div class="font-bold flex items-center gap-1 text-indigo-300">
+                  <span>💡</span><span>자동 최적화 지원 안내</span>
+                </div>
+                <p>일반 유튜브 주소, 짧은 공유 주소(youtu.be), 또는 퍼가기 HTML iframe 코드를 붙여넣기만 하면 무음 자동 재생 및 연속 반복 플레이가 가능한 16:9 와이드 임베드 코드로 즉각 변환됩니다.</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- 섹션 3: Web Audio 신디사이저 & 백색소음 -->
-        <div id="sec-stAudio" class="settings-section hidden space-y-4">
-          <!-- 알람 벨소리 및 반복 횟수 선택 -->
-          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
-            <div class="flex items-center justify-between">
-              <label class="font-bold text-white flex items-center gap-2">
-                <span>🔔</span><span>알람 종료 벨소리</span>
-              </label>
-              <!-- 미리듣기 버튼 -->
-              <button id="btnPreviewAlarm" class="text-xs px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition flex items-center gap-1">
-                <span>▶️</span><span>미리듣기</span>
-              </button>
-            </div>
-            <select id="selectAlarmSound" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none">
-              <option value="koreanSchoolBell" selected>실제 한국 학교 7음절 종소리 (솔-도-레-솔 / 솔-레-도 & 청동 배음)</option>
-              <option value="westminster">웨스트민스터 차임 (빅벤 4마디 종소리)</option>
-              <option value="dingDong">맑은 딩동 (2음 차임벨)</option>
-              <option value="marimba">경쾌한 마림바 아르페지오</option>
-              <option value="digitalBeep">디지털 시계 비프음</option>
-            </select>
-
-            <!-- 종료 알람음 반복 횟수 설정 -->
-            <div class="pt-2 border-t border-white/10">
-              <div class="flex items-center justify-between mb-1.5">
-                <label class="block text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                  <span>🔁</span><span>종료 알람음 반복 횟수</span>
+        <!-- 섹션 3: Web Audio 신디사이저 & 백색소음 (16:9 와이드 2열) -->
+        <div id="sec-stAudio" class="settings-section hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            
+            <!-- 알람 벨소리 및 반복 횟수 선택 -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3.5">
+              <div class="flex items-center justify-between">
+                <label class="font-bold text-white flex items-center gap-2">
+                  <span>🔔</span><span>알람 종료 벨소리</span>
                 </label>
-                <span class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-medium">기본: 3회 반복</span>
+                <!-- 미리듣기 버튼 -->
+                <button id="btnPreviewAlarm" class="text-xs px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold transition flex items-center gap-1 shadow cursor-pointer">
+                  <span>▶️</span><span>미리듣기</span>
+                </button>
               </div>
-              <select id="selectAlarmRepeat" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs">
-                <option value="1">1회 (한 번만 울림)</option>
-                <option value="3" selected>3회 반복 (기본 권장)</option>
-                <option value="5">5회 반복</option>
-                <option value="untilDismissed">해제시까지 계속 반복 (무한 반복)</option>
+              <select id="selectAlarmSound" class="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs sm:text-sm">
+                <option value="koreanSchoolBell" selected>실제 한국 학교 7음절 종소리 (솔-도-레-솔 / 솔-레-도 & 청동 배음)</option>
+                <option value="westminster">웨스트민스터 차임 (빅벤 4마디 종소리)</option>
+                <option value="dingDong">맑은 딩동 (2음 차임벨)</option>
+                <option value="marimba">경쾌한 마림바 아르페지오</option>
+                <option value="digitalBeep">디지털 시계 비프음</option>
               </select>
-              <p class="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
-                💡 알람이 울리는 중 화면의 <strong>[🔕 알람 끄기]</strong> 버튼이나 키보드 <strong>Space</strong>, <strong>Esc</strong>를 누르면 즉시 무음으로 멈춥니다.
-              </p>
-            </div>
-          </div>
 
-          <!-- 1분 전 예비령 및 앰버 펄스 설정 -->
-          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
-            <div>
-              <div class="font-bold text-white flex items-center gap-2">
-                <span>⚠️</span><span>1분 전 착석 예비령 & 앰버 펄스</span>
-              </div>
-              <p class="text-xs text-slate-400 mt-1">남은 시간 1분 도달 시 2음 핑 사운드 재생 및 테두리 시각 경고 점멸</p>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input id="chkWarningAlert" type="checkbox" checked class="sr-only peer">
-              <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-            </label>
-          </div>
-
-          <!-- 집중 앰비언트 백색소음 -->
-          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
-            <h4 class="font-bold text-white flex items-center gap-2">
-              <span>🎧</span><span>집중 앰비언트 사운드 (백색소음)</span>
-            </h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs text-slate-300 mb-1">소음 종류 선택</label>
-                <select id="selectAmbientType" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs">
-                  <option value="rain" selected>잔잔한 빗소리 (Low-Pass Filter)</option>
-                  <option value="breeze">솔솔 부는 숲속 바람소리 (Band-Pass Filter)</option>
+              <!-- 종료 알람음 반복 횟수 설정 -->
+              <div class="pt-3 border-t border-white/10">
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="block text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                    <span>🔁</span><span>종료 알람음 반복 횟수</span>
+                  </label>
+                  <span class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-medium">기본: 3회 반복</span>
+                </div>
+                <select id="selectAlarmRepeat" class="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs sm:text-sm">
+                  <option value="1">1회 (한 번만 울림)</option>
+                  <option value="3" selected>3회 반복 (기본 권장)</option>
+                  <option value="5">5회 반복</option>
+                  <option value="untilDismissed">해제시까지 계속 반복 (무한 반복)</option>
                 </select>
-              </div>
-              <div>
-                <label class="block text-xs text-slate-300 mb-1">음량 조절 (<span id="ambientVolumeLabel">40%</span>)</label>
-                <input id="sliderAmbientVolume" type="range" min="0" max="100" value="40" class="w-full accent-indigo-500" />
+                <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+                  💡 알람이 울릴 때 화면의 <strong>[🔕 알람 끄기]</strong> 버튼이나 키보드 <strong>Space</strong>, <strong>Esc</strong>를 누르면 즉시 무음으로 멈춥니다.
+                </p>
               </div>
             </div>
+
+            <!-- 1분 전 예비령 & 백색소음 -->
+            <div class="space-y-4">
+              <!-- 1분 전 착석 예비령 및 앰버 펄스 설정 -->
+              <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-white flex items-center gap-2">
+                    <span>⚠️</span><span>1분 전 착석 예비령 & 앰버 펄스</span>
+                  </div>
+                  <p class="text-xs text-slate-400 mt-1">남은 시간 1분 도달 시 2음 핑 사운드 재생 및 테두리 시각 경고 점멸</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input id="chkWarningAlert" type="checkbox" checked class="sr-only peer">
+                  <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                </label>
+              </div>
+
+              <!-- 집중 앰비언트 백색소음 -->
+              <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                <h4 class="font-bold text-white flex items-center gap-2">
+                  <span>🎧</span><span>집중 앰비언트 사운드 (백색소음)</span>
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs text-slate-300 mb-1">소음 종류 선택</label>
+                    <select id="selectAmbientType" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs">
+                      <option value="rain" selected>잔잔한 빗소리 (Low-Pass Filter)</option>
+                      <option value="breeze">솔솔 부는 숲속 바람소리 (Band-Pass Filter)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs text-slate-300 mb-1">음량 조절 (<span id="ambientVolumeLabel">40%</span>)</label>
+                    <input id="sliderAmbientVolume" type="range" min="0" max="100" value="40" class="w-full accent-indigo-500" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <!-- 섹션 4: 배경화면 커스텀 & 테마 모드 & QR 코드 설정 -->
-        <div id="sec-stDisplay" class="settings-section hidden space-y-4">
-          <!-- 1) 테마 모드 선택 (라이트 / 다크 / 시스템) -->
-          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
-            <h4 class="font-bold text-white flex items-center gap-2">
-              <span>🌓</span><span>화면 모드 테마 (기본: 은은한 라이트 모드)</span>
-            </h4>
-            <div class="grid grid-cols-3 gap-2">
-              <button type="button" class="theme-mode-btn active p-2.5 rounded-xl border border-indigo-500 bg-indigo-600/30 text-indigo-200 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer" data-mode="light">
-                <span>☀️</span><span>은은한 라이트 (기본)</span>
-              </button>
-              <button type="button" class="theme-mode-btn p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer" data-mode="dark">
-                <span>🌙</span><span>차분한 다크</span>
-              </button>
-              <button type="button" class="theme-mode-btn p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer" data-mode="system">
-                <span>💻</span><span>시스템 설정</span>
-              </button>
-            </div>
-            <p class="text-[11px] text-slate-400">💡 낮 시간 교실에서는 은은한 라이트 모드가 눈의 피로를 덜어주고, 빔프로젝터 사용 시 다크 모드가 선명합니다.</p>
-          </div>
-
-          <!-- 2) 메뉴 & 카드 스타일 배경 투명도(불투명도) 조절 -->
-          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-            <div class="flex items-center justify-between text-xs text-slate-300">
-              <span class="font-semibold flex items-center gap-1.5">
-                <span>🪟</span><span>카드 & 메뉴 스타일배경 투명도</span>
-              </span>
-              <span id="labelCardOpacity" class="font-bold text-indigo-400">45%</span>
-            </div>
-            <input id="sliderCardOpacity" type="range" min="0" max="95" value="45" class="w-full accent-indigo-500" />
-            <p class="text-[11px] text-slate-400">💡 배경 사진이 은은하게 비치는 글래스모피즘 투명도를 0%(완전 투명)부터 95%(선명)까지 자유롭게 조절합니다.</p>
-          </div>
-
-          <!-- 3) 배경 테마 선택 -->
-          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
-            <h4 class="font-bold text-white flex items-center gap-2">
-              <span>🎨</span><span>배경화면 테마 프리셋</span>
-            </h4>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <button class="preset-bg-btn p-2 rounded-xl bg-slate-800/80 hover:border-indigo-400 border border-slate-700 text-xs font-semibold text-slate-200 transition text-center" data-bg="https://i.imgur.com/VXI1sTq.jpeg">
-                🏫 기본 교실 (Zzang_AA)
-              </button>
-              <button class="preset-bg-btn p-2 rounded-xl bg-slate-800/80 hover:border-indigo-400 border border-slate-700 text-xs font-semibold text-slate-200 transition text-center" data-bg="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=2560&auto=format&fit=crop">
-                📚 아늑한 도서관
-              </button>
-              <button class="preset-bg-btn p-2 rounded-xl bg-slate-800/80 hover:border-indigo-400 border border-slate-700 text-xs font-semibold text-slate-200 transition text-center" data-bg="https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2560&auto=format&fit=crop">
-                🌲 푸른 숲속
-              </button>
-              <button class="preset-bg-btn p-2 rounded-xl bg-slate-800/80 hover:border-indigo-400 border border-slate-700 text-xs font-semibold text-slate-200 transition text-center" data-bg="https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=2560&auto=format&fit=crop">
-                🌌 신비한 우주
-              </button>
-            </div>
-
-            <!-- 커스텀 배경 업로드 -->
-            <div class="pt-2">
-              <label class="block text-xs text-slate-300 mb-1">내 PC 이미지로 배경 변경</label>
-              <input id="inputFileBg" type="file" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500" />
-            </div>
-
-            <!-- 배경 어둡기(Dimmer) 슬라이더 -->
-            <div class="pt-2">
-              <div class="flex items-center justify-between text-xs text-slate-300 mb-1">
-                <span>배경 틴트 / 어둡기 조절</span>
-                <span id="labelBgDimmer" class="font-bold text-indigo-300">15%</span>
+        <!-- 섹션 4: 배경화면 커스텀 & 테마 모드 & QR 코드 설정 (16:9 와이드 2열) -->
+        <div id="sec-stDisplay" class="settings-section hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            
+            <!-- 좌측 열: 테마 모드 및 글래스모피즘 투명도 / 배경 설정 -->
+            <div class="space-y-4">
+              <!-- 1) 테마 모드 선택 -->
+              <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
+                <h4 class="font-bold text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                  <span>🌓</span><span>화면 모드 테마 (기본: 은은한 라이트 모드)</span>
+                </h4>
+                <div class="grid grid-cols-3 gap-2">
+                  <button type="button" class="theme-mode-btn active p-2 rounded-xl border border-indigo-500 bg-indigo-600/30 text-indigo-200 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer" data-mode="light">
+                    <span>☀️</span><span>은은한 라이트 (기본)</span>
+                  </button>
+                  <button type="button" class="theme-mode-btn p-2 rounded-xl border border-slate-700 bg-slate-800/80 text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer" data-mode="dark">
+                    <span>🌙</span><span>차분한 다크</span>
+                  </button>
+                  <button type="button" class="theme-mode-btn p-2 rounded-xl border border-slate-700 bg-slate-800/80 text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer" data-mode="system">
+                    <span>💻</span><span>시스템 설정</span>
+                  </button>
+                </div>
               </div>
-              <input id="sliderBgDimmer" type="range" min="0" max="85" value="15" class="w-full accent-indigo-500" />
-            </div>
-          </div>
 
-          <!-- 4) 모바일 연동 QR 코드 링크 설정 -->
-          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
-            <h4 class="font-bold text-white flex items-center gap-2">
-              <span>📱</span><span>모바일 연동 QR 코드 설정</span>
-            </h4>
-            <div>
-              <label class="block text-xs text-slate-300 mb-1">연결할 URL (구글 폼, 패들렛, 클래스룸 등)</label>
-              <input id="inputQrUrl" type="url" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" value="https://padlet.com" />
+              <!-- 2) 카드 투명도 & 배경 틴트 조절 -->
+              <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                <div>
+                  <div class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                    <span class="font-semibold flex items-center gap-1.5">
+                      <span>🪟</span><span>카드 & 메뉴 스타일배경 투명도</span>
+                    </span>
+                    <span id="labelCardOpacity" class="font-bold text-indigo-400">45%</span>
+                  </div>
+                  <input id="sliderCardOpacity" type="range" min="0" max="95" value="45" class="w-full accent-indigo-500" />
+                </div>
+                <div class="pt-2 border-t border-white/10">
+                  <div class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                    <span class="font-semibold flex items-center gap-1.5">
+                      <span>🌫️</span><span>배경 틴트 / 어둡기 조절</span>
+                    </span>
+                    <span id="labelBgDimmer" class="font-bold text-indigo-300">15%</span>
+                  </div>
+                  <input id="sliderBgDimmer" type="range" min="0" max="85" value="15" class="w-full accent-indigo-500" />
+                </div>
+              </div>
+
+              <!-- 3) 배경 프리셋 & 로컬 업로드 -->
+              <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
+                <h4 class="font-bold text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                  <span>🎨</span><span>배경화면 테마 프리셋</span>
+                </h4>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <button class="preset-bg-btn p-2 rounded-xl bg-slate-800/80 hover:border-indigo-400 border border-slate-700 text-xs font-semibold text-slate-200 transition text-center" data-bg="https://i.imgur.com/VXI1sTq.jpeg">
+                    🏫 기본 교실
+                  </button>
+                  <button class="preset-bg-btn p-2 rounded-xl bg-slate-800/80 hover:border-indigo-400 border border-slate-700 text-xs font-semibold text-slate-200 transition text-center" data-bg="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=2560&auto=format&fit=crop">
+                    📚 아늑한 도서관
+                  </button>
+                  <button class="preset-bg-btn p-2 rounded-xl bg-slate-800/80 hover:border-indigo-400 border border-slate-700 text-xs font-semibold text-slate-200 transition text-center" data-bg="https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2560&auto=format&fit=crop">
+                    🌲 푸른 숲속
+                  </button>
+                  <button class="preset-bg-btn p-2 rounded-xl bg-slate-800/80 hover:border-indigo-400 border border-slate-700 text-xs font-semibold text-slate-200 transition text-center" data-bg="https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=2560&auto=format&fit=crop">
+                    🌌 신비한 우주
+                  </button>
+                </div>
+                <div class="pt-2">
+                  <label class="block text-xs text-slate-300 mb-1">내 PC 이미지로 배경 변경</label>
+                  <input id="inputFileBg" type="file" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer" />
+                </div>
+              </div>
             </div>
-            <div>
-              <label class="block text-xs text-slate-300 mb-1">QR 모달 안내 제목</label>
-              <input id="inputQrTitle" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none" value="모바일로 수업 패들렛 접속하기" />
+
+            <!-- 우측 열: 모바일 연동 QR 코드 설정 -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/10 space-y-4 flex flex-col justify-between">
+              <div class="space-y-3.5">
+                <h4 class="font-bold text-white flex items-center gap-2">
+                  <span>📱</span><span>모바일 연동 QR 코드 설정</span>
+                </h4>
+                <p class="text-xs text-slate-400">학생들이 스마트폰 카메라로 스캔하여 수업 활동이나 설문에 참여할 수 있는 링크를 설정합니다.</p>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">연결할 URL (패들렛, 구글 폼, 클래스룸 등)</label>
+                  <input id="inputQrUrl" type="url" class="w-full px-3 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs sm:text-sm font-mono" value="https://padlet.com" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">QR 모달 안내 제목</label>
+                  <input id="inputQrTitle" type="text" class="w-full px-3 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none text-xs sm:text-sm" value="모바일로 수업 패들렛 접속하기" />
+                </div>
+              </div>
+
+              <!-- 미리보기 가이드 박스 -->
+              <div class="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/20 text-xs text-slate-300 space-y-1.5">
+                <div class="font-bold text-indigo-300 flex items-center gap-1.5">
+                  <span>💡</span><span>QR 빠른 사용 팁</span>
+                </div>
+                <p>상단 헤더의 📱 버튼을 누르면 언제든지 대형 QR 코드 팝업이 나타나 학생들이 쉽게 카메라로 촬영할 수 있습니다.</p>
+              </div>
             </div>
+
           </div>
         </div>
 
       </div>
 
-      <!-- 모달 푸터 버튼 -->
-      <div class="pt-4 border-t border-white/10 flex items-center justify-end gap-3">
-        <button id="btnSaveSettings" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow-lg shadow-indigo-600/30">
-          설정 저장 및 적용
-        </button>
+      <!-- 모달 푸터 버튼 (16:9 와이드 푸터) -->
+      <div class="pt-3 sm:pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+        <div class="hidden sm:flex items-center gap-2 text-xs text-slate-400">
+          <span>단축키:</span>
+          <span class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[11px] font-mono">Esc</span>
+          <span>창 닫기</span>
+        </div>
+        <div class="flex items-center gap-2.5 ml-auto">
+          <button id="btnCloseSettingsFooter" onclick="dom.settingsModal.classList.add('hidden')" type="button" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 text-xs sm:text-sm font-semibold transition active:scale-95 cursor-pointer">
+            닫기
+          </button>
+          <button id="btnSaveSettings" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold text-xs sm:text-sm transition shadow-lg shadow-indigo-600/30 flex items-center gap-1.5 cursor-pointer">
+            <span>💾</span><span>설정 저장 및 즉각 적용</span>
+          </button>
+        </div>
       </div>
 
     </div>
@@ -1524,14 +1682,23 @@
         this.sensitivity = 1.5;
         this.theme = 'color'; // 'color' | 'emoji' | 'bubble'
         this.balls = [];
-        this.ballCount = 45;
+        this.ballCount = 38;
         this.threshold = 75;
         this.lastExplosionTime = 0;
 
         this.emojis = ['😀', '🤫', '🎈', '🐱', '⭐', '🌈', '🍎', '🚀', '🐶', '⚽'];
+        // 밝고 부드러운 화사한 파스텔톤 팔레트 10종
         this.palette = [
-          '#6366f1', '#818cf8', '#06b6d4', '#10b981', '#f59e0b',
-          '#ec4899', '#8b5cf6', '#3b82f6', '#14b8a6', '#f43f5e'
+          '#fda4af', // 파스텔 로즈핑크
+          '#fbcfe8', // 파스텔 블라썸
+          '#c4b5fd', // 소프트 라벤더
+          '#a5b4fc', // 페리윙클 블루
+          '#93c5fd', // 파스텔 스카이블루
+          '#6ee7b7', // 화사한 민트
+          '#86efac', // 소프트 스프링그린
+          '#fde047', // 따뜻한 파스텔 레몬
+          '#fed7aa', // 파스텔 살구피치
+          '#fdba74'  // 소프트 코랄
         ];
 
         this.width = 600;
@@ -1560,12 +1727,13 @@
       initBalls() {
         this.balls = [];
         for (let i = 0; i < this.ballCount; i++) {
-          const radius = 14 + Math.random() * 12;
+          // 크기를 1.2-2.0배 확대 (반지름 24px ~ 42px)
+          const radius = 24 + Math.random() * 18;
           this.balls.push({
             x: radius + Math.random() * Math.max(100, this.width - radius * 2),
             y: this.height - radius - Math.random() * 60,
-            vx: (Math.random() - 0.5) * 2,
-            vy: -Math.random() * 3,
+            vx: (Math.random() - 0.5) * 2.2,
+            vy: -Math.random() * 3.5,
             radius: radius,
             color: this.palette[i % this.palette.length],
             emoji: this.emojis[i % this.emojis.length],
@@ -1735,8 +1903,8 @@
         this.ctx.clearRect(0, 0, this.width, this.height);
 
         // 바닥 기준선
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-        this.ctx.lineWidth = 1;
+        this.ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+        this.ctx.lineWidth = 1.5;
         this.ctx.beginPath();
         this.ctx.moveTo(0, this.height - 2);
         this.ctx.lineTo(this.width, this.height - 2);
@@ -1749,46 +1917,56 @@
           this.ctx.translate(b.x, b.y);
 
           if (this.theme === 'color') {
-            const grad = this.ctx.createRadialGradient(-b.radius * 0.3, -b.radius * 0.3, b.radius * 0.1, 0, 0, b.radius);
+            // 화사한 파스텔톤 입체 구형 그라디언트 (탁한 검정 음영 완전 제거)
+            const grad = this.ctx.createRadialGradient(-b.radius * 0.35, -b.radius * 0.35, b.radius * 0.05, 0, 0, b.radius);
             grad.addColorStop(0, '#ffffff');
-            grad.addColorStop(0.35, b.color);
-            grad.addColorStop(1, '#020617');
+            grad.addColorStop(0.3, b.color);
+            grad.addColorStop(0.85, b.color);
+            grad.addColorStop(1, 'rgba(30, 41, 59, 0.22)');
             this.ctx.fillStyle = grad;
             this.ctx.beginPath();
             this.ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
             this.ctx.fill();
 
-            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-            this.ctx.lineWidth = 1.2;
+            // 상단 하이라이트 광택 (생동감 넘치는 젤리/마카롱 질감)
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+            this.ctx.beginPath();
+            this.ctx.ellipse(-b.radius * 0.32, -b.radius * 0.32, b.radius * 0.32, b.radius * 0.18, Math.PI / 4, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            this.ctx.lineWidth = 1.5;
             this.ctx.stroke();
 
           } else if (this.theme === 'emoji') {
             this.ctx.rotate(b.rotation);
-            this.ctx.font = `${Math.round(b.radius * 1.8)}px sans-serif`;
+            // 이모지 폰트 1.5~2배 확대
+            this.ctx.font = `${Math.round(b.radius * 2.0)}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`;
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             this.ctx.fillText(b.emoji, 0, 0);
 
           } else if (this.theme === 'bubble') {
-            const wobbleR = b.radius + Math.sin(b.bubbleWobble) * 1.5;
+            const wobbleR = b.radius + Math.sin(b.bubbleWobble) * 2.0;
             const grad = this.ctx.createRadialGradient(-wobbleR * 0.3, -wobbleR * 0.3, wobbleR * 0.1, 0, 0, wobbleR);
-            grad.addColorStop(0, 'rgba(255, 255, 255, 0.75)');
-            grad.addColorStop(0.4, 'rgba(147, 197, 253, 0.35)');
-            grad.addColorStop(0.8, 'rgba(192, 132, 252, 0.3)');
-            grad.addColorStop(1, 'rgba(96, 165, 250, 0.12)');
+            grad.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
+            grad.addColorStop(0.4, 'rgba(147, 197, 253, 0.45)');
+            grad.addColorStop(0.75, 'rgba(192, 132, 252, 0.4)');
+            grad.addColorStop(1, 'rgba(96, 165, 250, 0.18)');
 
             this.ctx.fillStyle = grad;
             this.ctx.beginPath();
             this.ctx.arc(0, 0, wobbleR, 0, Math.PI * 2);
             this.ctx.fill();
 
-            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-            this.ctx.lineWidth = 1.2;
+            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+            this.ctx.lineWidth = 1.8;
             this.ctx.stroke();
 
-            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            // 비눗방울 반사 빛망울
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
             this.ctx.beginPath();
-            this.ctx.arc(-wobbleR * 0.35, -wobbleR * 0.35, wobbleR * 0.22, 0, Math.PI * 2);
+            this.ctx.arc(-wobbleR * 0.35, -wobbleR * 0.35, wobbleR * 0.24, 0, Math.PI * 2);
             this.ctx.fill();
           }
 
@@ -1817,10 +1995,70 @@
       return word + (hasBatchim(word) ? '을' : '를');
     }
 
+    // 안내문 내용량(글자 수 및 라인 수)에 따른 스마트 반응형 폰트 크기 계산기
+    function getNoticeFontSizeClasses(markdown) {
+      if (!markdown) {
+        return {
+          containerClass: 'space-y-2 mb-2 max-h-[300px] sm:max-h-[360px] lg:max-h-[420px]',
+          titleClass: 'text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white mb-2 leading-tight tracking-tight',
+          itemClass: 'py-2 sm:py-2.5 px-3 sm:px-4',
+          ruleTitleClass: 'text-base sm:text-lg lg:text-xl font-black',
+          ruleDescClass: 'text-sm sm:text-base lg:text-lg text-slate-800 dark:text-slate-100 font-bold',
+          emojiBadgeClass: 'w-8 h-8 sm:w-9 sm:h-9 text-lg sm:text-xl'
+        };
+      }
+
+      const totalLen = markdown.trim().length;
+      const lines = markdown.trim().split(/\r?\n/).filter(l => l.trim().length > 0);
+      const lineCount = lines.length;
+
+      // 1) 초단문 (150자 미만 또는 4줄 이하) : 교실 맨 뒷자리까지 시원한 초대형 폰트
+      if (totalLen <= 150 && lineCount <= 4) {
+        return {
+          containerClass: 'space-y-3 mb-2 max-h-[300px] sm:max-h-[360px] lg:max-h-[420px]',
+          titleClass: 'text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white mb-2.5 leading-tight tracking-tight',
+          itemClass: 'py-3 sm:py-3.5 px-4 sm:px-5',
+          ruleTitleClass: 'text-lg sm:text-xl lg:text-2xl font-black',
+          ruleDescClass: 'text-base sm:text-lg lg:text-xl text-slate-800 dark:text-slate-100 font-bold',
+          emojiBadgeClass: 'w-10 h-10 sm:w-11 sm:h-11 text-2xl sm:text-3xl'
+        };
+      }
+      // 2) 중문 (150자 ~ 480자, 8대 약속 수칙 등) : 가독성을 대폭 끌어올린 시원한 대화면 폰트
+      else if (totalLen <= 480 && lineCount <= 10) {
+        return {
+          containerClass: 'space-y-2 sm:space-y-2.5 mb-2 max-h-[300px] sm:max-h-[360px] lg:max-h-[420px]',
+          titleClass: 'text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white mb-2 leading-tight tracking-tight',
+          itemClass: 'py-2 sm:py-2.5 px-3 sm:px-4',
+          ruleTitleClass: 'text-base sm:text-lg lg:text-xl font-black',
+          ruleDescClass: 'text-sm sm:text-base lg:text-lg text-slate-800 dark:text-slate-100 font-bold',
+          emojiBadgeClass: 'w-8 h-8 sm:w-9 sm:h-9 text-lg sm:text-xl'
+        };
+      }
+      // 3) 장문 (480자 초과) : 많은 내용을 깔끔히 담는 스마트 압축 폰트
+      else {
+        return {
+          containerClass: 'space-y-1.5 sm:space-y-2 mb-2 max-h-[300px] sm:max-h-[360px] lg:max-h-[420px]',
+          titleClass: 'text-lg sm:text-xl lg:text-2xl font-black text-slate-900 dark:text-white mb-1.5 leading-tight tracking-tight',
+          itemClass: 'py-1.5 sm:py-2 px-3',
+          ruleTitleClass: 'text-sm sm:text-base font-black',
+          ruleDescClass: 'text-xs sm:text-sm lg:text-base text-slate-800 dark:text-slate-100 font-bold',
+          emojiBadgeClass: 'w-7 h-7 sm:w-8 sm:h-8 text-base sm:text-lg'
+        };
+      }
+    }
+
     // 마크다운 텍스트를 아름답고 시인성 높은 구조화된 단락 HTML로 변환하는 렌더러
     function renderMarkdownToHTML(markdown) {
       if (!markdown || !markdown.trim()) {
-        return '<p class="text-xs sm:text-sm text-slate-400 italic">등록된 수업 안내가 없습니다.</p>';
+        return '<p class="text-sm sm:text-base text-slate-500 dark:text-slate-400 italic py-4 text-center">등록된 수업 안내가 없습니다.</p>';
+      }
+
+      const fontClasses = getNoticeFontSizeClasses(markdown);
+      if (dom && dom.displayNoticeBody) {
+        dom.displayNoticeBody.className = fontClasses.containerClass + ' overflow-y-auto pr-2 text-slate-900 dark:text-slate-100';
+      }
+      if (dom && dom.displayNoticeTitle) {
+        dom.displayNoticeTitle.className = fontClasses.titleClass;
       }
 
       const lines = markdown.split(/\r?\n/);
@@ -1833,11 +2071,11 @@
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;');
         // **굵은 글씨**
-        escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-white tracking-wide">$1</strong>');
+        escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong class="font-black text-indigo-950 dark:text-white tracking-wide">$1</strong>');
         // *기울임*
-        escaped = escaped.replace(/\*(.+?)\*/g, '<em class="italic text-indigo-200">$1</em>');
+        escaped = escaped.replace(/\*(.+?)\*/g, '<em class="italic text-indigo-700 dark:text-indigo-300">$1</em>');
         // `인라인 코드`
-        escaped = escaped.replace(/`(.+?)`/g, '<code class="px-1.5 py-0.5 rounded bg-slate-800 text-indigo-300 font-mono text-xs border border-slate-700">$1</code>');
+        escaped = escaped.replace(/`(.+?)`/g, '<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 font-mono text-xs border border-slate-300 dark:border-slate-700">$1</code>');
         return escaped;
       };
 
@@ -1848,8 +2086,8 @@
         // 1) 주의사항/팁 박스 (> ...)
         if (rawLine.startsWith('>')) {
           const content = parseInline(rawLine.substring(1).trim());
-          html += `<div class="border-l-4 border-amber-400/90 bg-amber-500/10 px-3 py-2 rounded-r-xl text-amber-200 text-xs sm:text-sm my-1.5 flex items-start gap-2 shadow-sm">
-            <span class="text-amber-400 font-bold flex-shrink-0">💡</span>
+          html += `<div class="border-l-4 border-amber-500 bg-amber-50/95 dark:bg-amber-950/50 ${fontClasses.itemClass} rounded-r-xl text-amber-950 dark:text-amber-200 ${fontClasses.ruleDescClass} my-1.5 flex items-start gap-2 shadow-sm border-y border-r border-amber-200/80 dark:border-amber-700/40">
+            <span class="text-amber-600 dark:text-amber-400 font-bold flex-shrink-0 text-base">💡</span>
             <div class="leading-relaxed flex-1">${content}</div>
           </div>`;
           continue;
@@ -1859,43 +2097,73 @@
         const headingMatch = rawLine.match(/^(#{1,4})\s+(.+)$/);
         if (headingMatch) {
           const title = parseInline(headingMatch[2]);
-          html += `<div class="text-sm sm:text-base font-bold text-white mt-3 mb-1 pb-1 border-b border-white/10 flex items-center gap-1.5">${title}</div>`;
+          html += `<div class="${fontClasses.titleClass} mt-3 mb-1.5 pb-1 border-b border-slate-300/60 dark:border-white/10 flex items-center gap-1.5">${title}</div>`;
           continue;
         }
 
-        // 3) 이모지 소제목 배지 (예: 📌 **수업 개요**, 🎒 **학생 준비 및 행동 요령**, 💡 **주의 사항**)
+        // 3) 콜론(:) 또는 이모지 수칙/약속 카드 (예: 🚫 장난치지 않기 : 안전하고 즐거운 수업 분위기를 만들어요.)
+        const colonMatch = rawLine.match(/^(.+?)\s*[:：]\s*(.+)$/);
+        if (colonMatch) {
+          let leftPart = colonMatch[1].trim();
+          let rightPart = colonMatch[2].trim();
+
+          // 좌측에서 이모지 분리 시도
+          let emoji = '';
+          let title = leftPart;
+          const emojiRegex = /^([\uD800-\uDBFF][\uDC00-\uDFFF]|[\u2600-\u27BF]|[\u2300-\u23FF]|[\u2B50-\u2B55]|[\u3030\u303D]|[\uE000-\uF8FF]|\S)\s+(.*)$/u;
+          const emMatch = leftPart.match(emojiRegex);
+          if (emMatch && emMatch[1] && emMatch[1].length <= 4) {
+            emoji = emMatch[1];
+            title = emMatch[2];
+          }
+
+          const parsedTitle = parseInline(title);
+          const parsedDesc = parseInline(rightPart);
+
+          html += `<div class="flex items-center gap-3 ${fontClasses.itemClass} rounded-xl bg-white/95 dark:bg-slate-900/90 border-2 border-indigo-200/90 dark:border-indigo-600/50 hover:border-indigo-500 hover:shadow-md transition shadow-sm mb-2 group">
+            ${emoji ? `<div class="flex-shrink-0 ${fontClasses.emojiBadgeClass} rounded-lg bg-indigo-100/95 dark:bg-indigo-950/80 border border-indigo-300 dark:border-indigo-700/70 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">${emoji}</div>` : ''}
+            <div class="flex-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <span class="${fontClasses.ruleTitleClass} text-indigo-950 dark:text-white tracking-wide">${parsedTitle}</span>
+              <span class="text-indigo-600 dark:text-indigo-400 font-black hidden sm:inline">:</span>
+              <span class="${fontClasses.ruleDescClass} text-slate-800 dark:text-slate-100 font-bold leading-relaxed">${parsedDesc}</span>
+            </div>
+          </div>`;
+          continue;
+        }
+
+        // 4) 이모지 소제목 배지 (예: 📌 **수업 개요**, 🎒 **학생 준비 및 행동 요령**)
         if (/^[📌🎒💡✨🔍📢🎯📝🔔]\s*\*\*/.test(rawLine)) {
           const content = parseInline(rawLine);
-          html += `<div class="text-xs sm:text-sm font-bold text-indigo-300 flex items-center gap-1.5 pt-2 pb-0.5">${content}</div>`;
+          html += `<div class="${fontClasses.ruleTitleClass} text-indigo-900 dark:text-indigo-300 font-black flex items-center gap-1.5 pt-2 pb-0.5">${content}</div>`;
           continue;
         }
 
-        // 4) 숫자 번호 목록 (1. , 2. ) -> 깔끔한 독립 카드 박스로 단락화
+        // 5) 숫자 번호 목록 (1. , 2. ) -> 깔끔한 독립 카드 박스로 단락화
         const numMatch = rawLine.match(/^(\d+)[\.\)]\s+(.+)$/);
         if (numMatch) {
           const num = numMatch[1];
           const content = parseInline(numMatch[2]);
-          html += `<div class="flex items-start gap-2.5 px-3 py-2 rounded-xl bg-slate-900/70 border border-slate-800/80 hover:border-indigo-500/40 transition shadow-sm mb-1.5">
-            <span class="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/40 text-xs font-bold flex items-center justify-center mt-0.5 shadow-sm">${num}</span>
-            <div class="text-xs sm:text-sm text-slate-200 leading-relaxed flex-1">${content}</div>
+          html += `<div class="flex items-start gap-2.5 ${fontClasses.itemClass} rounded-xl bg-white/95 dark:bg-slate-900/90 border-2 border-indigo-200/90 dark:border-indigo-600/50 hover:border-indigo-500 hover:shadow-md transition shadow-sm mb-2">
+            <span class="flex-shrink-0 w-6 h-6 rounded-md bg-indigo-600 text-white font-black text-xs sm:text-sm flex items-center justify-center mt-0.5 shadow-sm">${num}</span>
+            <div class="${fontClasses.ruleDescClass} text-slate-800 dark:text-slate-100 font-bold leading-relaxed flex-1">${content}</div>
           </div>`;
           continue;
         }
 
-        // 5) 불릿 목록 (- , * ) -> 불릿 카드 박스
+        // 6) 불릿 목록 (- , * ) -> 불릿 카드 박스
         const bulletMatch = rawLine.match(/^[\-\*]\s+(.+)$/);
         if (bulletMatch) {
           const content = parseInline(bulletMatch[1]);
-          html += `<div class="flex items-start gap-2.5 px-3 py-1.5 rounded-xl bg-slate-900/40 border border-slate-800/50 mb-1.5">
-            <span class="text-sky-400 font-bold text-sm leading-none mt-1">•</span>
-            <div class="text-xs sm:text-sm text-slate-300 leading-relaxed flex-1">${content}</div>
+          html += `<div class="flex items-start gap-2.5 ${fontClasses.itemClass} rounded-xl bg-white/90 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-800 mb-1.5 shadow-sm">
+            <span class="text-indigo-600 dark:text-sky-400 font-bold text-base leading-none mt-1">•</span>
+            <div class="${fontClasses.ruleDescClass} text-slate-800 dark:text-slate-100 font-bold leading-relaxed flex-1">${content}</div>
           </div>`;
           continue;
         }
 
-        // 6) 일반 문단 단락
+        // 7) 일반 문단 단락
         const content = parseInline(rawLine);
-        html += `<p class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-1.5">${content}</p>`;
+        html += `<p class="${fontClasses.ruleDescClass} text-slate-800 dark:text-slate-100 font-bold leading-relaxed mb-1.5">${content}</p>`;
       }
 
       return html;
@@ -1904,6 +2172,28 @@
     // 본문 -> 체크리스트 자동 추출 (⚡)
     function extractChecklistFromBody(text) {
       if (!text) return [];
+      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const extracted = [];
+
+      // 1) 콜론(:) 형태의 약속/수칙 라인 우선 감지 (예: 🚫 장난치지 않기 : 안전하고 즐거운 수업 분위기를 만들어요.)
+      lines.forEach(line => {
+        if (line.includes(':') || line.includes('：')) {
+          const parts = line.split(/[:：]/);
+          let key = parts[0].replace(/\*\*(.+?)\*\*/g, '$1').trim();
+          // 앞쪽 이모지 제거하여 순수 수칙명 추출
+          key = key.replace(/^([\uD800-\uDBFF][\uDC00-\uDFFF]|[\u2600-\u27BF]|[\u2300-\u23FF]|[\u2B50-\u2B55]|[\u3030\u303D]|[\uE000-\uF8FF]|\S+)\s*/u, '').trim();
+          // 괄호 내용 정리
+          key = key.replace(/\(.*?\)/g, '').trim();
+          if (key && key.length >= 2 && key.length <= 25 && !key.includes('개요') && !key.includes('주의')) {
+            extracted.push(key);
+          }
+        }
+      });
+
+      if (extracted.length > 0) {
+        return extracted;
+      }
+
       // 마크다운 기호 제거하여 순수 텍스트로 정돈
       const cleanedText = text
         .replace(/\*\*(.+?)\*\*/g, '$1')
@@ -1913,7 +2203,6 @@
         .replace(/^>\s*/gm, '');
 
       const sentences = cleanedText.split(/[.\n!?;]+/).map(s => s.trim()).filter(Boolean);
-      const extracted = [];
 
       // 동작 및 키워드 추출 정규식
       const patterns = [
@@ -1933,10 +2222,8 @@
           const m = sentence.match(pattern);
           if (m && m[1]) {
             let item = m[1].replace(/^(또한|그리고|미리|앞쪽|교탁에서|이번 시간에는|모둠별로|각자)\s*/g, '').trim();
-            // 끝에 남은 불필요한 조사(을/를, 은/는) 정돈
             item = item.replace(/(을|를|은|는|에|에서)$/, '').trim();
             if (item.length > 1 && item.length < 25) {
-              // 행동 형태 부착
               if (pattern.source.includes('착용')) extracted.push(item + ' 착용');
               else if (pattern.source.includes('수령')) extracted.push(item + ' 수령');
               else if (pattern.source.includes('펼쳐')) extracted.push(item + ' 펼치기');
@@ -1955,7 +2242,7 @@
         }
       });
 
-      return extracted.length > 0 ? extracted : ['교과서 및 필기도구 준비', '자리 정돈'];
+      return extracted.length > 0 ? extracted : ['장난치지 않기', '떠들지 않기', '예쁜 말 바른 자세', '규칙 잘 지키기'];
     }
 
     // 체크리스트 -> 본문 문장 자동 조합 (⚡) (마크다운 단락 구조)
@@ -2016,7 +2303,7 @@
       cardOpacity: parseInt(localStorage.getItem('zzang_cardOpacity')) || 45,
       bgDimmer: parseInt(localStorage.getItem('zzang_bgDimmer')) || 15,
       bgUrl: localStorage.getItem('zzang_bgUrl') || 'https://i.imgur.com/VXI1sTq.jpeg',
-      version: 'v1.3',
+      version: 'v1.8',
       shhSoundEnabled: true,
       bouncySensitivity: 1.5,
       bouncyTheme: 'color',
@@ -2034,16 +2321,21 @@
       qrUrl: 'https://padlet.com',
       qrTitle: '모바일로 수업 패들렛 접속하기',
       activeMediaTab: 'image',
-      noticeMarkdown: `📌 **수업 개요**
-이번 시간에는 모둠별 생태계 현미경 관찰 실습이 진행됩니다.
+      noticeMarkdown: `🚫 **장난치지 않기** : 안전하고 즐거운 수업 분위기를 만들어요.
 
-🎒 **학생 준비 및 행동 요령**
-1. **안전 장비 착용**: 실험복과 보안경을 바르게 착용해 주세요.
-2. **키트 수령**: 앞쪽 교탁에서 배부용 실험 키트를 모둠장 1명씩 수령합니다.
-3. **교과서 펼치기**: 교과서 **74페이지**를 미리 펼쳐놓아 주세요.
+🤫 **떠들지 않기** : 서로의 말에 귀 기울이며 조용히 집중해요.
 
-💡 **주의 사항**
-- 현미경 렌즈는 충격에 약하므로 양손으로 조심스럽게 다뤄주세요.`,
+💬 **예쁜 말, 바른 자세하기** : 고운 언어를 사용하고 바른 자세로 참여해요.
+
+🛑 **위험한 행동하지 않기** : 다치지 않도록 항상 조심해요.
+
+✅ **규칙 잘 지키기 (반칙하지 않기)** : 정해진 규칙을 지키며 공정하게 활동해요.
+
+🎁 **교구는 소중히 다루고 자신의 것에 책임지기** : 물건을 아끼고 스스로 잘 챙겨요. (중요)
+
+🧹 **활동 후 뒷정리 잘하기** : 머문 자리는 스스로 깨끗하게 정돈해요.
+
+🙋‍♂️ **인사 잘하기** : 선생님과 친구들에게 밝고 씩씩하게 인사해요.`,
 
       // 1분 브레인 스트레칭
       stretchStep: 1,
@@ -2623,7 +2915,7 @@
         if (dom.headerShhIcon) dom.headerShhIcon.textContent = '🔔';
         if (dom.headerShhText) dom.headerShhText.textContent = '쉿 소리 ON';
         if (dom.btnToggleShhSound) {
-          dom.btnToggleShhSound.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800/90 border border-indigo-500/50 text-indigo-300 transition shadow-lg cursor-pointer text-xs font-semibold';
+          dom.btnToggleShhSound.className = 'flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-indigo-50 dark:bg-slate-900/85 dark:hover:bg-slate-800/90 border border-indigo-400/50 transition shadow-sm cursor-pointer text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 whitespace-nowrap';
         }
         if (dom.tabShhIcon) dom.tabShhIcon.textContent = '🔔';
         if (dom.tabShhText) dom.tabShhText.textContent = '쉿 소리 ON';
@@ -2634,7 +2926,7 @@
         if (dom.headerShhIcon) dom.headerShhIcon.textContent = '🔕';
         if (dom.headerShhText) dom.headerShhText.textContent = '쉿 소리 OFF';
         if (dom.btnToggleShhSound) {
-          dom.btnToggleShhSound.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/60 text-slate-400 transition shadow-lg cursor-pointer text-xs font-semibold';
+          dom.btnToggleShhSound.className = 'flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-900/85 dark:hover:bg-slate-800/90 border border-slate-300 dark:border-slate-700/60 transition shadow-sm cursor-pointer text-[11px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap';
         }
         if (dom.tabShhIcon) dom.tabShhIcon.textContent = '🔕';
         if (dom.tabShhText) dom.tabShhText.textContent = '쉿 소리 OFF';
@@ -2819,20 +3111,16 @@
 
 
     /* ==========================================================
-       10. 오토 하이드 클린 프레젠테이션 (Clean View)
+       10. 클린 프레젠테이션 (Clean Presentation Mode)
+       - 하단 조작바는 오버레이 없이 화면에 항상 안정적으로 고정
+       - 3.5초간 무조작 시 마우스 커서만 자동 숨김
        ========================================================== */
     function resetInactivityTimer() {
-      dom.controlDock.classList.remove('auto-hide-inactive');
-      dom.controlDock.classList.add('auto-hide-active');
-      if (dom.appFooterBar) dom.appFooterBar.style.opacity = '1';
       document.body.classList.remove('cursor-none');
 
       clearTimeout(state.inactivityTimer);
       state.inactivityTimer = setTimeout(() => {
-        // 3.5초간 무조작 시 컨트롤 독 페이드아웃 및 커서 숨김
-        dom.controlDock.classList.remove('auto-hide-active');
-        dom.controlDock.classList.add('auto-hide-inactive');
-        if (dom.appFooterBar) dom.appFooterBar.style.opacity = '0.4';
+        // 3.5초간 무조작 시 마우스 커서만 숨김 (컨트롤 독은 고정 위치 유지)
         document.body.classList.add('cursor-none');
       }, 3500);
     }
